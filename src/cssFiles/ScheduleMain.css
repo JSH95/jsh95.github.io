@@ -1,0 +1,43 @@
+.Container {
+    width: 215px;
+    display: flex;
+    flex-direction: row;
+    column-gap: 6px;
+    align-items: center;
+    justify-content: flex-end;
+    flex: 0 0 auto;
+    padding: 0;
+    border-radius: 6px;
+}
+
+.Date, .Time {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 11px;
+    background-color: rgba(120, 120, 128, 0.12);
+    border-radius: 6px;
+}
+
+.Date {
+    width: 55px;
+    column-gap: 5px;
+}
+
+.Time {
+    width: 64px;
+    column-gap: 10px;
+}
+
+.Day, .Year, .Hour {
+    width: auto;
+    height: 22px;
+    color: rgba(0, 122, 255, 1.00);
+    font-family: SF Pro, serif;
+    font-weight: 400;
+    text-align: center;
+    line-height: 22px;
+    letter-spacing: -0.43px;
+    font-size: 17px;
+}
