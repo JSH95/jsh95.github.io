@@ -1,10 +1,10 @@
 apply plugin: 'com.android.application'
 
 android {
-    namespace "com.weavus" // 여기서 이름을 weavus로 변경
+    namespace "com.weavus.app" 
     compileSdk rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "com.weavus" // 여기서 applicationId를 weavus로 변경
+        applicationId "com.weavus.app" 
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
