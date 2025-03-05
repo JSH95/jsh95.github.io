@@ -20,6 +20,7 @@
     "build": "0.1.4",
     "chart.js": "^4.4.8",
     "dayjs": "^1.11.13",
+    "firebase": "^11.4.0",
     "gapi-script": "^1.2.0",
     "react": "^19.0.0",
     "react-bootstrap": "^2.10.8",
