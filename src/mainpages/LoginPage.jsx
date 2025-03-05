@@ -1,11 +1,12 @@
-import React, { useEffect, useState } from 'react';
+// src/mainpages/LoginPage.tsx
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../config/AuthContext'; // AuthContext에서 useAuth 훅 가져오기
 import createAxiosInstance from '../config/api';
 import '../cssFiles/Login.css';
 import containerImage from '../images/loginpageBackground.png';
 import logoImage from '../images/loginpageLogo.png';
-import { PushNotifications } from '@capacitor/push-notifications'; // 알림 API 추가
+import usePushNotificationPermission from '../hooks/usePushNotificationPermission'; // 경로 수정
 
 function LoginPage() {
   const [username, setUsername] = useState('');
@@ -16,26 +17,14 @@ function LoginPage() {
   const { login } = useAuth(); // AuthContext에서 setIsLoggedIn 가져오기
   const [remember, setRemember] = useState(false);
 
+  usePushNotificationPermission(); // 푸시 알림 권한 요청 훅 사용
+
   useEffect(() => {
     const savedUsername = localStorage.getItem('savedUsername');
     if (savedUsername) {
       setUsername(savedUsername);
       setRemember(true);
     }
-  }, []);
-
-  useEffect(() => {
-    // 알림 권한 요청
-    const requestNotificationPermission = async () => {
-      const status = await PushNotifications.requestPermissions();
-      if (status.receive === 'granted') {
-        console.log('알림 권한이 허용되었습니다.');
-      } else {
-        console.log('알림 권한이 거부되었습니다.');
-      }
-    };
-
-    requestNotificationPermission();
   }, []);
 
   const handleLogin = async (e) => {
