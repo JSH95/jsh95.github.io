@@ -6,8 +6,10 @@
   "main": "src/index.tsx",
   "homepage": "https://jsh95.github.io",
   "dependencies": {
+    "@capacitor/android": "^7.0.1",
     "@capacitor/cli": "^7.0.1",
     "@capacitor/core": "^7.0.1",
+    "@capacitor/push-notifications": "^7.0.0",
     "@fullcalendar/daygrid": "^6.1.15",
     "@fullcalendar/interaction": "^6.1.15",
     "@fullcalendar/react": "^6.1.15",
