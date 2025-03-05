@@ -68,14 +68,13 @@ function PersonnelDashboard() {
     <div className="container">
       <h1 className="title">WEAVUS 지원자 리스트</h1>
       <div className="row">
-        <Dropdown className="dropdown">
+        <Dropdown className="dropdown mb-3">
           <Dropdown.Toggle variant="success" id="dropdown-basic">
             합격여부
           </Dropdown.Toggle>
           <Dropdown.Menu>
             <Dropdown.Item  onClick={() => setShowAll(false)}>불합격자 숨기기</Dropdown.Item>
             <Dropdown.Item onClick={() => setShowAll(true)}>모두 보기</Dropdown.Item>
-            {/*<Dropdown.Item value="hideAll">불합격자 보기</Dropdown.Item>*/}
           </Dropdown.Menu>
         </Dropdown>
 
