@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "231578866102",
+    "project_id": "weavusapp",
+    "storage_bucket": "weavusapp.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:231578866102:android:7fb3ded0527f7ac459f117",
+        "android_client_info": {
+          "package_name": "com.weavus"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAngdWs7JZ5LIQZncwAenvyHM4aZCODtAA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
