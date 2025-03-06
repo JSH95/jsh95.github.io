@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import createAxiosInstance from "../../config/api";
 import { useAuth } from "../../config/AuthContext";
 
-const useWorkData = (year, month) => {
+const useWorkData = (year, month, id) => {
     const { username } = useAuth();
     const [workData, setWorkData] = useState({});
     const [loading, setLoading] = useState(false); // 로딩 상태 추가
@@ -14,18 +14,20 @@ const useWorkData = (year, month) => {
             setWorkData(cachedHolidays); // 이미 로드된 데이터가 있다면 설정
             return;
         }
-        // let usernameId = "";
-        // if(searchUserId){
-        //     usernameId = searchUserId;
-        // } else {
-        //     usernameId = username;
-        // }
         setLoading(true);
         setError(""); // 기존 오류 초기화
+
         try {
                 const axiosInstance = createAxiosInstance();
-                const response = await axiosInstance.get(
-                    `/workSchedule/${username}/${year}/${month}`
+            let ID;
+            if(!id){
+                let ID = username;
+            } else {
+                let ID = id;
+            }
+
+            const response = await axiosInstance.get(
+                    `/workSchedule/${ID}/${year}/${month}`
                 );
                 // console.log("근무 데이터 요청 결과:", response.data)
                 const newWorkDataList = {};

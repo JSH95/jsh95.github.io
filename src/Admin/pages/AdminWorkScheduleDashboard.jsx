@@ -56,28 +56,6 @@ const AdminWorkScheduleDashboard = () => {
 
     return (
         <div className="container">
-            {/*<div>*/}
-            {/*    <ResponsiveContainer width="100%" height={Math.max(chartData.length * 50, 200)}>*/}
-            {/*        <BarChart data={chartData} layout="vertical" margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>*/}
-            {/*            <XAxis type="number" domain={[0, 200]} tickCount={7} />*/}
-            {/*            <YAxis dataKey="name" type="category" width={160} hight={150}*/}
-            {/*                   onClick={test}/>*/}
-            {/*            <Tooltip />*/}
-            {/*            <Legend />*/}
-            {/*            <Bar dataKey="hours"*/}
-            {/*                 label={({ x, y, width, value }) => (*/}
-            {/*                     <text x={x + width + 5} y={y + 10} fill="#000" fontSize={12}>*/}
-            {/*                         {value}*/}
-            {/*                     </text>*/}
-            {/*                 )}*/}
-            {/*            >*/}
-            {/*                {chartData.map((entry, index) => (*/}
-            {/*                    <Cell key={`cell-${index}`} fill={entry.hours >= 120 ? "#c20000" : "#61e368"} />*/}
-            {/*                ))}*/}
-            {/*            </Bar>*/}
-            {/*        </BarChart>*/}
-            {/*    </ResponsiveContainer>*/}
-            {/*</div>*/}
             <div className="table-responsive">
                 <table className="table table-responsive table-bordered">
                     <thead>
