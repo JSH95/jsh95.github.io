@@ -22,14 +22,18 @@ const AdminWorkScheduleDashboard = () => {
                 const username = {};
                 // console.log("1",response.data)
                 response.data
-                    .filter((entry) => entry.workType === '출근' || entry.workType === '휴일출근') // '출근' 또는 '휴일출근'인 항목만 필터링
+                    .filter(
+                        (entry) => entry.workType === '출근' || entry.workType === '휴일출근'
+                    ) // '출근' 또는 '휴일출근'인 항목만 필터링
                     .forEach((entry) => {
                     const { id } = entry.employee;
                     const checkIn = new Date(`${entry.checkInDate}T${entry.checkInTime}`);
                     const checkOut = new Date(`${entry.checkOutDate}T${entry.checkOutTime}`);
                     const breakStart = new Date(`${entry.checkInDate}T${entry.breakTimeIn}`);
                     const breakEnd = new Date(`${entry.checkInDate}T${entry.breakTimeOut}`);
-                    const workDuration = (checkOut - checkIn - (breakEnd - breakStart)) / (1000 * 60 * 60);
+                    const workDuration = (checkOut - checkIn - (breakEnd - breakStart)) > 0
+                        ? Math.floor((checkOut - checkIn - (breakEnd - breakStart)) / (1000 * 60 * 60))
+                        : 0;
                     employeeHours[id] = (employeeHours[id] || 0) + workDuration;
                     basicWorkTime[id] = entry.basicWorkTime;
                     username[id] = entry.employee.name;
