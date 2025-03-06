@@ -1,12 +1,10 @@
 import React, {useEffect, useState} from "react";
-import {useLocation, useNavigate, useParams} from "react-router-dom";
-import {useAuth} from "../../config/AuthContext";
+import { useNavigate, useParams} from "react-router-dom";
 import useWorkData from "../utils/WorkData";
 import createAxiosInstance from "../../config/api";
 import workDataDefault from "../utils/WorkDataDefault";
 
 function WorkScheduleDashboard (){
-    const { username } = useAuth();
     const { date } = useParams();
     const year = new Date(date).getFullYear();
     const month = new Date(date).getMonth()+ 1;
@@ -101,10 +99,10 @@ function WorkScheduleDashboard (){
                 if(editedItem.workType !== "출근" && editedItem.workType !== "휴일출근"){
                     editedItem.workPosition = "휴가";
                 }
-                if(editedItem.workType === "출근" || editedItem.workType === "휴일출근"){
+                if(!(editedItem.workType !== "출근" && editedItem.workType !== "휴일출근"
+                    || editedItem.checkInTime !== data.checkInTime)){
                     editedItem.memo = "";
                 }
-
                 const axiosInstance = createAxiosInstance(); // 인스턴스 생성
                 await axiosInstance.post(
                     "/workSchedule/save",
@@ -203,17 +201,16 @@ function WorkScheduleDashboard (){
                         setProgress(percentCompleted);
                     },
                 });
-                setFileStatus(true);
                 window.alert("파일 업로드 성공!");
                 localStorage.setItem("fileStatus", JSON.stringify(true));
                 localStorage.setItem("selectedFile", JSON.stringify(selectedFile));
             } catch (error) {
                 if (error.response && error.response.status === 400) {
                     window.alert(error.response.data);
-                    setFileStatus(false);
+                    localStorage.setItem("fileStatus", JSON.stringify(false));
                 } else {
                     window.alert("파일 업로드 중 오류가 발생했습니다.");
-                    setFileStatus(false);
+                    localStorage.setItem("fileStatus", JSON.stringify(false));
                 }
             }finally {
                 setProgress(0);
@@ -324,7 +321,8 @@ function WorkScheduleDashboard (){
                                     <option value="휴일출근">휴일출근</option>
                                 </select>
                             </div>
-                            {editedItem.workType !== "출근" && editedItem.workType !== "휴일출근" ? (
+                            {editedItem.workType !== "출근" && editedItem.workType !== "휴일출근"
+                                 || editedItem.checkInTime !== data.checkInTime ? (
                                 <div className="form-group">
                                     <label>사유</label>
                                     <input
@@ -334,6 +332,7 @@ function WorkScheduleDashboard (){
                                         placeholder="사유를 입력해 주세요."
                                         value={editedItem.memo  || ""}
                                         onChange={handleInputChange}
+                                        required
                                     />
                                 </div>
                             ) : (
@@ -379,7 +378,6 @@ function WorkScheduleDashboard (){
                                     className="input"
                                     value={editedItem.workLocation || ""}
                                     onChange={handleInputChange}
-                                    disabled
                                 />
                             </div><div className="form-group">
                             <label className="label">기본근무시간</label>
@@ -508,15 +506,16 @@ function WorkScheduleDashboard (){
                                         readOnly
                                     />
                                 </div>
-                                <div className="form-group">
+                                {item?.memo ? (<div className="form-group">
                                     <label>사유</label>
                                     <input
-                                            type="text"
-                                            className="input"
-                                            value={item?.memo|| defaultItem.checkInTime}
-                                            readOnly
+                                        type="text"
+                                        className="input"
+                                        value={item?.memo|| defaultItem.checkInTime}
+                                        readOnly
                                     />
                                 </div>
+                                ) : (null)}
                                 {item?.fileId ? (
                                     <div className="form-group">
                                         <label>지연표 업로드 내역</label>
