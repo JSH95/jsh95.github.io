@@ -9,7 +9,7 @@ function usePushNotificationPermission() {
       if (status.receive === 'granted') {
         console.log('푸시 알림 권한이 허용되었습니다.');
       } else {
-        console.log('푸시 알림 권한이 거부되었습니다.');
+        console.log('푸시 알림 권한이 거부되었습니다...');
       }
     };
 
