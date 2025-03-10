@@ -1,8 +1,10 @@
-import React, { useState } from "react";
+import React, {useEffect, useState} from "react";
 import { EmployeeRegiApi } from "../utils/EmployeeRegiApi";
 import "../../config/index.css";
+import {TeamListApi} from "../../utils/TeamListApi";
 
 const EmployeeRegi = () => {
+  const { loadList, teamList, errorMsg} = TeamListApi();
   const { addEmployee, loading, error, responseMessage, setEmployeeRole, employeeRole, setTeamId, teamId} = EmployeeRegiApi(); // API 상태 가져오기
   const [formData, setFormData] = useState({
     id: "",
@@ -14,7 +16,7 @@ const EmployeeRegi = () => {
     rank: "",
     status: 0,
   });
-
+  // console.log("teamList", teamList);
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -22,6 +24,10 @@ const EmployeeRegi = () => {
       [name]: value
     }));
   };
+
+  useEffect(() => {
+    loadList();
+  }, [loadList]);
 
   const handleChangeRole = (e) => {
     const { value } = e.target;
@@ -32,8 +38,18 @@ const EmployeeRegi = () => {
     setTeamId(value);
   }
 
+  useEffect(() => {
+    if (employeeRole === "TEAM") {
+      setTeamId(0);
+      // console.log("teamId", teamId);
+    }
+  }, [employeeRole]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if(employeeRole === "TEAM"){
+      setTeamId(0);
+    }
     await addEmployee(formData); // API 호출
     if (!error) {
       // 성공 시 폼 초기화
@@ -49,6 +65,7 @@ const EmployeeRegi = () => {
       });
       setEmployeeRole("");
       setTeamId("");
+      loadList();
     }
   };
 
@@ -157,7 +174,7 @@ const EmployeeRegi = () => {
             </select>
           </div>
           <div className="form-group mb-2">
-            <label>관리자 계정</label>
+            <label>계정 권한</label>
             <select
                 value={employeeRole}
                 onChange={handleChangeRole}
@@ -165,7 +182,7 @@ const EmployeeRegi = () => {
                 required
             >
               <option value="" disabled>
-                관리자 계정 설정
+                계정 권한을 선택해 주세요.
               </option>
               <option value="ADMIN">관리자권한</option>
               <option value="TEAM">팀장</option>
@@ -173,22 +190,33 @@ const EmployeeRegi = () => {
             </select>
           </div>
           {employeeRole === "TEAM" ? null : (
-              <div className="form-group mb-2">
-                <label>팀 선택</label>
+            <div className="form-group">
+              <label>소속 팀장</label>
                 <select
-                    value={teamId || ""}
-                    onChange={handleChangeTeam}
-                    className="input"
-                    required
+                name="institutionId"
+                value={teamId || ""}
+                onChange={handleChangeTeam}
+                required
+                className="input"
                 >
                   <option value="" disabled>
-                    팀 선택
+                  소속 팀장을 선택해 주세요.
                   </option>
-                  <option value="0">팀장</option>
-                  <option value="1">1팀</option>
-                  <option value="2">2팀</option>
-                </select>
-              </div>
+                  {errorMsg ? (
+                      <option value="" disabled>{errorMsg}</option> // 오류 메시지를 옵션으로 표시
+                  ) : teamList && teamList.length > 0 ? (
+                      teamList.map((team) => (
+                          <option key={team.id} value={team.id}>
+                            {team.teamLeaderName}
+                          </option>
+                      ))
+                  ) : (
+                      <option value="" disabled>
+                        Loading...
+                      </option>
+                  )}
+              </select>
+            </div>
           )}
           <button type="submit" disabled={loading} className="btn btn-success">
             {loading ? "등록 중..." : "직원 등록"}
