@@ -3,7 +3,7 @@ import { EmployeeRegiApi } from "../utils/EmployeeRegiApi";
 import "../../config/index.css";
 
 const EmployeeRegi = () => {
-  const { addEmployee, loading, error, responseMessage, setEmployeeRole, employeeRole } = EmployeeRegiApi(); // API 상태 가져오기
+  const { addEmployee, loading, error, responseMessage, setEmployeeRole, employeeRole, setTeamId, teamId} = EmployeeRegiApi(); // API 상태 가져오기
   const [formData, setFormData] = useState({
     id: "",
     name: "",
@@ -27,6 +27,10 @@ const EmployeeRegi = () => {
     const { value } = e.target;
     setEmployeeRole(value);
   }
+  const handleChangeTeam = (e) => {
+    const { value } = e.target;
+    setTeamId(value);
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -43,6 +47,8 @@ const EmployeeRegi = () => {
         rank: "",
         status: 0,
       });
+      setEmployeeRole("");
+      setTeamId("");
     }
   };
 
@@ -162,9 +168,28 @@ const EmployeeRegi = () => {
                 관리자 계정 설정
               </option>
               <option value="ADMIN">관리자권한</option>
+              <option value="TEAM">팀장</option>
               <option value="GENERAL">일반사원</option>
             </select>
           </div>
+          {employeeRole === "TEAM" ? null : (
+              <div className="form-group mb-2">
+                <label>팀 선택</label>
+                <select
+                    value={teamId || ""}
+                    onChange={handleChangeTeam}
+                    className="input"
+                    required
+                >
+                  <option value="" disabled>
+                    팀 선택
+                  </option>
+                  <option value="0">팀장</option>
+                  <option value="1">1팀</option>
+                  <option value="2">2팀</option>
+                </select>
+              </div>
+          )}
           <button type="submit" disabled={loading} className="btn btn-success">
             {loading ? "등록 중..." : "직원 등록"}
           </button>
