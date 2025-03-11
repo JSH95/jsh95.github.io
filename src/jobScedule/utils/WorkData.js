@@ -17,7 +17,6 @@ const useWorkData = (year, month, id) => {
         setLoading(true);
         setError(""); // 기존 오류 초기화
         let ID;
-        console.log("id", id)
         if(!id){
             ID = username;
         } else {
@@ -28,10 +27,10 @@ const useWorkData = (year, month, id) => {
             const response = await axiosInstance.get(
                     `/workSchedule/${ID}/${year}/${month}`
                 );
-                console.log("근무 데이터 요청 결과:", response.data)
+                // console.log("근무 데이터 요청 결과:", response.data)
                 const newWorkDataList = {};
                 if(response.data.length === 0){
-                    console.log("없음");
+                    // console.log("없음");
                     setWorkData(newWorkDataList);
                 } else {
                     response.data.forEach((event) => {
