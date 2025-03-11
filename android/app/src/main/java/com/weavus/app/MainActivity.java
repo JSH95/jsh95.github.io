@@ -1,4 +1,4 @@
-package com.weavus.app ;
+package com.weavus.app;
 
 import com.getcapacitor.BridgeActivity;
 
