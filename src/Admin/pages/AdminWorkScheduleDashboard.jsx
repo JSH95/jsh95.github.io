@@ -3,9 +3,12 @@ import {BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, Cell}
 import "../../config/index.css";
 import createAxiosInstance from "../../config/api";
 import {useNavigate} from "react-router-dom";
+import {useAuth} from "../../config/AuthContext";
 
 
 const AdminWorkScheduleDashboard = () => {
+    const { username } = useAuth();
+    const { role } = useAuth();
     const navigate = useNavigate();
     const [chartData, setChartData] = useState([]);
     const today = new Date();
@@ -17,31 +20,37 @@ const AdminWorkScheduleDashboard = () => {
             try {
                 const axiosInstance = createAxiosInstance();
                 const response = await axiosInstance.get(`/workSchedule/${year}/${month}`);
+
+                // 데이터를 가져왔으므로 response.data 사용
+                const filteredData = response.data.filter(
+                    (entry) =>
+                        (entry.workType === '출근' || entry.workType === '휴일출근') &&
+                        (role === 'ROLE_ADMIN' || entry.employee.team.teamLeaderId === username) // 어드민이면 팀장 ID 조건 제거
+                );
+
                 const employeeHours = {};
                 const basicWorkTime = {};
-                const username = {};
-                // console.log("1",response.data)
-                response.data
-                    .filter(
-                        (entry) => entry.workType === '출근' || entry.workType === '휴일출근'
-                    ) // '출근' 또는 '휴일출근'인 항목만 필터링
-                    .forEach((entry) => {
+                const usernames = {}; // 기존 username과 변수명 충돌 방지
+
+                filteredData.forEach((entry) => {
                     const { id } = entry.employee;
                     const checkIn = new Date(`${entry.checkInDate}T${entry.checkInTime}`);
                     const checkOut = new Date(`${entry.checkOutDate}T${entry.checkOutTime}`);
                     const breakStart = new Date(`${entry.checkInDate}T${entry.breakTimeIn}`);
                     const breakEnd = new Date(`${entry.checkInDate}T${entry.breakTimeOut}`);
+
                     const workDuration = (checkOut - checkIn - (breakEnd - breakStart)) > 0
                         ? Math.floor((checkOut - checkIn - (breakEnd - breakStart)) / (1000 * 60 * 60))
                         : 0;
+
                     employeeHours[id] = (employeeHours[id] || 0) + workDuration;
                     basicWorkTime[id] = entry.basicWorkTime;
-                    username[id] = entry.employee.name;
-                    });
+                    usernames[id] = entry.employee.name;
+                });
 
                 setChartData(Object.keys(employeeHours).map((id) => ({
                     id,
-                    username: username[id],
+                    username: usernames[id],
                     hours: employeeHours[id],
                     basicWorkTime: basicWorkTime[id],
                 })));
@@ -51,7 +60,8 @@ const AdminWorkScheduleDashboard = () => {
         };
 
         fetchData();
-    }, [ year, month, chartData]);
+    }, [year, month]); // chartData 제거 (무한 루프 방지)
+
 
     function moveToDetail(id){
         window.alert("상세 페이지로 이동합니다 :" + id);
