@@ -15,7 +15,7 @@ const AdminWorkScheduleList = () =>  {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
-    const workDataList = useWorkData(id, year, month); // ✅ 데이터와 갱신 함수 가져오기
+    const workDataList = useWorkData(year, month, id); // ✅ 데이터와 갱신 함수 가져오기
     // const workDefaultData = useWorkDefaultData();
 
     //     "2025-01-01": { attendanceType: "휴일", workType: "", checkInTime: "", checkOutTime: "", memo: "공휴일" },
@@ -88,11 +88,8 @@ const AdminWorkScheduleList = () =>  {
         });
     };
 
-
-
-
     const handleClickEdit = (date) => {
-        navigate(`/workSchedule/detail/${date}`);
+        navigate(`/workSchedule/adminDetail/${date}/${id}`);
     }
 
     function handleClickReceipt() {
@@ -130,10 +127,11 @@ const AdminWorkScheduleList = () =>  {
                             <tr key={index} >
                                 <td className={day.styleClass}>
                                     {day.date}日 &nbsp;
+                                    {day.workType? (
                                         <i className="bi bi-pencil-fill"
                                            onClick={() => handleClickEdit(day.key)}
-                                        >
-                                        </i>
+                                        ></i>
+                                    ) : null}
                                 </td>
                                 <td className={day.styleClass}>{day.weekday}</td>
                                 <td className={day.styleClass}>{day.workType} </td>

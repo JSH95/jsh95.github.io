@@ -67,24 +67,26 @@ function PersonnelDashboard() {
   return (
     <div className="container">
       <h1 className="title">WEAVUS 지원자 리스트</h1>
-      <div className="row">
-        <Dropdown className="dropdown">
+      <div className="row align-items-center">
+        <div className="d-flex gap-2 w-100">
+        <Dropdown className="dropdown mb-2">
           <Dropdown.Toggle variant="success" id="dropdown-basic">
             합격여부
           </Dropdown.Toggle>
           <Dropdown.Menu>
             <Dropdown.Item  onClick={() => setShowAll(false)}>불합격자 숨기기</Dropdown.Item>
             <Dropdown.Item onClick={() => setShowAll(true)}>모두 보기</Dropdown.Item>
-            {/*<Dropdown.Item value="hideAll">불합격자 보기</Dropdown.Item>*/}
           </Dropdown.Menu>
         </Dropdown>
-
-        <button className="btn btn-success col me-2" onClick={() => handleRowClick()}>
-          지원자 등록
-        </button>
-        <button className="btn btn-primary col" onClick={() => handleRowClick2()}>
-          기관 목록
-        </button>
+          <div className="ms-auto">
+            <button className="btn btn-success me-2" onClick={() => handleRowClick()}>
+              지원자 등록
+            </button>
+            <button className="btn btn-primary " onClick={() => handleRowClick2()}>
+              기관 목록
+            </button>
+          </div>
+        </div>
       </div>
 
       {loading && <div className="loading">Loading...</div>}
