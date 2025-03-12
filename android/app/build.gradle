@@ -1,20 +1,20 @@
 apply plugin: 'com.android.application'
 
 android {
-    namespace "com.weavus.app" 
+    namespace "com.weavus.app"
     compileSdk rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "com.weavus.app" 
+        applicationId "com.weavus.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
+            // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
             ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
-
     buildTypes {
         release {
             minifyEnabled false
@@ -39,27 +39,20 @@ dependencies {
     androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
     implementation project(':capacitor-cordova-android-plugins')
-
-    // Firebase BoM (Bill of Materials) 추가
-    implementation platform('com.google.firebase:firebase-bom:33.10.0')
-
-    // Firebase 라이브러리 추가 (예: Firebase Analytics, Firebase Authentication)
-    implementation 'com.google.firebase:firebase-analytics'   // Firebase Analytics
-    implementation 'com.google.firebase:firebase-auth'       // Firebase Authentication
-    implementation 'com.google.firebase:firebase-firestore'  // Firebase Firestore
-
-    // Firebase Cloud Messaging 추가 예시 (푸시 알림용)
-    implementation 'com.google.firebase:firebase-messaging'  // Firebase Cloud Messaging (푸시 알림)
+    
+    // Firebase Messaging 의존성 추가
+    implementation 'com.google.firebase:firebase-messaging:23.0.0'
 }
 
-// Firebase Google 서비스 플러그인 적용
+// google-services 플러그인 적용
 apply from: 'capacitor.build.gradle'
 
 try {
     def servicesJSON = file('google-services.json')
     if (servicesJSON.text) {
-        apply plugin: 'com.google.gms.google-services' // Google 서비스 플러그인 적용
+        // google-services 플러그인 적용
+        apply plugin: 'com.google.gms.google-services'
     }
-} catch(Exception e) {
+} catch (Exception e) {
     logger.info("google-services.json not found, google-services plugin not applied. Push Notifications won't work")
 }
