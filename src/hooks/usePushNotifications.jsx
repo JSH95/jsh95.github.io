@@ -32,13 +32,16 @@ const usePushNotification = () => {
 // 토큰을 서버로 전송하는 함수
 const sendTokenToBackend = async (token) => {
   try {
-    const response = await fetch('https://your-backend-api.com/save-token', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ token }),
-    });
+    const response = await fetch(
+      'https://port-0-severance-m4yzyreu8bbe535f.sel4.cloudtype.app/api/fcm/save',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ token }),
+      }
+    );
 
     if (response.ok) {
       console.log('토큰 전송 성공');
