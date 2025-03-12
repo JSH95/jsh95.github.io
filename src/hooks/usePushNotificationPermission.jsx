@@ -6,18 +6,18 @@ const usePushNotificationPermission = () => {
   const [token, setToken] = useState(null);
 
   useEffect(() => {
-    const requestPermission = async () => {
+    const requestPermissions = async () => {
       if (!Capacitor.isNativePlatform()) {
         console.log('네이티브 환경에서만 지원됩니다.');
         return;
       }
 
+      // 푸시 알림 권한 요청
       console.log('푸시 알림 권한 요청 중...');
+      const pushStatus = await PushNotifications.requestPermissions();
+      console.log('푸시 알림 권한 상태:', pushStatus);
 
-      const status = await PushNotifications.requestPermissions();
-      console.log('권한 상태:', status);
-
-      if (status.receive === 'granted') {
+      if (pushStatus.receive === 'granted') {
         console.log('푸시 알림 권한 허용됨.');
 
         await PushNotifications.register();
@@ -37,7 +37,7 @@ const usePushNotificationPermission = () => {
       }
     };
 
-    requestPermission();
+    requestPermissions();
   }, []);
 
   useEffect(() => {
