@@ -4,7 +4,9 @@ color ic_launcher_background
 drawable ic_launcher_background
 drawable ic_launcher_foreground
 drawable splash
+id splash_image
 layout activity_main
+layout activity_splash
 mipmap ic_launcher
 mipmap ic_launcher_adaptive_back
 mipmap ic_launcher_adaptive_fore
