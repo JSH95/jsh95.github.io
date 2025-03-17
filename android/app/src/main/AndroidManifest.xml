@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-
+    
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -9,19 +9,27 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
+        <!-- SplashActivity를 시작 액티비티로 설정 -->
         <activity
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode|navigation"
-            android:name="com.weavus.app.MainActivity"
-            android:label="@string/title_activity_main"
-            android:theme="@style/AppTheme.NoActionBarLaunch"
+            android:name="com.weavus.app.SplashActivity"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" 
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|screenLayout|fontScale"
             android:launchMode="singleTask"
             android:exported="true">
-
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
 
+        <!-- MainActivity는 SplashActivity 종료 후 호출됩니다 -->
+        <activity
+            android:name="com.weavus.app.MainActivity"
+            android:label="@string/title_activity_main"
+            android:theme="@style/AppTheme.NoActionBarLaunch"
+            android:launchMode="standard"
+            android:exported="true">
         </activity>
 
         <provider
@@ -35,7 +43,6 @@
         </provider>
     </application>
 
-    <!-- Permissions -->
-
+    <!-- 권한 설정 -->
     <uses-permission android:name="android.permission.INTERNET" />
 </manifest>

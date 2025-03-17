@@ -6,19 +6,21 @@ import createAxiosInstance from '../config/api';
 import '../cssFiles/Login.css';
 import containerImage from '../images/loginpageBackground.png';
 import logoImage from '../images/loginpageLogo.png';
+import usePushNotificationPermission from '../hooks/usePushNotificationPermission'; // 경로 확인 후 수정
 
 function LoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [token, setToken] = useState(null); // 토큰 상태 추가
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth(); // AuthContext에서 setIsLoggedIn 가져오기
   const [remember, setRemember] = useState(false);
 
-  // usePushNotificationPermission(); // (앱전용 웹 사용불가)푸시 알림 권한 요청 훅 사용
 
+  usePushNotificationPermission(); // (앱전용 웹 사용불가)푸시 알림 권한 요청 훅 사용
+
+  // 모바일
   useEffect(() => {
     const savedUsername = localStorage.getItem('savedUsername');
     if (savedUsername) {
@@ -45,13 +47,12 @@ function LoginPage() {
       const {
         success,
         message,
-        token,
+        token, // 토큰은 이제 사용되지 않음
         role,
         username: responseUsername,
       } = response.data;
       if (success) {
-        setToken(token); // 로그인 성공 시 토큰 상태 저장
-        login(token, role, responseUsername); // 수정된 변수명 적용
+        login(token, role, responseUsername); // 로그인 시 토큰을 저장하지만, 여기서는 토큰을 상태에 저장하지 않음
         if (role === 'ROLE_ADMIN') {
           navigate('/dashboard');
         } else {
@@ -143,18 +144,6 @@ function LoginPage() {
             {isLoading ? 'Loading...' : '로그인'}
           </button>
           {error && <p className='error-message'>{error}</p>}
-
-          {/* 토큰 표시 버튼 */}
-          {token && (
-            <div className='token-display'>
-              <button
-                type='button'
-                onClick={() => alert(`FCM 토큰: ${token}`)} // 토큰을 팝업으로 보여줌
-              >
-                FCM 토큰 보기
-              </button>
-            </div>
-          )}
         </form>
       </div>
     </div>

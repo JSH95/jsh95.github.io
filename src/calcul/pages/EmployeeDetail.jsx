@@ -18,16 +18,20 @@ function EmployeeDetail() {
   const { loadList, teamList, errorMsg} = TeamListApi();
   const [teamId, setTeamId] = useState(""); // 팀 아이디 설정
   const [employeeRole, setEmployeeRole] = useState(""); // 관리자 설정
+  const [password, setPassword] = useState("");
 
   useEffect(() => {
     const fetchEmployee = async () => {
       try {
         const axiosInstance = createAxiosInstance(); // 인스턴스 생성
         const response = await axiosInstance.get(`/employees/${employeeId}`);
-        const response2 = await axiosInstance.get(`/employees/${employeeId}`);
+        const response2 = await axiosInstance.get(`/employees/team/${employeeId}`);
         setItem(response.data);
         setEditedItem(response.data);
-        // console.log(response.data)
+        setEmployeeRole(response2.data.roles? response2.data.roles : "");
+        setTeamId(response.data.team.id);
+        // console.log("1 : ", response.data)
+        console.log("2 : ",response2.data)
       } catch (err) {
         setError("직원 정보를 불러오지 못했습니다. \n 새로고침 해보세요.");
         // console.error(err);
@@ -65,7 +69,7 @@ function EmployeeDetail() {
         conversionDate: editedItem.conversionDate || null, // conversionDate가 없을 경우 null
         rank: editedItem.rank,
         status: editedItem.status,
-        teamId: employeeRole === "TEAM" ? "0" : teamId
+        teamId: teamId
       };
       try {
         if (employeeDto.rank === "" && employeeDto.employeeType === "") {
@@ -78,11 +82,11 @@ function EmployeeDetail() {
             employeeDto , {
               headers: {
                 "Role": employeeRole,
+                "password": password,
               },
             }
         );
         setItem(response.data);
-        // setEditedItem(response.data);
         setIsEditing(false);
         window.alert("직원 수정을 완료했습니다");
       } catch (err) {
@@ -91,7 +95,7 @@ function EmployeeDetail() {
           window.alert("입력된 값을 다시 한번 확인해 주세요");
         } else {
           // 기타 에러에 대한 처리
-          setError("직원 정보를 저장하는 데 실패했습니다.");
+          setError("직원 정보를 저장하는 데 실패했습니다." + err);
         }
       }
     }
@@ -140,6 +144,11 @@ function EmployeeDetail() {
   };
 
   const handleChangeRole = (e) => {
+    const { value } = e.target;
+    setEmployeeRole(value);
+  }
+
+  const handleChangePassword = (e) => {
     const { value } = e.target;
     setEmployeeRole(value);
   }
@@ -245,13 +254,12 @@ function EmployeeDetail() {
                 <div className="form-group">
                   <label>소속 팀장</label>
                   <select
-                      name="teamId"
-                      value={teamId ?  teamId : editedItem.team.id}
+                      // name="teamId"
+                      value={teamId ? teamId : editedItem.team.id}
                       onChange={handleChangeTeam}
                       required
                       className="input"
                   >
-
                     {errorMsg ? (
                         <option value="" disabled>{errorMsg}</option> // 오류 메시지를 옵션으로 표시
                     ) :
