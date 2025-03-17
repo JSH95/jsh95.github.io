@@ -34,6 +34,7 @@ import WorkScheduleMain from "./jobScedule/pages/WorkScheduleMain";
 import WorkScheduleReceipt from "./jobScedule/pages/WorkScheduleReceipt";
 import AdminWorkScheduleDashboard from "./Admin/pages/AdminWorkScheduleDashboard";
 import AdminWorkScheduleList from "./Admin/pages/AdminWorkScheduleList";
+import AdminWorkScheduleDetail from "./Admin/pages/AdminWorkScheduleDetail";
 
 const Layout = ({ children }) => (
     <>
@@ -269,6 +270,14 @@ const App = () => {
                     element={
                         <ProtectedRoute>
                             <AdminWorkScheduleList/>
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/workSchedule/adminDetail/:date/:id"
+                    element={
+                        <ProtectedRoute>
+                            <AdminWorkScheduleDetail/>
                         </ProtectedRoute>
                     }
                 />
