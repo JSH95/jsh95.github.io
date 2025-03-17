@@ -12,10 +12,6 @@ export function EmployeeRegiApi() {
     setError("");
     setResponseMessage(""); // 상태 초기화
 
-    // employeeRole === "TEAM" ? setTeamId("0") : null; // 팀 아이디 설정
-    // console.log("employeeRole", employeeRole);
-    // console.log("employeeData", employeeData);
-    // console.log("teamId", teamId);
     try {
       const axiosInstance = createAxiosInstance(); // 인스턴스 생성
       const response = await axiosInstance.post("/employees", employeeData, {
@@ -26,16 +22,12 @@ export function EmployeeRegiApi() {
       });
       // 응답 데이터 설정
       setResponseMessage(response.data);
-
+      setEmployeeRole("");
+      setTeamId("");
+      console.log("등록 응답: ", response.data);
       window.alert("등록이 완료되었습니다.");
     } catch (err) {
-      if (err.response) {
-        setError("등록 실패 : " + err.response.data.message);
-      } else if (err.request) {
-        setError("등록 실패: 서버로부터 응답이 없습니다." + err.request);
-      } else {
-        setError("등록 실패 : ${err.message}");
-      }
+      setError("등록 실패 : " + err.response.data.message);
     } finally {
       setLoading(false);
     }

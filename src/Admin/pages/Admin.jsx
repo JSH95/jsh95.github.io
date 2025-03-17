@@ -100,6 +100,16 @@ const EmployeeSettings = () => {
     navigate("/admin/list");
   }
 
+  function handleMessage() {
+    try {
+      const axiosInstance = createAxiosInstance(); // 인스턴스 생성
+      axiosInstance.get("/fcm/testSend");
+        alert("알림이 발송되었습니다.");
+    }catch (err) {
+       alert("다시 한번 확인해 주세요. " + err.message);
+    }
+  }
+
   return (
     <div className="container d-flex justify-content-center align-items-center flex-column">
       <div className="row justify-content-md-center">
@@ -107,6 +117,7 @@ const EmployeeSettings = () => {
       <div className="card mb-3">
         <h2 className="title card-header">WEAVUS 관리자 페이지</h2>
         <button className="btn btn-info" type="button" onClick={handleGoList}> 리스트(테스트)</button>
+
         <table className="table card-body">
           <thead>
           <tr>
@@ -195,6 +206,11 @@ const EmployeeSettings = () => {
             <button type="submit" className="btn btn-success card-footer">생성</button>
           </form>
         </div>
+      </div>
+      <div>
+        <button className="btn btn-success card-footer" onClick={handleMessage}>
+          App 테스트 알림 발송
+        </button>
       </div>
     </div>
 
