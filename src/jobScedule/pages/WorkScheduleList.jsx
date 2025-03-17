@@ -98,9 +98,6 @@ const WorkScheduleList = () =>  {
         const scheduleData  = {stateInfo : "true"};
         navigate("/workSchedule/dashBoard", {state: scheduleData });
     }
-    const handleClickMain = () => {
-        navigate("/workSchedule/main");
-    }
 
     const handleClickEdit = (date) => {
         navigate(`/workSchedule/detail/${date}`);
@@ -116,9 +113,13 @@ const WorkScheduleList = () =>  {
             <div className="container">
                 <h2 className="text-dark mb-1">WORK SCHEDULE</h2>
                 <div className="d-flex justify-content-center align-items-center">
-                    <button onClick={() => changeMonth(-1)}>◀</button>
+                    <button onClick={() => changeMonth(-1)} className="btn">
+                        <i class="bi bi-arrow-left-circle-fill fs-3"></i>
+                    </button>
                     <h2 className="px-3">{year} / {String(month).padStart(2, "0")}</h2>
-                    <button onClick={() => changeMonth(1)}>▶</button>
+                    <button onClick={() => changeMonth(1)} className="btn">
+                        <i class="bi bi-arrow-right-circle-fill fs-3"></i>
+                    </button>
                 </div>
                 <button type="button" className="btn btn-primary me-4" onClick={handleClickMyPage}>
                     기본 정보 수정
@@ -136,7 +137,7 @@ const WorkScheduleList = () =>  {
                             <th className="text-center">区分</th>
                             <th className="text-center">開始時間</th>
                             <th className="text-center">終了時間</th>
-                            <th className="text-center">비고</th>
+                            <th className="text-center" style={{ maxWidth: "200px" }}>비고</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -154,13 +155,16 @@ const WorkScheduleList = () =>  {
                                 <td className={day.styleClass}>{day.workPosition}</td>
                                 <td className={day.styleClass}>{day.checkInTime} </td>
                                 <td className={day.styleClass}>{day.checkOutTime} </td>
-                                <td className={day.styleClass}>{day.memo}
+                                <td className={`${day.styleClass} text-truncate`}
+                                    style={{ maxWidth: "300px" , minWidth: "200px"}}
+                                >
                                     {day.file === "true" ? (
-                                        <>&nbsp;
+                                        <>
                                             <i className="bi bi-file-earmark-check-fill"
                                                 onClick={() => handleClickEdit(day.key)}></i>
                                         </>
-                                    ) : (null)}
+                                    ) : (null)}&nbsp;
+                                    {day.memo}
                                 </td>
 
                             </tr>

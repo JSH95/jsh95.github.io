@@ -85,7 +85,6 @@ function EmployeeDetail() {
             }
         );
         setItem(response.data);
-        // setEditedItem(response.data);
         setIsEditing(false);
         window.alert("직원 수정을 완료했습니다");
       } catch (err) {

@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "./AuthContext";
 import "bootstrap/dist/css/bootstrap.min.css";
 import logoImage from '../images/loginpageLogo.png';
+import {Dropdown} from "react-bootstrap";
 
 // 메뉴바 컴포넌트
 const NavigationBar = () => {
@@ -51,11 +52,16 @@ const NavigationBar = () => {
                 <ul className="navbar-nav me-auto ">
                   {isLoggedIn && role === "ROLE_ADMIN" && (
                       <>
-                        <li className="nav-item">
-                          <Link className="nav-link text-dark fw-bold "
-                                to="/workSchedule/main"
-                                onClick={handleLinkClick}>근무표(테스트)</Link>
-                        </li>
+                        <Dropdown>
+                          <Dropdown.Toggle variant="link" className="nav-link text-dark fw-bold">
+                            근무표
+                          </Dropdown.Toggle>
+                          <Dropdown.Menu>
+                            <Dropdown.Item as={Link} to="/workSchedule/main">근무기록</Dropdown.Item>
+                            <Dropdown.Item as={Link} to="workSchedule/list">근무표 일람</Dropdown.Item>
+                            <Dropdown.Item as={Link} to="workSchedule/dashBoard">MyPage</Dropdown.Item>
+                          </Dropdown.Menu>
+                        </Dropdown>
                         <li className="nav-item">
                           <Link className="nav-link
                                          text-dark
@@ -100,28 +106,38 @@ const NavigationBar = () => {
                   )}
                   {isLoggedIn && role === "ROLE_TEAM" && (
                       <>
-                        <li className="nav-item">
-                          <Link className="nav-link text-dark fw-bold "
-                                to="/workSchedule/main"
-                                onClick={handleLinkClick}>근무표(테스트)</Link>
-                        </li>
+                        <Dropdown>
+                          <Dropdown.Toggle variant="link" className="nav-link text-dark fw-bold">
+                            근무표
+                          </Dropdown.Toggle>
+                          <Dropdown.Menu>
+                            <Dropdown.Item as={Link} to="/workSchedule/main">근무기록</Dropdown.Item>
+                            <Dropdown.Item as={Link} to="workSchedule/list">근무표 일람</Dropdown.Item>
+                            <Dropdown.Item as={Link} to="workSchedule/dashBoard">MyPage</Dropdown.Item>
+                          </Dropdown.Menu>
+                        </Dropdown>
                         <li className="nav-item" >
                           <Link className="nav-link
                                          text-dark
                                          fw-bold
                                          "
                                 to="/admin/list"
-                                onClick={handleLinkClick}>팀원관리(임시)</Link>
+                                onClick={handleLinkClick}>팀원관리(테스트)</Link>
                         </li>
                       </>
                   )}
                   {isLoggedIn && role === "ROLE_GENERAL" && (
                       <div>
-                        <li className="nav-item">
-                          <Link className="nav-link text-dark fw-bold "
-                                to="/workSchedule/main"
-                                onClick={handleLinkClick}>근무표(테스트)</Link>
-                        </li>
+                        <Dropdown>
+                          <Dropdown.Toggle variant="link" className="nav-link text-dark fw-bold">
+                            근무표
+                          </Dropdown.Toggle>
+                          <Dropdown.Menu>
+                            <Dropdown.Item as={Link} to="/workSchedule/main">근무기록</Dropdown.Item>
+                            <Dropdown.Item as={Link} to="workSchedule/list">근무표 일람</Dropdown.Item>
+                            <Dropdown.Item as={Link} to="workSchedule/dashBoard">MyPage</Dropdown.Item>
+                          </Dropdown.Menu>
+                        </Dropdown>
                       </div>
                   )}
                 </ul>
