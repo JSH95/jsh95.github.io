@@ -20,9 +20,11 @@ const usePushNotificationPermission = () => {
       if (pushStatus.receive === 'granted') {
         console.log('푸시 알림 권한 허용됨.');
 
+        // 푸시 알림 등록
         await PushNotifications.register();
         console.log('푸시 알림 등록 완료');
 
+        // 푸시 알림 등록 후에 토큰 받기
         PushNotifications.addListener('registration', (token) => {
           console.log('발급된 FCM 토큰:', token.value); // ✅ 토큰 확인
           setToken(token.value);
