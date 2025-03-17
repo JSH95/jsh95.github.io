@@ -20,8 +20,6 @@ const AdminWorkScheduleDashboard = () => {
             try {
                 const axiosInstance = createAxiosInstance();
                 const response = await axiosInstance.get(`/workSchedule/${year}/${month}`);
-
-                // 데이터를 가져왔으므로 response.data 사용
                 const filteredData = response.data.filter(
                     (entry) =>
                         (entry.workType === '출근' || entry.workType === '휴일출근') &&

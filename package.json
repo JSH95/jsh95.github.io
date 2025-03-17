@@ -9,6 +9,7 @@
     "@capacitor/android": "^7.0.1",
     "@capacitor/cli": "^7.0.1",
     "@capacitor/core": "^7.0.1",
+    "@capacitor/ios": "^7.1.0",
     "@capacitor/push-notifications": "^7.0.0",
     "@fullcalendar/daygrid": "^6.1.15",
     "@fullcalendar/interaction": "^6.1.15",
@@ -44,7 +45,8 @@
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d build"
+    "deploy": "gh-pages -d build",
+    "start-android-studio": "start \"\" \"C:\\Program Files\\Android\\Android Studio\\bin\\studio64.exe\" \"C:\\Users\\user\\Desktop\\ReactFront\\android\""
   },
   "browserslist": [
     ">0.2%",

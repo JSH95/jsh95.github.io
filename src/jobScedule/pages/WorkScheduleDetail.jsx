@@ -36,35 +36,41 @@ function WorkScheduleDashboard (){
         });
 
     useEffect(() => {
-                if (workData.workData[date]) {
-                    setItem(workData.workData[date]);
-                    setEditedItem(workData.workData[date]);
-                    console.log ("item 가공데이터 : " ,item)
-                } else {
-                    const newDefaultItem = {
-                        ...defaultItem,
-                        checkInTime: data.checkInTime,
-                        checkOutTime: data.checkOutTime,
-                        breakTimeIn: data.breakTimeIn,
-                        breakTimeOut: data.breakTimeOut,
-                        workLocation: data.workLocation,
-                        basicWorkTime: data.basicWorkTime,
-                        workPosition: data.workPosition,
-                    };
-                    setItem(null);
-                    setEditedItem(newDefaultItem);
-                }
+        dataLoging();
         }, [data, workData?.workData[date]]);
 
+    const dataLoging = async () => {
+        if (workData.workData[date]) {
+            setItem(workData.workData[date]);
+            setEditedItem(workData.workData[date]);
+            // console.log ("item 가공데이터 : " ,item)
+        } else {
+            const newDefaultItem = {
+                ...defaultItem,
+                checkInTime: data.checkInTime,
+                checkOutTime: data.checkOutTime,
+                breakTimeIn: data.breakTimeIn,
+                breakTimeOut: data.breakTimeOut,
+                workLocation: data.workLocation,
+                basicWorkTime: data.basicWorkTime,
+                workPosition: data.workPosition,
+            };
+            setItem(null);
+            setEditedItem(newDefaultItem);
+        }
+    }
+
     useEffect(() => {
-        // workData가 없거나 비어있을 때만 isEditing을 true로 설정
+        dataEditing();
+    }, [workData?.workData]);  // workData가 변경될 때마다 실행
+
+    const dataEditing = async () => {
         if (!workData.workData[date] || workData.workData[date].isEmpty) {
             setIsEditing(true);
         } else {
             setIsEditing(false);  // 데이터가 있으면 편집 상태를 false로 설정
         }
-    }, [workData?.workData]);  // workData가 변경될 때마다 실행
-
+    }
     function handleClickBack() {
         navigate("/workSchedule/list");
     }
@@ -166,7 +172,7 @@ function WorkScheduleDashboard (){
             const axiosInstance = createAxiosInstance();
             await axiosInstance.delete(`/workSchedule/file/delete/${id}`);
             window.alert("지연표를 삭제하였습니다.");
-
+            dataLoging();
         } catch (error) {
             console.error("지연표 삭제 실패:", error);
             alert("지연표 삭제 중 오류가 발생했습니다. \n 다시 시도해 주세요.");
@@ -185,6 +191,9 @@ function WorkScheduleDashboard (){
             setUploading(true);
             setProgress(0); // 초기화
             try {
+                let lastUpdateTime = 0;
+                const delay = 100; // 업데이트 간격 (ms)
+
                 const formData = new FormData();
                 formData.append("file", selectedFile);
                 formData.append("date", date);
@@ -198,9 +207,13 @@ function WorkScheduleDashboard (){
                         const percentCompleted = Math.round(
                             (progressEvent.loaded * 100) / progressEvent.total
                         );
-                        setProgress(percentCompleted);
-                    },
+                        const currentTime = Date.now();
+                        if (currentTime - lastUpdateTime > delay) {
+                            setProgress(percentCompleted);
+                            lastUpdateTime = currentTime; // 마지막 업데이트 시간을 기록
+                        }                    },
                 });
+                setProgress(100);
                 window.alert("파일 업로드 성공!");
                 localStorage.setItem("fileStatus", JSON.stringify(true));
                 localStorage.setItem("selectedFile", JSON.stringify(selectedFile));
@@ -237,6 +250,7 @@ function WorkScheduleDashboard (){
                                     value={editedItem?.id  || ""}
                                     onChange={handleInputChange}
                                     disabled
+                                    hidden
                                 />
                             </div>
                             <div className="form-group">
@@ -409,6 +423,7 @@ function WorkScheduleDashboard (){
                                                             backgroundColor: "#4caf50",
                                                             height: "10px",
                                                             borderRadius: "5px",
+                                                            transition: "width 0.5s ease-in-out"
                                                         }}
                                                     ></div>
                                                 </div>

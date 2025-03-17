@@ -18,9 +18,9 @@ function WorkScheduleDashboard (){
         const fetchWorkDefaultData = async () => {
             setLoading(true);
             setError("");
-            if (!location.state !== null) {
-            setIsEditing(location.state);
-            }
+            // if (workDefaultData === undefined) {
+            // setIsEditing(true);
+            // }
             try {
                 if(workDefaultData?.checkInTime === null) {
                     // ✅ employeeName이 없으면 기본 값 설정 (예외 처리)
@@ -36,12 +36,15 @@ function WorkScheduleDashboard (){
                         basicWorkTime: "",
                     };
                     setEditedItem(defaultData);
+                    setIsEditing(false);
                 }
-                else if (isEditing) {
+                else{
                     setEditedItem(workDefaultData);
-                }else if (!isEditing && workDefaultData && Object.keys(workDefaultData).length > 0) {
-                    navigate("/workSchedule/list");
+                    setIsEditing(true);
                 }
+                // else if (!isEditing && workDefaultData && Object.keys(workDefaultData).length > 0) {
+                //     navigate("/workSchedule/list");
+                // }
             } catch (error) {
                 setError("근무표 기본 정보를 불러오지 못했습니다.");
             } finally {

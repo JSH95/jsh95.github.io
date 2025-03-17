@@ -71,8 +71,8 @@ const WorkScheduleMain = () => {
 
     const handleStart = async (e) => {
         e.preventDefault();
-            if (savedData.checkInTime !== data.checkInTime ||
-                savedData.checkOutTime !== data.checkOutTime) {
+            if (savedData.checkInTime > data.checkInTime ||
+                savedData.checkOutTime < data.checkOutTime) {
                 if(savedData.memo.length === 0) {
                     window.alert("사유를 입력해주세요.");
                     return;
@@ -87,7 +87,7 @@ const WorkScheduleMain = () => {
                     { ...prev, memo: ""}));
                 return;
             }
-            if(savedData.checkInTime !== data.checkInTime && selectedFile === null && fileStatus === false) {
+            if(savedData.checkInTime < data.checkInTime && selectedFile === null && fileStatus === false) {
                 const confirmDelete = window.confirm("지연서 파일을 업로드 하지 않았습니다. \n 그래도 진행하시겠습니까?");
                 if (!confirmDelete) return;
             }
@@ -160,92 +160,102 @@ const WorkScheduleMain = () => {
 
     return (
         <div className="container d-flex justify-content-center align-items-center flex-column">
-            <h2>근무 출퇴근 기록</h2>
             <form onSubmit={handleStart}>
-                {/*encType="multipart/form-data"*/}
-                <div>
-                    <div className="d-flex align-items-center gap-2 mb-3 my-2">
-                        <strong className="col-5">출근 시간 :</strong>
-                        <input
-                            type="time"
-                            className="input"
-                            name="checkInTime"
-                            value={savedData.checkInTime || ""}
-                            onChange={handleChange}
-                            required
-                        />
+                <div className="card" style={{ minWidth: "359.2px"}}>
+                    <div className="card-header">
+                        <h2>근무 출퇴근 기록</h2>
                     </div>
-
-                    <div className="d-flex align-items-center gap-2 mb-3">
-                        <strong className="col-5">퇴근 시간 :</strong>
-                        <input
-                            type="time"
-                            className="input"
-                            name="checkOutTime"
-                            value={savedData.checkOutTime || ""}
-                            onChange={handleChange}
-                            required
-                        />
-                    </div>
-                    {(savedData.checkInTime !== data.checkInTime || savedData.checkOutTime !== data.checkOutTime) && (
-                        <div className="d-flex align-items-center gap-2 mb-3">
-                            <strong className="col-3">사유 :</strong>
-                            <textarea
-                                className="bi-textarea-resize input"
-                                name="memo"
-                                value={savedData.memo || ""}
+                    <div className="card-body">
+                        <div className="d-flex align-items-center gap-2 mb-3 my-2 text-nowrap">
+                            <strong className="col-5">출근 시간 :</strong>
+                            <input
+                                type="time"
+                                className="input"
+                                name="checkInTime"
+                                value={savedData.checkInTime || ""}
                                 onChange={handleChange}
-                                placeholder="출근, 퇴근시간이 기준과 다를 시 사유를 입력해 주세요."
+                                required
                             />
                         </div>
-                    )}
-                    {savedData.checkInTime !== data.checkInTime ? (
-                        <div className="row-cols-1">
-                            {uploading && (
-                                <div style={{ marginBottom: "10px" }}>
-                                    <p>업로드 진행 중: {progress}%</p>
-                                    <div
-                                        style={{
-                                            // width: "100%",
-                                            backgroundColor: "#e0e0e0",
-                                            borderRadius: "5px",
-                                        }}
-                                    >
+
+                        <div className="d-flex align-items-center gap-2 mb-3 text-nowrap">
+                            <strong className="col-5">퇴근 시간 :</strong>
+                            <input
+                                type="time"
+                                className="input"
+                                name="checkOutTime"
+                                value={savedData.checkOutTime || ""}
+                                onChange={handleChange}
+                                required
+                            />
+                        </div>
+                        {(savedData.checkInTime > data.checkInTime || savedData.checkOutTime < data.checkOutTime) && (
+                            <>
+                            <div className="d-flex align-items-center gap-2 mb-3">
+                                <strong className="col-3">사유 :</strong>
+                                <textarea
+                                    className="bi-textarea-resize input"
+                                    name="memo"
+                                    value={savedData.memo || ""}
+                                    onChange={handleChange}
+                                    placeholder="사유를 입력해 주세요."
+                                    maxLength={40}
+                                />
+                                <small>{savedData.memo.length}/40</small>
+                            </div>
+
+                            </>
+                        )}
+                        {savedData.checkInTime > data.checkInTime ? (
+                            <div className="row-cols-1">
+                                {uploading && (
+                                    <div style={{ marginBottom: "10px" }}>
+                                        <p>업로드 진행 중: {progress}%</p>
                                         <div
                                             style={{
-                                                width: `${progress}%`,
-                                                backgroundColor: "#4caf50",
-                                                height: "10px",
+                                                // width: "100%",
+                                                backgroundColor: "#e0e0e0",
                                                 borderRadius: "5px",
                                             }}
-                                        ></div>
+                                        >
+                                            <div
+                                                style={{
+                                                    width: `${progress}%`,
+                                                    backgroundColor: "#4caf50",
+                                                    height: "10px",
+                                                    borderRadius: "5px",
+                                                }}
+                                            ></div>
+                                        </div>
+                                    </div>
+                                )}
+                                <div className="d-flex flex-column align-items-end gap-2 mb-3 my-2">
+                                    <div>
+                                        <strong>지연표 업로드 .jpg, .png타입 업로드 가능</strong>
+                                        <input
+                                            type="file"
+                                            className="form-control"
+                                            accept=".jpg, .png" // 필요에 따라 확장자 제한
+                                            onChange={handleFileChange}
+                                            placeholder="지연표 업로드"
+                                        />
+                                    </div>
+                                    <div>
+                                        <button onClick={handleUpload}
+                                                className="btn btn-info"
+                                                type="button">
+                                            업로드
+                                        </button>
                                     </div>
                                 </div>
-                            )}
-                            <div className="d-flex flex-column align-items-end gap-2 mb-3 my-2">
-                                <div>
-                                    <strong>지연표 업로드 .jpg, .png타입 업로드 가능</strong>
-                                    <input
-                                        type="file"
-                                        className="form-control"
-                                        accept=".jpg, .png" // 필요에 따라 확장자 제한
-                                        onChange={handleFileChange}
-                                        placeholder="지연표 업로드"
-                                    />
-                                </div>
-                                <div>
-                                    <button onClick={handleUpload}
-                                            className="btn btn-info"
-                                            type="button">
-                                        업로드
-                                    </button>
-                                </div>
                             </div>
+                        ) : null}
+                        <div className="card-footer bg-transparent">
+                            <button type="submit" className="btn btn-primary w-100">
+                                출퇴근 기록
+                            </button>
                         </div>
-                    ) : null}
-                    <button type="submit" className="btn btn-primary">
-                        출퇴근 기록
-                    </button>
+                    </div>
                 </div>
             </form>
         </div>
