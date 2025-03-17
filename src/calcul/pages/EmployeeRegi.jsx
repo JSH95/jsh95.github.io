@@ -193,8 +193,8 @@ const EmployeeRegi = () => {
             <div className="form-group">
               <label>소속 팀장</label>
                 <select
-                name="institutionId"
-                value={teamId || ""}
+                // name="institutionId"
+                value={teamId}
                 onChange={handleChangeTeam}
                 required
                 className="input"
