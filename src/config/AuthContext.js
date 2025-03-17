@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 
-// 로그인 상태와 관련된 데이터를 관리할 Context 생성
+// 로그인 상태와 관련된 데이터를 관리할 Context 생성합니다.
 const AuthContext = createContext({
   isLoggedIn: false,
   token: null,

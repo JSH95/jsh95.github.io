@@ -6,7 +6,6 @@ import createAxiosInstance from "../../config/api"; // 로그인 유저 정보�
 
 function WorkScheduleDashboard (){
     const { username } = useAuth();
-    const [item, setItem] = useState({});
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [isEditing, setIsEditing] = useState(false);
@@ -14,7 +13,6 @@ function WorkScheduleDashboard (){
     const navigate = useNavigate();
     const location = useLocation();
     const workDefaultData = useWorkDefaultData();
-    const [isDataLoaded, setIsDataLoaded] = useState(false);
 
     useEffect(() => {
         const fetchWorkDefaultData = async () => {
@@ -37,11 +35,9 @@ function WorkScheduleDashboard (){
                         breakTimeOut: "",
                         basicWorkTime: "",
                     };
-                    setItem(defaultData);
                     setEditedItem(defaultData);
                 }
                 else if (isEditing) {
-                    setItem(workDefaultData);
                     setEditedItem(workDefaultData);
                 }else if (!isEditing && workDefaultData && Object.keys(workDefaultData).length > 0) {
                     navigate("/workSchedule/list");

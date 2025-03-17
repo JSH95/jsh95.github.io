@@ -43,8 +43,20 @@ const Layout = ({ children }) => (
 );
 
 const ProtectedRoute = ({ children }) => {
-    const { isLoggedIn } = useAuth();
-    return isLoggedIn ? children : <Navigate to="/" />;
+    const { isLoggedIn , role} = useAuth();
+    if(role === "ROLE_ADMIN"){
+        return isLoggedIn ?
+            children
+            : <Navigate to="/" />;
+    } else if (role === "ROLE_GENERAL"){
+        return isLoggedIn ?
+            children
+            : <Navigate to="/" />;
+    } else if (role === "ROLE_TEAM"){
+        return isLoggedIn ?
+            children
+            : <Navigate to="/" />;
+    }
 };
 
 const App = () => {
@@ -64,7 +76,10 @@ const App = () => {
     return(
         <Layout>
             <Routes>
-                <Route path="/" element={<LoginPage />} />
+                <Route
+                    path="/"
+                    element={<LoginPage />}
+                />
                 <Route
                     path="/dashboard"
                     element={
