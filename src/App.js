@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 import {
     HashRouter as Router,
     Route,
@@ -37,10 +37,10 @@ import AdminWorkScheduleList from "./Admin/pages/AdminWorkScheduleList";
 import AdminWorkScheduleDetail from "./Admin/pages/AdminWorkScheduleDetail";
 
 const Layout = ({ children }) => (
-    <>
-        <NavigationBar />
-        <div style={{ marginTop: "100px", padding: "0px" }}>{children}</div>
-    </>
+  <>
+    <NavigationBar />
+    <div style={{ marginTop: '100px', padding: '0px' }}>{children}</div>
+  </>
 );
 
 const ProtectedRoute = ({ children }) => {
@@ -61,19 +61,19 @@ const ProtectedRoute = ({ children }) => {
 };
 
 const App = () => {
-    const navigate = useNavigate();
-    const { isLoggedIn } = useAuth();
-    const location = useLocation();
+  const navigate = useNavigate();
+  const { isLoggedIn } = useAuth();
+  const location = useLocation();
 
-    useEffect(() => {
-        // 새로고침 후 로그인 상태 확인
-        if (isLoggedIn && location.pathname === "/#/") {
-            navigate('/dashboard'); // 로그인 상태에서 "/"에 있을 경우에만 리다이렉트
-        } else if (!isLoggedIn && location.pathname !== "/#/") {
-            navigate('/'); // 로그인되지 않은 사용자가 다른 경로로 접근할 경우 리다이렉트
-        }
-    }, [isLoggedIn, navigate, location.pathname ]);
-
+  useEffect(() => {
+    // 새로고침 후 로그인 상태 확인
+    if (isLoggedIn && location.pathname === '/#/') {
+      navigate('/dashboard'); // 로그인 상태에서 "/"에 있을 경우에만 리다이렉트
+    } else if (!isLoggedIn && location.pathname !== '/#/') {
+      navigate('/'); // 로그인되지 않은 사용자가 다른 경로로 접근할 경우 리다이렉트
+    }
+  }, [isLoggedIn, navigate, location.pathname]);
+  
     return(
         <Layout>
             <Routes>
@@ -287,11 +287,13 @@ const App = () => {
 };
 
 const Root = () => (
-    <AuthProvider>
-        <Router>
-            <App />
-        </Router>
-    </AuthProvider>
+  <AuthProvider>
+    <Router>
+      <App />
+    </Router>
+  </AuthProvider>
 );
 
 export default Root;
+
+//ㅇ
