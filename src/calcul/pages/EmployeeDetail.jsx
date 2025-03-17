@@ -18,6 +18,7 @@ function EmployeeDetail() {
   const { loadList, teamList, errorMsg} = TeamListApi();
   const [teamId, setTeamId] = useState(""); // 팀 아이디 설정
   const [employeeRole, setEmployeeRole] = useState(""); // 관리자 설정
+  const [password, setPassword] = useState("");
 
   useEffect(() => {
     const fetchEmployee = async () => {
@@ -30,7 +31,7 @@ function EmployeeDetail() {
         setEmployeeRole(response2.data.roles? response2.data.roles : "");
         setTeamId(response.data.team.id);
         // console.log("1 : ", response.data)
-        // console.log("2 : ",response2.data.roles)
+        console.log("2 : ",response2.data)
       } catch (err) {
         setError("직원 정보를 불러오지 못했습니다. \n 새로고침 해보세요.");
         // console.error(err);
@@ -81,6 +82,7 @@ function EmployeeDetail() {
             employeeDto , {
               headers: {
                 "Role": employeeRole,
+                "password": password,
               },
             }
         );
@@ -142,6 +144,11 @@ function EmployeeDetail() {
   };
 
   const handleChangeRole = (e) => {
+    const { value } = e.target;
+    setEmployeeRole(value);
+  }
+
+  const handleChangePassword = (e) => {
     const { value } = e.target;
     setEmployeeRole(value);
   }
