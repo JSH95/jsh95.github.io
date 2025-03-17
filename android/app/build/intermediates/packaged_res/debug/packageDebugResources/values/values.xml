@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="ic_launcher_background">#FFFFFF</color>
-    <string name="app_name">react</string>
+    <string name="app_name">WEAVUS</string>
     <string name="custom_url_scheme">com.weavus.app</string>
     <string name="gcm_defaultSenderId" translatable="false">661703840134</string>
     <string name="google_api_key" translatable="false">AIzaSyD1UdhMg_MPpUBaSIX6_US4Cyo21E1zjek</string>
@@ -10,7 +10,7 @@
     <string name="google_storage_bucket" translatable="false">testweavus.firebasestorage.app</string>
     <string name="package_name">com.weavus.app</string>
     <string name="project_id" translatable="false">testweavus</string>
-    <string name="title_activity_main">react</string>
+    <string name="title_activity_main">WEAVUS</string>
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         
         <item name="colorPrimary">@color/colorPrimary</item>

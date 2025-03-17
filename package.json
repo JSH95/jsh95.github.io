@@ -46,7 +46,7 @@
     "eject": "react-scripts eject",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d build",
-    "android-build": "npx cap copy android",
+    "android-build": "npx cap copy android && cd android && gradlew assembleDebug",
     "start-android-studio": "start \"\" \"C:\\Program Files\\Android\\Android Studio\\bin\\studio64.exe\" \"C:\\Users\\user\\Desktop\\ReactFront\\android\""
   },
   "browserslist": [
