@@ -3,9 +3,12 @@ import {BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, Cell}
 import "../../config/index.css";
 import createAxiosInstance from "../../config/api";
 import {useNavigate} from "react-router-dom";
+import {useAuth} from "../../config/AuthContext";
 
 
 const AdminWorkScheduleDashboard = () => {
+    const { username } = useAuth();
+    const { role } = useAuth();
     const navigate = useNavigate();
     const [chartData, setChartData] = useState([]);
     const today = new Date();
@@ -17,27 +20,35 @@ const AdminWorkScheduleDashboard = () => {
             try {
                 const axiosInstance = createAxiosInstance();
                 const response = await axiosInstance.get(`/workSchedule/${year}/${month}`);
+                const filteredData = response.data.filter(
+                    (entry) =>
+                        (entry.workType === '출근' || entry.workType === '휴일출근') &&
+                        (role === 'ROLE_ADMIN' || entry.employee.team.teamLeaderId === username) // 어드민이면 팀장 ID 조건 제거
+                );
+
                 const employeeHours = {};
                 const basicWorkTime = {};
-                const username = {};
-                // console.log("1",response.data)
-                response.data
-                    .filter((entry) => entry.workType === '출근' || entry.workType === '휴일출근') // '출근' 또는 '휴일출근'인 항목만 필터링
-                    .forEach((entry) => {
+                const usernames = {}; // 기존 username과 변수명 충돌 방지
+
+                filteredData.forEach((entry) => {
                     const { id } = entry.employee;
                     const checkIn = new Date(`${entry.checkInDate}T${entry.checkInTime}`);
                     const checkOut = new Date(`${entry.checkOutDate}T${entry.checkOutTime}`);
                     const breakStart = new Date(`${entry.checkInDate}T${entry.breakTimeIn}`);
                     const breakEnd = new Date(`${entry.checkInDate}T${entry.breakTimeOut}`);
-                    const workDuration = (checkOut - checkIn - (breakEnd - breakStart)) / (1000 * 60 * 60);
+
+                    const workDuration = (checkOut - checkIn - (breakEnd - breakStart)) > 0
+                        ? Math.floor((checkOut - checkIn - (breakEnd - breakStart)) / (1000 * 60 * 60))
+                        : 0;
+
                     employeeHours[id] = (employeeHours[id] || 0) + workDuration;
                     basicWorkTime[id] = entry.basicWorkTime;
-                    username[id] = entry.employee.name;
-                    });
+                    usernames[id] = entry.employee.name;
+                });
 
                 setChartData(Object.keys(employeeHours).map((id) => ({
                     id,
-                    username: username[id],
+                    username: usernames[id],
                     hours: employeeHours[id],
                     basicWorkTime: basicWorkTime[id],
                 })));
@@ -47,7 +58,8 @@ const AdminWorkScheduleDashboard = () => {
         };
 
         fetchData();
-    }, [ year, month, chartData]);
+    }, [year, month]); // chartData 제거 (무한 루프 방지)
+
 
     function moveToDetail(id){
         window.alert("상세 페이지로 이동합니다 :" + id);
@@ -56,28 +68,6 @@ const AdminWorkScheduleDashboard = () => {
 
     return (
         <div className="container">
-            {/*<div>*/}
-            {/*    <ResponsiveContainer width="100%" height={Math.max(chartData.length * 50, 200)}>*/}
-            {/*        <BarChart data={chartData} layout="vertical" margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>*/}
-            {/*            <XAxis type="number" domain={[0, 200]} tickCount={7} />*/}
-            {/*            <YAxis dataKey="name" type="category" width={160} hight={150}*/}
-            {/*                   onClick={test}/>*/}
-            {/*            <Tooltip />*/}
-            {/*            <Legend />*/}
-            {/*            <Bar dataKey="hours"*/}
-            {/*                 label={({ x, y, width, value }) => (*/}
-            {/*                     <text x={x + width + 5} y={y + 10} fill="#000" fontSize={12}>*/}
-            {/*                         {value}*/}
-            {/*                     </text>*/}
-            {/*                 )}*/}
-            {/*            >*/}
-            {/*                {chartData.map((entry, index) => (*/}
-            {/*                    <Cell key={`cell-${index}`} fill={entry.hours >= 120 ? "#c20000" : "#61e368"} />*/}
-            {/*                ))}*/}
-            {/*            </Bar>*/}
-            {/*        </BarChart>*/}
-            {/*    </ResponsiveContainer>*/}
-            {/*</div>*/}
             <div className="table-responsive">
                 <table className="table table-responsive table-bordered">
                     <thead>

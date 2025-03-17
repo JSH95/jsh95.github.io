@@ -6,7 +6,7 @@ import createAxiosInstance from '../config/api';
 import '../cssFiles/Login.css';
 import containerImage from '../images/loginpageBackground.png';
 import logoImage from '../images/loginpageLogo.png';
-import usePushNotificationPermission from '../hooks/usePushNotificationPermission'; // 경로 수정
+import usePushNotificationPermission from '../hooks/usePushNotificationPermission'; // 경로 확인 후 수정
 
 function LoginPage() {
   const [username, setUsername] = useState('');
@@ -17,8 +17,10 @@ function LoginPage() {
   const { login } = useAuth(); // AuthContext에서 setIsLoggedIn 가져오기
   const [remember, setRemember] = useState(false);
 
-  usePushNotificationPermission(); // 푸시 알림 권한 요청 훅 사용
 
+  usePushNotificationPermission(); // (앱전용 웹 사용불가)푸시 알림 권한 요청 훅 사용
+
+  // 모바일
   useEffect(() => {
     const savedUsername = localStorage.getItem('savedUsername');
     if (savedUsername) {

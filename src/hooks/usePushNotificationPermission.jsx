@@ -8,7 +8,7 @@ const usePushNotificationPermission = () => {
   useEffect(() => {
     const requestPermissions = async () => {
       if (!Capacitor.isNativePlatform()) {
-        console.log('네이티브 환경에서만 지원됩니다.');
+        // console.log('네이티브 환경에서만 지원됩니다.');
         return;
       }
 

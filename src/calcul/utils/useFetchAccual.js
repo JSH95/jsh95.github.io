@@ -18,6 +18,7 @@ export function useFetchAccual() {
           const dateB = new Date(b.employee.entryDate);
           return dateA - dateB; // 오름차순 정렬 (날짜가 오래된 순)
         });
+        // console.log("정렬된 데이터:", sortedData)
         setUserData(sortedData);
       } catch (error) {
         if (error.response) {

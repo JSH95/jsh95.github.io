@@ -3,6 +3,9 @@ import { useParams, useNavigate } from "react-router-dom";
 import { getEmployeeTypeText, getRankText } from "../../utils/textUtils";
 import createAxiosInstance from "../../config/api";
 import "../../config/index.css";
+import {TeamListApi} from "../../utils/TeamListApi";
+
+
 
 function EmployeeDetail() {
   const { employeeId } = useParams();
@@ -12,17 +15,25 @@ function EmployeeDetail() {
   const [error, setError] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const [editedItem, setEditedItem] = useState({});
+  const { loadList, teamList, errorMsg} = TeamListApi();
+  const [teamId, setTeamId] = useState(""); // 팀 아이디 설정
+  const [employeeRole, setEmployeeRole] = useState(""); // 관리자 설정
 
   useEffect(() => {
     const fetchEmployee = async () => {
       try {
         const axiosInstance = createAxiosInstance(); // 인스턴스 생성
         const response = await axiosInstance.get(`/employees/${employeeId}`);
+        const response2 = await axiosInstance.get(`/employees/team/${employeeId}`);
         setItem(response.data);
         setEditedItem(response.data);
+        setEmployeeRole(response2.data.roles? response2.data.roles : "");
+        setTeamId(response.data.team.id);
+        // console.log("1 : ", response.data)
+        // console.log("2 : ",response2.data.roles)
       } catch (err) {
-        setError("직원 정보를 불러오지 못했습니다.");
-        console.error(err);
+        setError("직원 정보를 불러오지 못했습니다. \n 새로고침 해보세요.");
+        // console.error(err);
       } finally {
         setLoading(false);
       }
@@ -30,6 +41,10 @@ function EmployeeDetail() {
 
     fetchEmployee();
   }, [employeeId]);
+
+  useEffect(() => {
+    loadList();
+  }, [loadList]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -44,15 +59,30 @@ function EmployeeDetail() {
     if (!confirmSave) {
       return;
     } else {
+      const employeeDto = {
+        id: editedItem.id,
+        name: editedItem.name,
+        entryDate: editedItem.entryDate,
+        exitDate: editedItem.exitDate || null, // 퇴사일이 없을 경우 null로 처리
+        employeeType: editedItem.employeeType, // 'REGULAR' 또는 'CONTRACT'
+        conversionDate: editedItem.conversionDate || null, // conversionDate가 없을 경우 null
+        rank: editedItem.rank,
+        status: editedItem.status,
+        teamId: teamId
+      };
       try {
-        if (editedItem.rank === "" && editedItem.employeeType === "") {
+        if (employeeDto.rank === "" && employeeDto.employeeType === "") {
           alert("입력되지 않은 값이 있습니다. 다시 한번 확인해 주세요."); // 직급이 선택되지 않으면 경고 메시지 표시
           return;
         }
         const axiosInstance = createAxiosInstance(); // 인스턴스 생성
         const response = await axiosInstance.put(
           `/employees/${employeeId}`,
-          editedItem
+            employeeDto , {
+              headers: {
+                "Role": employeeRole,
+              },
+            }
         );
         setItem(response.data);
         setIsEditing(false);
@@ -63,7 +93,7 @@ function EmployeeDetail() {
           window.alert("입력된 값을 다시 한번 확인해 주세요");
         } else {
           // 기타 에러에 대한 처리
-          setError("직원 정보를 저장하는 데 실패했습니다.");
+          setError("직원 정보를 저장하는 데 실패했습니다." + err);
         }
       }
     }
@@ -105,6 +135,16 @@ function EmployeeDetail() {
       console.error(err);
     }
   };
+
+  const handleChangeTeam = (e) => {
+    const { value } = e.target;
+    setTeamId(value);
+  };
+
+  const handleChangeRole = (e) => {
+    const { value } = e.target;
+    setEmployeeRole(value);
+  }
 
   if (loading) return <p className="loading">Loading...</p>;
   if (error) return <p className="error">{error}</p>;
@@ -204,6 +244,49 @@ function EmployeeDetail() {
                     <option value={4}>사장</option>
                   </select>
                 </div>
+                <div className="form-group">
+                  <label>소속 팀장</label>
+                  <select
+                      // name="teamId"
+                      value={teamId ? teamId : editedItem.team.id}
+                      onChange={handleChangeTeam}
+                      required
+                      className="input"
+                  >
+                    {errorMsg ? (
+                        <option value="" disabled>{errorMsg}</option> // 오류 메시지를 옵션으로 표시
+                    ) :
+                        <>
+                            <option value="" disabled>소속 팀장을 선택해 주세요.</option>
+                            {teamList && teamList.length > 0 ? (
+                          teamList.map((team) => (
+                            <option key={team.id} value={team.id}>
+                              {team.teamLeaderName}
+                            </option>
+                          ))
+                          ) : (
+                            <option value="" disabled>
+                              Loading...
+                            </option>
+                          )}
+                        </>
+                        }
+                  </select>
+                </div>
+                <div  className="form-group">
+                  <label className="label">계정 권한</label>
+                  <select
+                      className="input"
+                      value={employeeRole}
+                      onChange={handleChangeRole}
+                      required
+                  >
+                    <option value="" disabled>계정 권한을 선택해 주세요</option>
+                    <option value="ADMIN">관리자권한</option>
+                    <option value="TEAM">팀장</option>
+                    <option value="GENERAL">일반사원</option>
+                  </select>
+                </div>
               </>
             ) : (
               <>
@@ -240,6 +323,18 @@ function EmployeeDetail() {
                   <div  className="form-group mb-1">
                     <label className="label">직급</label>
                       <p  className="box">{getRankText(item.rank)}</p>
+                  </div>
+                  <div className="form-group mb-1">
+                    <label className="label">소속 팀장</label>
+                    <div>
+                      {item.id === item.team.teamLeaderId ? (
+                          <p className="box">팀장</p>
+                      ) : item.team.teamLeaderId === null || item.team.teamLeaderId === "admin" ? (
+                          <p className="box">팀이 정해지지 않았습니다.</p>
+                      ) : (
+                          <p className="box">{item.team.teamLeaderName}</p>
+                      )}
+                    </div>
                   </div>
                 </div>
               </>

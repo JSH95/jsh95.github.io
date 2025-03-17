@@ -6,7 +6,6 @@ import createAxiosInstance from "../../config/api"; // 로그인 유저 정보�
 
 function WorkScheduleDashboard (){
     const { username } = useAuth();
-    const [item, setItem] = useState({});
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [isEditing, setIsEditing] = useState(false);
@@ -14,15 +13,14 @@ function WorkScheduleDashboard (){
     const navigate = useNavigate();
     const location = useLocation();
     const workDefaultData = useWorkDefaultData();
-    const [isDataLoaded, setIsDataLoaded] = useState(false);
 
     useEffect(() => {
         const fetchWorkDefaultData = async () => {
             setLoading(true);
             setError("");
-            if (!location.state !== null) {
-            setIsEditing(location.state);
-            }
+            // if (workDefaultData === undefined) {
+            // setIsEditing(true);
+            // }
             try {
                 if(workDefaultData?.checkInTime === null) {
                     // ✅ employeeName이 없으면 기본 값 설정 (예외 처리)
@@ -37,15 +35,16 @@ function WorkScheduleDashboard (){
                         breakTimeOut: "",
                         basicWorkTime: "",
                     };
-                    setItem(defaultData);
                     setEditedItem(defaultData);
+                    setIsEditing(false);
                 }
-                else if (isEditing) {
-                    setItem(workDefaultData);
+                else{
                     setEditedItem(workDefaultData);
-                }else if (!isEditing && workDefaultData && Object.keys(workDefaultData).length > 0) {
-                    navigate("/workSchedule/list");
+                    setIsEditing(true);
                 }
+                // else if (!isEditing && workDefaultData && Object.keys(workDefaultData).length > 0) {
+                //     navigate("/workSchedule/list");
+                // }
             } catch (error) {
                 setError("근무표 기본 정보를 불러오지 못했습니다.");
             } finally {

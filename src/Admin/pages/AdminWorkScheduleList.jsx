@@ -15,7 +15,7 @@ const AdminWorkScheduleList = () =>  {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
-    const workDataList = useWorkData(id, year, month); // ✅ 데이터와 갱신 함수 가져오기
+    const workDataList = useWorkData(year, month, id); // ✅ 데이터와 갱신 함수 가져오기
     // const workDefaultData = useWorkDefaultData();
 
     //     "2025-01-01": { attendanceType: "휴일", workType: "", checkInTime: "", checkOutTime: "", memo: "공휴일" },
@@ -88,15 +88,13 @@ const AdminWorkScheduleList = () =>  {
         });
     };
 
-
-
-
     const handleClickEdit = (date) => {
-        navigate(`/workSchedule/detail/${date}`);
+        navigate(`/workSchedule/adminDetail/${date}/${id}`);
     }
 
     function handleClickReceipt() {
-        navigate(`/workSchedule/receipt/${year}-${String(month).padStart(2, '0')}`)
+        // navigate(`/workSchedule/receipt/${year}-${String(month).padStart(2, '0')}`)
+        window.alert("해당 페이지는 테스트 중입니다.")
     }
 
     if (loading) return <p>Loading...</p>;
@@ -105,9 +103,13 @@ const AdminWorkScheduleList = () =>  {
             <div className="container">
                 <h2 className="text-dark mb-1">WORK SCHEDULE</h2>
                 <div className="d-flex justify-content-center align-items-center">
-                    <button onClick={() => changeMonth(-1)}>◀</button>
+                    <button onClick={() => changeMonth(-1)} className="btn">
+                        <i class="bi bi-arrow-left-circle-fill fs-3"></i>
+                    </button>
                     <h2 className="px-3">{year} / {String(month).padStart(2, "0")}</h2>
-                    <button onClick={() => changeMonth(1)}>▶</button>
+                    <button onClick={() => changeMonth(1)} className="btn">
+                        <i class="bi bi-arrow-right-circle-fill fs-3"></i>
+                    </button>
                 </div>
                 <button type="button" className="btn btn-secondary" onClick={handleClickReceipt}>
                     {month}월 영수증 첨부
@@ -122,7 +124,7 @@ const AdminWorkScheduleList = () =>  {
                             <th className="text-center">区分</th>
                             <th className="text-center">開始時間</th>
                             <th className="text-center">終了時間</th>
-                            <th className="text-center">비고</th>
+                            <th className="text-center" style={{ maxWidth: "200px" }}>비고</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -130,23 +132,26 @@ const AdminWorkScheduleList = () =>  {
                             <tr key={index} >
                                 <td className={day.styleClass}>
                                     {day.date}日 &nbsp;
+                                    {day.workType? (
                                         <i className="bi bi-pencil-fill"
                                            onClick={() => handleClickEdit(day.key)}
-                                        >
-                                        </i>
+                                        ></i>
+                                    ) : null}
                                 </td>
                                 <td className={day.styleClass}>{day.weekday}</td>
                                 <td className={day.styleClass}>{day.workType} </td>
                                 <td className={day.styleClass}>{day.workPosition}</td>
                                 <td className={day.styleClass}>{day.checkInTime} </td>
                                 <td className={day.styleClass}>{day.checkOutTime} </td>
-                                <td className={day.styleClass}>{day.memo}
+                                <td className={`${day.styleClass} text-truncate`}
+                                    style={{ maxWidth: "300px" , minWidth: "200px"}}
+                                >{day.memo}
                                     {day.file === "true" ? (
                                         <>&nbsp;
                                             <i className="bi bi-file-earmark-check-fill"
                                                 onClick={() => handleClickEdit(day.key)}></i>
                                         </>
-                                    ) : (null)}
+                                    ) : null}
                                 </td>
 
                             </tr>

@@ -50,7 +50,9 @@
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d build"
+    "deploy": "gh-pages -d build",
+    "android-build": "npx cap copy android",
+    "start-android-studio": "start \"\" \"C:\\Program Files\\Android\\Android Studio\\bin\\studio64.exe\" \"C:\\Users\\user\\Desktop\\ReactFront\\android\""
   },
   "browserslist": [
     ">0.2%",
