@@ -111,108 +111,224 @@ const EmployeeSettings = () => {
   }
 
   return (
-    <div className="container d-flex justify-content-center align-items-center flex-column">
-      <div className="row justify-content-md-center">
-        <div className="col-md-14">
-      <div className="card mb-3">
-        <h2 className="title card-header">WEAVUS 관리자 페이지</h2>
-        <button className="btn btn-info" type="button" onClick={handleGoList}> 리스트(테스트)</button>
+    // <div className="container d-flex justify-content-center align-items-center flex-column">
+    //   <div className="row justify-content-md-center">
+    //     <div className="col-md-14">
+    //   <div className="card mb-3">
+    //     <h2 className="title card-header">WEAVUS 관리자 페이지</h2>
+    //     <button className="btn btn-info" type="button" onClick={handleGoList}> 리스트(테스트)</button>
+    //
+    //     <table className="table card-body">
+    //       <thead>
+    //       <tr>
+    //         <th className="table-header">직급</th>
+    //         <th className="table-header">현재 월 적립 금액</th>
+    //       </tr>
+    //       </thead>
+    //       <tbody>
+    //       {employees.map((employee, index) => (
+    //           <tr key={index}>
+    //             <td className="table-data">{getRankText(employee.rank)}</td>
+    //             <td className="table-data">
+    //               <input
+    //                   type="text"
+    //                   className="input"
+    //                   value={formatAmount(employee.monthlyAmount)}
+    //                   onChange={(e) => handleAmountChange(index, e.target.value)}
+    //               />
+    //             </td>
+    //           </tr>
+    //       ))}
+    //       </tbody>
+    //     </table>
+    //       <button className="btn btn-success card-footer" onClick={handleSave}>
+    //         적립금 {""}
+    //         업데이트
+    //       </button>
+    //   </div>
+    //       <form onSubmit={adminSignUp} className="card ">
+    //         <h2 className="card-header">계정 생성</h2>
+    //
+    //         <div className="card-body">
+    //           <label htmlFor="username" className="label">
+    //             아이디 :
+    //           </label>
+    //           <input
+    //               name="username"
+    //               type="text"
+    //               value={item.username}
+    //               onChange={handleInputChange}
+    //               placeholder="아이디"
+    //               className="input mb-2"
+    //               required
+    //           />
+    //           <label htmlFor="password" className="label">
+    //             비밀번호 :
+    //           </label>
+    //           <input
+    //               name="password"
+    //               type="password"
+    //               value={item.password}
+    //               onChange={handleInputChange}
+    //               placeholder="비밀번호"
+    //               className="input mb-2"
+    //               required
+    //           />
+    //           <label htmlFor="password" className="label">
+    //             비밀번호확인 :
+    //           </label>
+    //           <input
+    //               name="password2"
+    //               type="password"
+    //               value={password2}
+    //               placeholder="비밀번호 확인"
+    //               className="input mb-2"
+    //               onChange={handlePassword2Change}
+    //               required
+    //           />
+    //           <label htmlFor="password" className="label">
+    //             권한 선택 :
+    //           </label>
+    //           <select
+    //               name="role"
+    //               type=""
+    //               value={item.role}
+    //               onChange={handleInputChange}
+    //               className="input mb-2"
+    //               required
+    //           >
+    //             <option value="">권한 선택</option>
+    //             <option value="GENERAL">일반사원</option>
+    //             <option value="ADMIN">관리자권한</option>
+    //             <option value="TEAM">팀장</option>
+    //           </select>
+    //         </div>
+    //         <button type="submit" className="btn btn-success card-footer">생성</button>
+    //       </form>
+    //     </div>
+    //   </div>
+    //   <div>
+    //     <button className="btn btn-success card-footer" onClick={handleMessage}>
+    //       App 테스트 알림 발송
+    //     </button>
+    //   </div>
+    // </div>
 
-        <table className="table card-body">
-          <thead>
-          <tr>
-            <th className="table-header">직급</th>
-            <th className="table-header">현재 월 적립 금액</th>
-          </tr>
-          </thead>
-          <tbody>
-          {employees.map((employee, index) => (
-              <tr key={index}>
-                <td className="table-data">{getRankText(employee.rank)}</td>
-                <td className="table-data">
-                  <input
-                      type="text"
-                      className="input"
-                      value={formatAmount(employee.monthlyAmount)}
-                      onChange={(e) => handleAmountChange(index, e.target.value)}
-                  />
-                </td>
-              </tr>
-          ))}
-          </tbody>
-        </table>
-          <button className="btn btn-success card-footer" onClick={handleSave}>
-            적립금 {""}
-            업데이트
-          </button>
-      </div>
-          <form onSubmit={adminSignUp} className="card ">
-            <h2 className="card-header">계정 생성</h2>
+      <div className="container py-5">
+        <div className="row justify-content-center">
+          <div className="col-md-8 col-lg-6">
+            <div className="card shadow-lg mb-4">
+              <h2 className="card-header text-center bg-primary text-white">WEAVUS 관리자 페이지</h2>
+              <div className="card-body">
+                <button className="btn btn-info w-100 mb-3" type="button" onClick={handleGoList}>
+                  사원 월별 근무 그래프
+                </button>
 
-            <div className="card-body">
-              <label htmlFor="username" className="label">
-                아이디 :
-              </label>
-              <input
-                  name="username"
-                  type="text"
-                  value={item.username}
-                  onChange={handleInputChange}
-                  placeholder="아이디"
-                  className="input mb-2"
-                  required
-              />
-              <label htmlFor="password" className="label">
-                비밀번호 :
-              </label>
-              <input
-                  name="password"
-                  type="password"
-                  value={item.password}
-                  onChange={handleInputChange}
-                  placeholder="비밀번호"
-                  className="input mb-2"
-                  required
-              />
-              <label htmlFor="password" className="label">
-                비밀번호확인 :
-              </label>
-              <input
-                  name="password2"
-                  type="password"
-                  value={password2}
-                  placeholder="비밀번호 확인"
-                  className="input mb-2"
-                  onChange={handlePassword2Change}
-                  required
-              />
-              <label htmlFor="password" className="label">
-                권한 선택 :
-              </label>
-              <select
-                  name="role"
-                  type=""
-                  value={item.role}
-                  onChange={handleInputChange}
-                  className="input mb-2"
-                  required
-              >
-                <option value="">권한 선택</option>
-                <option value="GENERAL">일반사원</option>
-                <option value="ADMIN">관리자권한</option>
-                <option value="TEAM">팀장</option>
-              </select>
+                <table className="table table-striped">
+                  <thead>
+                  <tr>
+                    <th className="table-header">직급</th>
+                    <th className="table-header">현재 월 적립 금액</th>
+                  </tr>
+                  </thead>
+                  <tbody>
+                  {employees.map((employee, index) => (
+                      <tr key={index}>
+                        <td className="table-data">{getRankText(employee.rank)}</td>
+                        <td className="table-data">
+                          <input
+                              type="text"
+                              className="form-control"
+                              value={formatAmount(employee.monthlyAmount)}
+                              onChange={(e) => handleAmountChange(index, e.target.value)}
+                          />
+                        </td>
+                      </tr>
+                  ))}
+                  </tbody>
+                </table>
+
+                <button className="btn btn-success w-100 mt-3" onClick={handleSave}>
+                  적립금 업데이트
+                </button>
+              </div>
             </div>
-            <button type="submit" className="btn btn-success card-footer">생성</button>
-          </form>
+
+            {/* 계정 생성 폼 */}
+            <div className="card shadow-lg mb-4">
+              <h2 className="card-header text-center bg-secondary text-white">계정 생성</h2>
+              <form onSubmit={adminSignUp} className="card-body">
+                <div className="mb-3">
+                  <label htmlFor="username" className="form-label">아이디 :</label>
+                  <input
+                      name="username"
+                      type="text"
+                      value={item.username}
+                      onChange={handleInputChange}
+                      placeholder="아이디"
+                      className="form-control"
+                      required
+                  />
+                </div>
+
+                <div className="mb-3">
+                  <label htmlFor="password" className="form-label">비밀번호 :</label>
+                  <input
+                      name="password"
+                      type="password"
+                      value={item.password}
+                      onChange={handleInputChange}
+                      placeholder="비밀번호"
+                      className="form-control"
+                      required
+                  />
+                </div>
+
+                <div className="mb-3">
+                  <label htmlFor="password" className="form-label">비밀번호 확인 :</label>
+                  <input
+                      name="password2"
+                      type="password"
+                      value={password2}
+                      onChange={handlePassword2Change}
+                      placeholder="비밀번호 확인"
+                      className="form-control"
+                      required
+                  />
+                </div>
+
+                <div className="mb-3">
+                  <label htmlFor="role" className="form-label">권한 선택 :</label>
+                  <select
+                      name="role"
+                      value={item.role}
+                      onChange={handleInputChange}
+                      className="form-control"
+                      required
+                  >
+                    <option value="">권한 선택</option>
+                    <option value="GENERAL">일반사원</option>
+                    <option value="ADMIN">관리자권한</option>
+                    <option value="TEAM">팀장</option>
+                  </select>
+                </div>
+
+                <button type="submit" className="btn btn-primary w-100">
+                  계정 생성
+                </button>
+              </form>
+            </div>
+
+            {/* 앱 테스트 알림 발송 버튼 */}
+            <div className="text-center mt-4">
+              <button className="btn btn-warning" onClick={handleMessage}>
+                App 테스트 알림 발송
+              </button>
+            </div>
+          </div>
         </div>
       </div>
-      <div>
-        <button className="btn btn-success card-footer" onClick={handleMessage}>
-          App 테스트 알림 발송
-        </button>
-      </div>
-    </div>
+
 
 
   );
