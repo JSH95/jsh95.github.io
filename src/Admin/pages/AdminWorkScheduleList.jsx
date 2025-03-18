@@ -18,6 +18,8 @@ const AdminWorkScheduleList = () =>  {
     const workDataList = useWorkData(year, month, id); // ✅ 데이터와 갱신 함수 가져오기
     // const workDefaultData = useWorkDefaultData();
 
+    //     "2025-01-01": { attendanceType: "휴일", workType: "", checkInTime: "", checkOutTime: "", memo: "공휴일" },
+
     useEffect(() => {
         const fetchSchedule = async () => {
             setLoading(true);
@@ -91,7 +93,7 @@ const AdminWorkScheduleList = () =>  {
     }
 
     function handleClickReceipt() {
-        navigate(`/workSchedule/receipt/${year}-${String(month).padStart(2, '0')}/${id}`)
+        // navigate(`/workSchedule/receipt/${year}-${String(month).padStart(2, '0')}`)
         window.alert("해당 페이지는 테스트 중입니다.")
     }
 

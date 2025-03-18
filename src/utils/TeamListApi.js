@@ -3,8 +3,8 @@ import createAxiosInstance from "../config/api";
 
 export function TeamListApi() {
     const [teamList, setTeamListApi] = useState([]);
-    const [teLoding, setLoading] = useState(false);
-    const [teErrorMsg, setErrorMsg] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [errorMsg, setErrorMsg] = useState("");
 
 
     const loadList = useCallback(async () => {
@@ -21,5 +21,5 @@ export function TeamListApi() {
                     setLoading(false);
                 }
     }, []);
-    return { loadList, teLoding, teErrorMsg, teamList};
+    return { loadList, loading, errorMsg, teamList};
 }
