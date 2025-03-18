@@ -93,7 +93,7 @@ const AdminWorkScheduleList = () =>  {
     }
 
     function handleClickReceipt() {
-        // navigate(`/workSchedule/receipt/${year}-${String(month).padStart(2, '0')}`)
+        navigate(`/workSchedule/receipt/${year}-${String(month).padStart(2, '0')}/${id}`)
         window.alert("해당 페이지는 테스트 중입니다.")
     }
 
