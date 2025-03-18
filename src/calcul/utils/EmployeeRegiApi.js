@@ -7,7 +7,6 @@ export function EmployeeRegiApi() {
   const [responseMessage, setResponseMessage] = useState("");
   const [employeeRole, setEmployeeRole] = useState(""); // 관리자 설정
   const [teamId, setTeamId] = useState(employeeRole === "TEAM" ? "0" : ""); // 팀 아이디 설정
-  const [departmentId, setDepartment] = useState(""); // 부서 설정
   const addEmployee = async (employeeData) => {
     setLoading(true);
     setError("");
@@ -19,15 +18,13 @@ export function EmployeeRegiApi() {
         headers: {
           "Role": employeeRole,
           "TeamID": teamId,
-          "DepartmentId": departmentId,
         },
       });
       // 응답 데이터 설정
       setResponseMessage(response.data);
       setEmployeeRole("");
       setTeamId("");
-      setDepartment("");
-      // console.log("등록 응답: ", response.data);
+      console.log("등록 응답: ", response.data);
       window.alert("등록이 완료되었습니다.");
     } catch (err) {
       setError("등록 실패 : " + err.response.data.message);
@@ -36,16 +33,12 @@ export function EmployeeRegiApi() {
     }
   };
 
-  return {
-    addEmployee,
+  return { addEmployee,
     loading,
     error,
     responseMessage,
     setEmployeeRole,
     employeeRole,
     setTeamId,
-    teamId,
-    setDepartment,
-    departmentId
-  };
+    teamId};
 }
