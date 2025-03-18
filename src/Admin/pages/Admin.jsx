@@ -10,8 +10,6 @@ const EmployeeSettings = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [password2, setPassword2] = useState("");
-  // const [username, setUsername] = useState("");
-  // const [password, setPassword] = useState("");
   const [item, setItem] = useState({
         username : "",
         password : "",
