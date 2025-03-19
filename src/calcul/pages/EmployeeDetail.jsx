@@ -30,9 +30,9 @@ function EmployeeDetail() {
         setItem(response.data);
         setEditedItem(response.data);
         setEmployeeRole(response2.data.roles? response2.data.roles : "");
-        setTeamId(response.data.team.id? response.data.team.id : "");
-        console.log("1 : ", response.data.team.id)
-        // console.log("2 : ",response2.data)
+        setTeamId(response.data.team.id);
+        // console.log("1 : ", response.data)
+        // console.log("2 : ",response2.data.roles)
       } catch (err) {
         setError("직원 정보를 불러오지 못했습니다. \n 새로고침 해보세요.");
         // console.error(err);
@@ -77,6 +77,7 @@ function EmployeeDetail() {
         status: editedItem.status,
         teamId: teamId,
         departmentId: editedItem.department.id,
+
       };
       try {
         if (employeeDto.rank === "" || employeeDto.employeeType === "" || employeeRole === "") {

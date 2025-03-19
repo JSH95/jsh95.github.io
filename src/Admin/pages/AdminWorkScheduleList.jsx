@@ -1,22 +1,22 @@
 
 import React, {useEffect, useState} from 'react';
-import {useNavigate, useParams} from "react-router-dom";
+import {useLocation, useNavigate, useParams} from "react-router-dom";
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import "../../config/index.css";
 import holidayListData from "../../utils/holidayListData";
 import useWorkData from "../../jobScedule/utils/WorkData";
-import useWorkDefaultData from "../../jobScedule/utils/WorkDataDefault";
+
 const AdminWorkScheduleList = () =>  {
     const { id } = useParams();
-    const today = new Date();
-    const [year, setYear] = useState(today.getFullYear());
-    const [month, setMonth] = useState(today.getMonth() + 1);
+    const location = useLocation();
+    const { year : selectedYear, month: selectedMonth } = location.state;
+    const [year, setYear] = useState(selectedYear);
+    const [month, setMonth] = useState(selectedMonth);
     const [schedule, setSchedule] = useState([]);
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const workDataList = useWorkData(year, month, id); // ✅ 데이터와 갱신 함수 가져오기
-    // const workDefaultData = useWorkDefaultData();
 
     useEffect(() => {
         const fetchSchedule = async () => {
@@ -92,7 +92,6 @@ const AdminWorkScheduleList = () =>  {
 
     function handleClickReceipt() {
         navigate(`/workSchedule/receipt/${year}-${String(month).padStart(2, '0')}/${id}`)
-        window.alert("해당 페이지는 테스트 중입니다.")
     }
 
     if (loading) return <p>Loading...</p>;
