@@ -69,14 +69,15 @@ const AdminWorkScheduleDashboard = () => {
     return (
         <div className="container">
             <div className="table-responsive">
-                <table className="table table-responsive table-bordered">
+                <table className="table table-bordered
+                style={{ tableLayout: 'fixed', width: '100%' }}">
                     <thead>
                     <tr>
-                        <th className="table-header">이름</th>
-                        <th className="table-header">기본 근무시간</th>
-                        <th className="table-header">총 근무시간</th>
-                        <th className="table-header">초과 근무시간</th>
-                        <th className="table-header">
+                        <th className="table-header" style={{ minWidth: '150px', whiteSpace: 'nowrap' }}>이름</th>
+                        <th className="table-header" style={{ minWidth: '150px', whiteSpace: 'nowrap' }}>기본 근무시간</th>
+                        <th className="table-header" style={{ minWidth: '150px', whiteSpace: 'nowrap' }}>총 근무시간</th>
+                        <th className="table-header" style={{ minWidth: '150px', whiteSpace: 'nowrap' }}>초과 근무시간</th>
+                        <th className="table-header table-header-fixed"  style={{ minWidth: '200px', whiteSpace: 'nowrap' }}>
                             <div className="x-axis-ticks">
                                 {/* X축 눈금 값을 표시합니다. */}
                                 {[0, 50, 100, 150, 200].map((tick) => (
