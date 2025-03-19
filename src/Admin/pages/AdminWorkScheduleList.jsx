@@ -91,7 +91,7 @@ const AdminWorkScheduleList = () =>  {
     }
 
     function handleClickReceipt() {
-        navigate(`/workSchedule/receipt/${year}-${String(month).padStart(2, '0')}/${id}`)
+        navigate(`/workSchedule/receipt/${year}-${String(month).padStart(2, '0')}/${id}`);
     }
 
     if (loading) return <p>Loading...</p>;
