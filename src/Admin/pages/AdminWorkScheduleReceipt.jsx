@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 import createAxiosInstance from "../../config/api";
 import {useNavigate, useParams} from "react-router-dom";
 
-const ReceiptList = () => {
+const AdminWorkScheduleReceipt = () => {
     const { date } = useParams();
     const navigate = useNavigate();
     const [receipts, setReceipts] = useState([]);  // 영수증 리스트
@@ -15,7 +15,7 @@ const ReceiptList = () => {
     const fetchReceipts = async () => {
         try {
             const axiosInstance = createAxiosInstance();
-            const response = await axiosInstance.get(`/workSchedule/receipts/${date}`, {
+            const response = await axiosInstance.get(`/workSchedule/receipts/${date}/${id}`, {
                     params: {manager: true}
                 });
             setReceipts(response.data);
@@ -92,4 +92,5 @@ const ReceiptList = () => {
     );
 };
 
-export default ReceiptList;
+export default AdminWorkScheduleReceipt;
+

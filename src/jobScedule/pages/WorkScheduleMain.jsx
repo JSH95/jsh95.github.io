@@ -87,7 +87,7 @@ const WorkScheduleMain = () => {
                     { ...prev, memo: ""}));
                 return;
             }
-            if(savedData.checkInTime < data.checkInTime && selectedFile === null && fileStatus === false) {
+            if(savedData.checkInTime > data.checkInTime && selectedFile === null && fileStatus === false) {
                 const confirmDelete = window.confirm("지연서 파일을 업로드 하지 않았습니다. \n 그래도 진행하시겠습니까?");
                 if (!confirmDelete) return;
             }

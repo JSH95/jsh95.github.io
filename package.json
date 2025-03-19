@@ -11,10 +11,15 @@
     "@capacitor/core": "^7.0.1",
     "@capacitor/ios": "^7.1.0",
     "@capacitor/push-notifications": "^7.0.0",
+    "@capacitor/splash-screen": "^7.0.0",
     "@fullcalendar/daygrid": "^6.1.15",
     "@fullcalendar/interaction": "^6.1.15",
     "@fullcalendar/react": "^6.1.15",
     "@fullcalendar/timegrid": "^6.1.15",
+    "@react-native-community/cli": "^18.0.0",
+    "@react-native-firebase/app": "^21.12.0",
+    "@react-native-firebase/firestore": "^21.12.0",
+    "@tailwindcss/postcss": "^4.0.14",
     "axios": "1.7.9",
     "bootstrap": "^5.3.3",
     "bootstrap-icons": "^1.11.3",
@@ -26,17 +31,20 @@
     "react": "^19.0.0",
     "react-bootstrap": "^2.10.8",
     "react-dom": "^19.0.0",
+    "react-native": "^0.78.0",
     "react-router-dom": "7.0.2",
     "react-scripts": "^5.0.1",
     "recharts": "^2.15.1",
     "styled-components": "6.1.13",
-    "tailwindcss": "^4.0.8"
+    "tailwindcss": "^3.4.17"
   },
   "devDependencies": {
     "@types/react": "19.0.0",
     "@types/react-dom": "19.0.0",
+    "autoprefixer": "^10.4.21",
     "gh-pages": "^6.2.0",
     "loader-utils": "3.2.1",
+    "postcss": "^8.5.3",
     "typescript": "^4.9.5"
   },
   "scripts": {
@@ -46,7 +54,9 @@
     "eject": "react-scripts eject",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d build",
-    "start-android-studio": "start \"\" \"C:\\Program Files\\Android\\Android Studio\\bin\\studio64.exe\" \"C:\\Users\\user\\Desktop\\ReactFront\\android\""
+    "android-build": "npx cap copy android && cd android && gradlew assembleDebug",
+    "start-android-studio": "start \"\" \"C:\\Program Files\\Android\\Android Studio\\bin\\studio64.exe\" \"C:\\Users\\user\\Desktop\\ReactFront\\android\"",
+    "gitUpload": "git pull origin master && git add . && git commit -m \"update\" && git push origin JSH"
   },
   "browserslist": [
     ">0.2%",

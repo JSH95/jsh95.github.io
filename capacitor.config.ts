@@ -1,9 +1,10 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.weavus.app', //
+  appId: 'com.weavus.app',
   appName: 'react',
   webDir: 'build',
+  android: {},
 };
 
 export default config;

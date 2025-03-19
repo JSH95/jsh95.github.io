@@ -72,6 +72,7 @@ function EmployeeDashboard() {
               <th className="text-center">이름</th>
               <th className="text-center">입사일</th>
               <th className="text-center">계약 상태</th>
+              <th className="text-center">부서</th>
             </tr>
           </thead>
           <tbody>
@@ -89,6 +90,7 @@ function EmployeeDashboard() {
                 <td className="table-data ">
                   {getEmployeeTypeText(employee.employeeType, employee.status)}
                 </td>
+                <td className="table-data ">{employee.department.name}</td>
               </tr>
             ))}
           </tbody>

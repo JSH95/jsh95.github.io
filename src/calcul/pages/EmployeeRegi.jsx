@@ -2,10 +2,22 @@ import React, {useEffect, useState} from "react";
 import { EmployeeRegiApi } from "../utils/EmployeeRegiApi";
 import "../../config/index.css";
 import {TeamListApi} from "../../utils/TeamListApi";
+import {DepartmentListApi} from "../../utils/DepartmentListApi";
 
 const EmployeeRegi = () => {
-  const { loadList, teamList, errorMsg} = TeamListApi();
-  const { addEmployee, loading, error, responseMessage, setEmployeeRole, employeeRole, setTeamId, teamId} = EmployeeRegiApi(); // API 상태 가져오기
+  const { loadList, teamList, teErrorMsg, teLoding} = TeamListApi();
+  const { deLoadList, departmentList, deErrorMsg, deLoading} = DepartmentListApi();
+  const { addEmployee,
+    loading,
+    error,
+    responseMessage,
+    setEmployeeRole,
+    employeeRole,
+    setTeamId,
+    teamId,
+    setDepartment,
+    departmentId
+  } = EmployeeRegiApi(); // API 상태 가져오기
   const [formData, setFormData] = useState({
     id: "",
     name: "",
@@ -29,6 +41,10 @@ const EmployeeRegi = () => {
     loadList();
   }, [loadList]);
 
+  useEffect(() => {
+    deLoadList();
+  }, [deLoadList]);
+
   const handleChangeRole = (e) => {
     const { value } = e.target;
     setEmployeeRole(value);
@@ -38,10 +54,14 @@ const EmployeeRegi = () => {
     setTeamId(value);
   }
 
+  const handleChangeDepartment = (e) => {
+    const { value } = e.target;
+    setDepartment(value);
+  }
+
   useEffect(() => {
     if (employeeRole === "TEAM") {
       setTeamId(0);
-      // console.log("teamId", teamId);
     }
   }, [employeeRole]);
 
@@ -65,6 +85,7 @@ const EmployeeRegi = () => {
       });
       setEmployeeRole("");
       setTeamId("");
+      setDepartment("");
       loadList();
     }
   };
@@ -173,6 +194,32 @@ const EmployeeRegi = () => {
               <option value={4}>사장</option>
             </select>
           </div>
+          <div className="form-group">
+            <label>부서</label>
+            <select
+                value={departmentId}
+                onChange={handleChangeDepartment}
+                required
+                className="input"
+            >
+              <option value="" disabled>
+                소속 부서을 선택해 주세요.
+              </option>
+              {deErrorMsg ? (
+                  <option value="" disabled>{deErrorMsg}</option> // 오류 메시지를 옵션으로 표시
+              ) : departmentList && departmentList.length > 0 ? (
+                  departmentList.map((department) => (
+                      <option key={department.id} value={department.id}>
+                        {department.name}
+                      </option>
+                  ))
+              ) : (
+                  <option value="" disabled>
+                    Loading...
+                  </option>
+              )}
+            </select>
+          </div>
           <div className="form-group mb-2">
             <label>계정 권한</label>
             <select
@@ -193,8 +240,8 @@ const EmployeeRegi = () => {
             <div className="form-group">
               <label>소속 팀장</label>
                 <select
-                name="institutionId"
-                value={teamId || ""}
+                // name="institutionId"
+                value={teamId}
                 onChange={handleChangeTeam}
                 required
                 className="input"
@@ -202,8 +249,8 @@ const EmployeeRegi = () => {
                   <option value="" disabled>
                   소속 팀장을 선택해 주세요.
                   </option>
-                  {errorMsg ? (
-                      <option value="" disabled>{errorMsg}</option> // 오류 메시지를 옵션으로 표시
+                  {teErrorMsg ? (
+                      <option value="" disabled>{teErrorMsg}</option> // 오류 메시지를 옵션으로 표시
                   ) : teamList && teamList.length > 0 ? (
                       teamList.map((team) => (
                           <option key={team.id} value={team.id}>

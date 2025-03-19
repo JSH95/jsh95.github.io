@@ -16,7 +16,15 @@ end
 
 target 'App' do
   capacitor_pods
+<<<<<<< HEAD
+
+  # Firebase 모듈 추가
+  pod 'Firebase/Core'
+  pod 'Firebase/Messaging'
+
+=======
   # Add your Pods here
+>>>>>>> master
 end
 
 post_install do |installer|
