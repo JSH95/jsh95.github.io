@@ -15,6 +15,12 @@ const AdminWorkScheduleDashboard = () => {
     const [year, setYear] = useState(today.getFullYear());
     const [month, setMonth] = useState(today.getMonth() + 1);
     // console.log("chartData",chartData);
+
+    const timeStringToMinutes = (timeStr) => {
+        const [hours, minutes] = timeStr.split(':').map(Number);
+        return hours * 60 + minutes;
+    };
+
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -36,11 +42,11 @@ const AdminWorkScheduleDashboard = () => {
                     const checkOut = new Date(`${entry.checkOutDate}T${entry.checkOutTime}`);
                     const breakStart = new Date(`${entry.checkInDate}T${entry.breakTimeIn}`);
                     const breakEnd = new Date(`${entry.checkInDate}T${entry.breakTimeOut}`);
-                    // const basicWorkTime =
-                    //     (entry.employeeWorkDate.checkOutTime - entry.employeeWorkDate.checkInTime)
-                    //     -
-                    //     (entry.employeeWorkDate.breakTimeOut - entry.employeeWorkDate.breakTimeIn);
-                    // console.log("basicWorkTime",basicWorkTime);
+                    const basicWorkTime =
+                        (entry.employeeWorkDate.checkOutTime - entry.employeeWorkDate.checkInTime)
+                        -
+                        (entry.employeeWorkDate.breakTimeOut - entry.employeeWorkDate.breakTimeIn);
+                    console.log("basicWorkTime",basicWorkTime);
                     const workDuration = (checkOut - checkIn - (breakEnd - breakStart)) > 0
                         ? Math.floor((checkOut - checkIn - (breakEnd - breakStart)) / (1000 * 60 * 60))
                         : 0;
