@@ -31,7 +31,8 @@ function Dashboard() {
   return (
     <div className='container'>
       <h1 className='title'>
-        {token && <div>FCM 토큰: {token}</div>} {/* 토큰을 제목 아래에 표시 */}
+      {/*  {token && <div>FCM 토큰: {token}</div>} /!* 토큰을 제목 아래에 표시 *!/*/}
+        퇴직금 적립 현황
       </h1>
       <div className='table-responsive'>
         <table className='table table-responsive'>

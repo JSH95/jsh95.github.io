@@ -865,6 +865,7 @@ id showHome
 id showTitle
 id spacer
 id special_effects_controller_view_tag
+id splash_image
 id splashscreen_icon_view
 id split_action_bar
 id src_atop
@@ -955,6 +956,7 @@ layout abc_search_view
 layout abc_select_dialog_material
 layout abc_tooltip
 layout activity_main
+layout activity_splash
 layout bridge_layout_main
 layout custom_dialog
 layout ime_base_split_test_activity
@@ -1409,6 +1411,9 @@ style Widget_AppCompat_Toolbar_Button_Navigation
 style Widget_Compat_NotificationActionContainer
 style Widget_Compat_NotificationActionText
 style Widget_Support_CoordinatorLayout
+style capacitor_default_style
+style capacitor_full_screen_style
+style capacitor_immersive_style
 styleable ActionBar background backgroundSplit backgroundStacked contentInsetEnd contentInsetEndWithActions contentInsetLeft contentInsetRight contentInsetStart contentInsetStartWithNavigation customNavigationLayout displayOptions divider elevation height hideOnContentScroll homeAsUpIndicator homeLayout icon indeterminateProgressStyle itemPadding logo navigationMode popupTheme progressBarPadding progressBarStyle subtitle subtitleTextStyle title titleTextStyle
 styleable ActionBarLayout android_layout_gravity
 styleable ActionMenuItemView android_minWidth

@@ -10,6 +10,7 @@ const AdminWorkScheduleDashboard = () => {
     const { username } = useAuth();
     const { role } = useAuth();
     const navigate = useNavigate();
+
     const [chartData, setChartData] = useState([]);
     const today = new Date();
     const [year, setYear] = useState(today.getFullYear());
@@ -25,7 +26,7 @@ const AdminWorkScheduleDashboard = () => {
                         (entry.workType === '출근' || entry.workType === '휴일출근') &&
                         (role === 'ROLE_ADMIN' || entry.employee.team.teamLeaderId === username) // 어드민이면 팀장 ID 조건 제거
                 );
-
+                console.log("filteredData",filteredData);
                 const employeeHours = {};
                 const basicWorkTime = {};
                 const usernames = {}; // 기존 username과 변수명 충돌 방지

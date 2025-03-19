@@ -4,8 +4,7 @@ import { getEmployeeTypeText, getRankText } from "../../utils/textUtils";
 import createAxiosInstance from "../../config/api";
 import "../../config/index.css";
 import {TeamListApi} from "../../utils/TeamListApi";
-import {DepartmentListApi} from "../../utils/DepartmentListApi";
-import handleChangePass from "../utils/passwordChange";
+
 
 
 function EmployeeDetail() {
@@ -17,9 +16,9 @@ function EmployeeDetail() {
   const [isEditing, setIsEditing] = useState(false);
   const [editedItem, setEditedItem] = useState({});
   const { loadList, teamList, errorMsg} = TeamListApi();
-  const { deLoadList, departmentList, deErrorMsg, deLoading} = DepartmentListApi();
   const [teamId, setTeamId] = useState(""); // 팀 아이디 설정
   const [employeeRole, setEmployeeRole] = useState(""); // 관리자 설정
+  const [password, setPassword] = useState("");
 
   useEffect(() => {
     const fetchEmployee = async () => {
@@ -32,7 +31,6 @@ function EmployeeDetail() {
         setEmployeeRole(response2.data.roles? response2.data.roles : "");
         setTeamId(response.data.team.id);
         // console.log("1 : ", response.data)
-        // console.log("2 : ",response2.data.roles)
       } catch (err) {
         setError("직원 정보를 불러오지 못했습니다. \n 새로고침 해보세요.");
         // console.error(err);
@@ -48,10 +46,6 @@ function EmployeeDetail() {
     loadList();
   }, [loadList]);
 
-  useEffect(() => {
-    deLoadList();
-  }, [deLoadList]);
-
   const handleChange = (e) => {
     const { name, value } = e.target;
     setEditedItem((prevItem) => ({
@@ -65,7 +59,6 @@ function EmployeeDetail() {
     if (!confirmSave) {
       return;
     } else {
-      console.log("editedItem : ", editedItem);
       const employeeDto = {
         id: editedItem.id,
         name: editedItem.name,
@@ -77,10 +70,9 @@ function EmployeeDetail() {
         status: editedItem.status,
         teamId: teamId,
         departmentId: editedItem.department.id,
-
       };
       try {
-        if (employeeDto.rank === "" || employeeDto.employeeType === "" || employeeRole === "") {
+        if (employeeDto.rank === "" && employeeDto.employeeType === "") {
           alert("입력되지 않은 값이 있습니다. 다시 한번 확인해 주세요."); // 직급이 선택되지 않으면 경고 메시지 표시
           return;
         }
@@ -90,10 +82,10 @@ function EmployeeDetail() {
             employeeDto , {
               headers: {
                 "Role": employeeRole,
+                "password": password,
               },
             }
         );
-        console.log("employeeDto : ", employeeDto);
         setItem(response.data);
         setIsEditing(false);
         window.alert("직원 수정을 완료했습니다");
@@ -156,35 +148,10 @@ function EmployeeDetail() {
     setEmployeeRole(value);
   }
 
-  const handlePassword = (id) => {
-    handleChangePass(id);  // id를 전달하여 비밀번호 변경 창을 엽니다.
+  const handleChangePassword = (e) => {
+    const { value } = e.target;
+    setEmployeeRole(value);
   }
-
-  useEffect(() => {
-    const handlePasswordChange = async (event) => {
-      if (event.data.type === 'changePassword') {
-        const {password, id} = event.data;
-        try{
-          const axiosInstance = createAxiosInstance(); // 인스턴스 생성
-          await axiosInstance.post('/employees/password', null,{
-                headers: {
-                  "id": id,
-                  "password": password,
-                }
-          })
-            alert('비밀번호가 변경되었습니다.');
-            window.location.reload(); // 부모 창 새로고침
-        }catch (err) {
-          console.error('비밀번호 변경 중 오류 발생:', err);
-          alert('비밀번호 변경 중 오류가 발생했습니다.');
-        }
-      }
-    };
-    window.addEventListener('message', handlePasswordChange);
-    return () => {
-      window.removeEventListener('message', handlePasswordChange);
-    };
-  }, []);
 
   if (loading) return <p className="loading">Loading...</p>;
   if (error) return <p className="error">{error}</p>;
@@ -285,42 +252,10 @@ function EmployeeDetail() {
                   </select>
                 </div>
                 <div className="form-group">
-                  <label>부서</label>
-                  <select
-                      name="department.id"
-                      value={editedItem.department.id}
-                      onChange={(e) =>
-                          setEditedItem((prevItem) => ({
-                            ...prevItem,
-                            department: { ...prevItem.department, id: e.target.value }
-                          }))
-                      }
-                      required
-                      className="input"
-                  >
-                    <option value="" disabled>
-                      소속 부서을 선택해 주세요.
-                    </option>
-                    {deErrorMsg ? (
-                        <option value="" disabled>{deErrorMsg}</option> // 오류 메시지를 옵션으로 표시
-                    ) : departmentList && departmentList.length > 0 ? (
-                        departmentList.map((department) => (
-                            <option key={department.id} value={department.id}>
-                              {department.name}
-                            </option>
-                        ))
-                    ) : (
-                        <option value="" disabled>
-                          Loading...
-                        </option>
-                    )}
-                  </select>
-                </div>
-                <div className="form-group">
                   <label>소속 팀장</label>
                   <select
                       // name="teamId"
-                      value={teamId}
+                      value={teamId ? teamId : editedItem.team.id}
                       onChange={handleChangeTeam}
                       required
                       className="input"
@@ -333,7 +268,7 @@ function EmployeeDetail() {
                             {teamList && teamList.length > 0 ? (
                           teamList.map((team) => (
                             <option key={team.id} value={team.id}>
-                              {team.teamLeaderName === "adminname" ? "미정" : team.teamLeaderName}
+                              {team.teamLeaderName}
                             </option>
                           ))
                           ) : (
@@ -396,10 +331,6 @@ function EmployeeDetail() {
                     <label className="label">직급</label>
                       <p  className="box">{getRankText(item.rank)}</p>
                   </div>
-                  <div  className="form-group mb-1">
-                    <label className="label">부서</label>
-                    <p  className="box">{item.department.name}</p>
-                  </div>
                   <div className="form-group mb-1">
                     <label className="label">소속 팀장</label>
                     <div>
@@ -411,9 +342,6 @@ function EmployeeDetail() {
                           <p className="box">{item.team.teamLeaderName}</p>
                       )}
                     </div>
-                  </div>
-                  <div className="form-group mb-1">
-                    <button className="btn btn-primary" type="button" onClick={() =>handlePassword(item.id)}>비밀번호 변경</button>
                   </div>
                 </div>
               </>

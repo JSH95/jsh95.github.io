@@ -18,7 +18,7 @@ function AdminWorkScheduleDashboard (){
         try{
             if (workData.workData[date]) {
                 setItem(workData.workData[date]);
-                console.log ("item 가공데이터 : " ,item)
+                // console.log ("item 가공데이터 : " ,item)
             } else {
                 setItem(null);
             }
