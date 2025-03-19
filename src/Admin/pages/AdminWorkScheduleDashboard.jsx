@@ -10,10 +10,11 @@ const AdminWorkScheduleDashboard = () => {
     const { username } = useAuth();
     const { role } = useAuth();
     const navigate = useNavigate();
+
     const [chartData, setChartData] = useState([]);
     const today = new Date();
-    const year = new Date(today).getFullYear();
-    const month = new Date(today).getMonth()+ 1;
+    const [year, setYear] = useState(today.getFullYear());
+    const [month, setMonth] = useState(today.getMonth() + 1);
     // console.log("chartData",chartData);
     useEffect(() => {
         const fetchData = async () => {
@@ -25,7 +26,7 @@ const AdminWorkScheduleDashboard = () => {
                         (entry.workType === '출근' || entry.workType === '휴일출근') &&
                         (role === 'ROLE_ADMIN' || entry.employee.team.teamLeaderId === username) // 어드민이면 팀장 ID 조건 제거
                 );
-
+                console.log("filteredData",filteredData);
                 const employeeHours = {};
                 const basicWorkTime = {};
                 const usernames = {}; // 기존 username과 변수명 충돌 방지
@@ -36,11 +37,17 @@ const AdminWorkScheduleDashboard = () => {
                     const checkOut = new Date(`${entry.checkOutDate}T${entry.checkOutTime}`);
                     const breakStart = new Date(`${entry.checkInDate}T${entry.breakTimeIn}`);
                     const breakEnd = new Date(`${entry.checkInDate}T${entry.breakTimeOut}`);
-
+                    const basicWorkTime =
+                        (entry.employeeWorkDate.checkOutTime - entry.employeeWorkDate.checkInTime)
+                        -
+                        (entry.employeeWorkDate.breakTimeOut - entry.employeeWorkDate.breakTimeIn);
+                    console.log("basicWorkTime",basicWorkTime);
                     const workDuration = (checkOut - checkIn - (breakEnd - breakStart)) > 0
                         ? Math.floor((checkOut - checkIn - (breakEnd - breakStart)) / (1000 * 60 * 60))
                         : 0;
-
+                    const basicTime = (basicWorkTime) > 0
+                        ? Math.floor((basicWorkTime) / (1000 * 60 * 60))
+                        : 0;
                     employeeHours[id] = (employeeHours[id] || 0) + workDuration;
                     basicWorkTime[id] = entry.basicWorkTime;
                     usernames[id] = entry.employee.name;
@@ -60,14 +67,37 @@ const AdminWorkScheduleDashboard = () => {
         fetchData();
     }, [year, month]); // chartData 제거 (무한 루프 방지)
 
+    const changeMonth = (direction) => {
+        setMonth((prev) => {
+            let newMonth = prev + direction;
+            let newYear = year;
+
+            if (newMonth < 1) {
+                newYear -= 1;
+                newMonth = 12;
+            } else if (newMonth > 12) {
+                newYear += 1;
+                newMonth = 1;
+            }
+
+            setYear(newYear);
+            return newMonth;
+        });
+    };
+
 
     function moveToDetail(id){
-        window.alert("상세 페이지로 이동합니다 :" + id);
-        navigate(`/workSchedule/adminList/${id}`);
+        window.alert("상세 페이지로 이동합니다 : " + id + " "+ year + "년" +  " " + month + "월");
+        navigate(`/workSchedule/adminList/${id}`, { state: { year, month }});
     }
 
     return (
         <div className="container">
+            <div className="d-flex justify-content-between align-items-center mb-3">
+                <button className="btn btn-secondary" onClick={() => changeMonth(-1)}>이전 달</button>
+                <h3>{year}년 {month}월</h3>
+                <button className="btn btn-secondary" onClick={() => changeMonth(1)}>다음 달</button>
+            </div>
             <div className="table-responsive">
                 <table className="table table-bordered
                 style={{ tableLayout: 'fixed', width: '100%' }}">

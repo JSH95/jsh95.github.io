@@ -11,16 +11,12 @@ function WorkScheduleDashboard (){
     const [isEditing, setIsEditing] = useState(false);
     const [editedItem, setEditedItem] = useState({});
     const navigate = useNavigate();
-    const location = useLocation();
     const workDefaultData = useWorkDefaultData();
 
     useEffect(() => {
         const fetchWorkDefaultData = async () => {
             setLoading(true);
             setError("");
-            // if (workDefaultData === undefined) {
-            // setIsEditing(true);
-            // }
             try {
                 if(workDefaultData?.checkInTime === null) {
                     // ✅ employeeName이 없으면 기본 값 설정 (예외 처리)
@@ -42,9 +38,6 @@ function WorkScheduleDashboard (){
                     setEditedItem(workDefaultData);
                     setIsEditing(true);
                 }
-                // else if (!isEditing && workDefaultData && Object.keys(workDefaultData).length > 0) {
-                //     navigate("/workSchedule/list");
-                // }
             } catch (error) {
                 setError("근무표 기본 정보를 불러오지 못했습니다.");
             } finally {

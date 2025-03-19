@@ -31,7 +31,7 @@ function EmployeeDetail() {
         setEmployeeRole(response2.data.roles? response2.data.roles : "");
         setTeamId(response.data.team.id);
         // console.log("1 : ", response.data)
-        console.log("2 : ",response2.data)
+        // console.log("2 : ",response2.data)
       } catch (err) {
         setError("직원 정보를 불러오지 못했습니다. \n 새로고침 해보세요.");
         // console.error(err);

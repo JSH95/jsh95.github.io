@@ -17,7 +17,6 @@ function WorkScheduleDashboard (){
     const [uploading, setUploading] = useState(false);
     const [selectedFile, setSelectedFile] = useState(null);
     const [progress, setProgress] = useState(0); // 업로드 진행 상태
-    const [fileStatus, setFileStatus ] = useState(false);
     const workData = useWorkData(year, month); // ✅ 최상위에서 호출
     const data = workDataDefault();
     const [defaultItem] = useState({

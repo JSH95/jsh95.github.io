@@ -18,7 +18,7 @@ function AdminWorkScheduleDashboard (){
         try{
             if (workData.workData[date]) {
                 setItem(workData.workData[date]);
-                console.log ("item 가공데이터 : " ,item)
+                // console.log ("item 가공데이터 : " ,item)
             } else {
                 setItem(null);
             }
@@ -33,7 +33,9 @@ function AdminWorkScheduleDashboard (){
     }, [workData?.workData[date]]);
 
     function handleClickBack() {
-        navigate("/workSchedule/adminList/" + id);
+        const year = new Date(date).getFullYear();
+        const month = new Date(date).getMonth() + 1;
+        navigate(`/workSchedule/adminList/${id}`, { state: { year, month }} );
     }
 
     if (loading) return <div>로딩 중...</div>;

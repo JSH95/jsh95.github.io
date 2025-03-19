@@ -27,7 +27,9 @@ const AdminWorkScheduleReceipt = () => {
     };
 
     function handleClickList() {
-        // navigate("/workSchedule/list");
+        const year = new Date(date).getFullYear();
+        const month = new Date(date).getMonth() + 1;
+        navigate(`/workSchedule/adminList/${id}`, { state: { year, month }} );
     }
 
 
