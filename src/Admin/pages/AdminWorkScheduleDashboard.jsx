@@ -15,7 +15,6 @@ const AdminWorkScheduleDashboard = () => {
     const today = new Date();
     const [year, setYear] = useState(today.getFullYear());
     const [month, setMonth] = useState(today.getMonth() + 1);
-    // console.log("chartData",chartData);
     const timeStringToMinutes = (timeStr) => {
         const [hours, minutes] = timeStr.split(':').map(Number);
         return hours * 60 + minutes;
@@ -44,7 +43,6 @@ const AdminWorkScheduleDashboard = () => {
                 const japanHolidays = Object.keys(japanHolidaysObject);
                 const axiosInstance = createAxiosInstance();
                 const response = await axiosInstance.get(`/workSchedule/${year}/${month}`);
-                // console.log("response",response.data);
                 const filteredData = response.data.filter(
                     (entry) =>
                         (entry.workType === '출근' || entry.workType === '휴일출근') &&
@@ -55,7 +53,6 @@ const AdminWorkScheduleDashboard = () => {
                 const basicWorkTime = {};
                 const usernames = {}; // 기존 username과 변수명 충돌 방지
                 const businessDaysInMonth = GetBusinessDays(year, month, japanHolidays);
-                // console.log("businessDaysIn" + year + month, businessDaysInMonth);
                 filteredData.forEach((entry) => {
                     const { id } = entry.employee;
                     const checkIn = new Date(`${entry.checkInDate}T${entry.checkInTime}`);
