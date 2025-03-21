@@ -4,6 +4,7 @@ import "../../config/index.css";
 import createAxiosInstance from "../../config/api";
 import {useNavigate} from "react-router-dom";
 import {useAuth} from "../../config/AuthContext";
+import holidayListData from "../../utils/holidayListData";
 
 
 const AdminWorkScheduleDashboard = () => {
@@ -15,17 +16,35 @@ const AdminWorkScheduleDashboard = () => {
     const [year, setYear] = useState(today.getFullYear());
     const [month, setMonth] = useState(today.getMonth() + 1);
     // console.log("chartData",chartData);
-
     const timeStringToMinutes = (timeStr) => {
         const [hours, minutes] = timeStr.split(':').map(Number);
         return hours * 60 + minutes;
     };
 
+    function GetBusinessDays(year, month, holidays) {
+        let businessDays = 0;
+        const date = new Date(year, month - 1, 1);
+        while (date.getMonth() === month - 1) {
+            const day = date.getDay();
+            const formattedDate = date.toISOString().slice(0, 10); // YYYY-MM-DD 형식
+            if (day !== 0 && day !== 6 && !holidays.includes(formattedDate)) {
+                businessDays++;
+            }
+            date.setDate(date.getDate() + 1);
+        }
+        console.log("businessDays",businessDays)
+        return businessDays;
+    }
+
     useEffect(() => {
         const fetchData = async () => {
+
             try {
+                const japanHolidaysObject  = await holidayListData();
+                const japanHolidays = Object.keys(japanHolidaysObject);
                 const axiosInstance = createAxiosInstance();
                 const response = await axiosInstance.get(`/workSchedule/${year}/${month}`);
+                // console.log("response",response.data);
                 const filteredData = response.data.filter(
                     (entry) =>
                         (entry.workType === '출근' || entry.workType === '휴일출근') &&
@@ -35,26 +54,33 @@ const AdminWorkScheduleDashboard = () => {
                 const employeeHours = {};
                 const basicWorkTime = {};
                 const usernames = {}; // 기존 username과 변수명 충돌 방지
-
+                const businessDaysInMonth = GetBusinessDays(year, month, japanHolidays);
+                // console.log("businessDaysIn" + year + month, businessDaysInMonth);
                 filteredData.forEach((entry) => {
                     const { id } = entry.employee;
                     const checkIn = new Date(`${entry.checkInDate}T${entry.checkInTime}`);
                     const checkOut = new Date(`${entry.checkOutDate}T${entry.checkOutTime}`);
                     const breakStart = new Date(`${entry.checkInDate}T${entry.breakTimeIn}`);
                     const breakEnd = new Date(`${entry.checkInDate}T${entry.breakTimeOut}`);
-                    const basicWorkTime =
-                        (entry.employeeWorkDate.checkOutTime - entry.employeeWorkDate.checkInTime)
-                        -
-                        (entry.employeeWorkDate.breakTimeOut - entry.employeeWorkDate.breakTimeIn);
-                    console.log("basicWorkTime",basicWorkTime);
+
+                    const BasicCheckInMinutes = timeStringToMinutes(entry.employeeWorkDate.checkInTime);
+                    const BasicCheckOutMinutes = timeStringToMinutes(entry.employeeWorkDate.checkOutTime);
+                    const BasicBreakInMinutes = timeStringToMinutes( entry.employeeWorkDate.breakTimeIn);
+                    const BasicBreakOutMinutes = timeStringToMinutes(entry.employeeWorkDate.breakTimeOut);
+                    const basicWorkTimeInHours = (
+                        (
+                            (BasicCheckOutMinutes - BasicCheckInMinutes)
+                            -
+                            (BasicBreakOutMinutes - BasicBreakInMinutes)
+                        ) / 60
+                    ).toFixed(1);
+                    const monthlyBasicWorkTime = (basicWorkTimeInHours * businessDaysInMonth).toFixed(1);
+
                     const workDuration = (checkOut - checkIn - (breakEnd - breakStart)) > 0
                         ? Math.floor((checkOut - checkIn - (breakEnd - breakStart)) / (1000 * 60 * 60))
                         : 0;
-                    // const basicTime = (basicWorkTime) > 0
-                    //     ? Math.floor((basicWorkTime) / (1000 * 60 * 60))
-                    //     : 0;
-                    employeeHours[id] = (employeeHours[id] || 0) + workDuration;
-                    basicWorkTime[id] = entry.basicWorkTime;
+                    employeeHours[id] = (employeeHours[id] || 0) + Number(workDuration);
+                    basicWorkTime[id] = monthlyBasicWorkTime;
                     usernames[id] = entry.employee.name;
                 });
 
@@ -65,7 +91,8 @@ const AdminWorkScheduleDashboard = () => {
                     basicWorkTime: basicWorkTime[id],
                 })));
             } catch (error) {
-                console.error("Error fetching work schedule data:", error);
+                alert("데이터를 불러올 수 없습니다. \n 다시 시도해주세요.")
+                console.error("Error fetching work schedule data:");
             }
         };
 

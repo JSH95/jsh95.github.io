@@ -18,9 +18,6 @@ function WorkScheduleDashboard (){
         const fetchWorkDefaultData = async () => {
             setLoading(true);
             setError("");
-            // if (workDefaultData === undefined) {
-            // setIsEditing(true);
-            // }
             try {
                 if(workDefaultData?.checkInTime === null) {
                     // ✅ employeeName이 없으면 기본 값 설정 (예외 처리)
@@ -33,7 +30,6 @@ function WorkScheduleDashboard (){
                         checkOutTime: "",
                         breakTimeIn: "",
                         breakTimeOut: "",
-                        basicWorkTime: "",
                     };
                     setEditedItem(defaultData);
                     setIsEditing(false);
@@ -42,9 +38,6 @@ function WorkScheduleDashboard (){
                     setEditedItem(workDefaultData);
                     setIsEditing(true);
                 }
-                // else if (!isEditing && workDefaultData && Object.keys(workDefaultData).length > 0) {
-                //     navigate("/workSchedule/list");
-                // }
             } catch (error) {
                 setError("근무표 기본 정보를 불러오지 못했습니다.");
             } finally {
@@ -156,19 +149,6 @@ function WorkScheduleDashboard (){
                                                 <option value="본사">본사</option>
                                                 <option value="재택근무">재택근무</option>
                                             </select>
-                                        </div>
-                                    </div>
-                                    <div className="form-group">
-                                        <label className="label">기준 시간</label>
-                                        <div>
-                                            <input
-                                                type="number"
-                                                className="input"
-                                                name="basicWorkTime"
-                                                value={editedItem.basicWorkTime}
-                                                onChange={handleChange}
-                                                required
-                                            />
                                         </div>
                                     </div>
                                     <div className="form-group">

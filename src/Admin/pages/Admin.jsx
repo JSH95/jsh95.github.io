@@ -207,10 +207,11 @@ const EmployeeSettings = () => {
                     <option value="TEAM">팀장</option>
                   </select>
                 </div>
-
-                <button type="submit" className="btn btn-primary w-100">
-                  계정 생성
-                </button>
+                <div>
+                  <button type="submit" className="btn btn-primary w-100">
+                    계정 생성
+                  </button>
+                </div>
               </form>
             </div>
 

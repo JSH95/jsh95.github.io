@@ -54,7 +54,6 @@ const useWorkData = (year, month, id) => {
                             fileName : event.workScheduleFileList[0]?.fileName || "",
                             fileUrl : event.workScheduleFileList[0]?.url || "",
                             fileId : event.workScheduleFileList[0]?.id || "",
-                            basicWorkTime: event.basicWorkTime || "",
                         };
                     });
                     cachedHolidays = newWorkDataList; // 캐싱하여 중복 요청 방지

@@ -32,7 +32,6 @@ function WorkScheduleDashboard (){
         workPosition: "",
         workLocation: "",
         memo: "",
-        basicWorkTime: "",
         });
 
     useEffect(() => {
@@ -52,7 +51,6 @@ function WorkScheduleDashboard (){
                 breakTimeIn: data.breakTimeIn,
                 breakTimeOut: data.breakTimeOut,
                 workLocation: data.workLocation,
-                basicWorkTime: data.basicWorkTime,
                 workPosition: data.workPosition,
             };
             setItem(null);
@@ -393,16 +391,7 @@ function WorkScheduleDashboard (){
                                     value={editedItem.workLocation || ""}
                                     onChange={handleInputChange}
                                 />
-                            </div><div className="form-group">
-                            <label className="label">기본근무시간</label>
-                            <input
-                                name="basicWorkTime"
-                                type="number"
-                                className="input"
-                                value={editedItem.basicWorkTime || ""}
-                                onChange={handleInputChange}
-                            />
-                        </div>
+                            </div>
                             {editedItem.checkInTime !== data.checkInTime ? ( // 체크인 시간이 다르면 표시
                                 <>
                                     <label className="label">지연표를 업로드 해주세요</label>

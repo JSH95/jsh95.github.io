@@ -1,10 +1,8 @@
 import UIKit
 import Capacitor
-<<<<<<< HEAD
 import Firebase
 import UserNotifications
-=======
->>>>>>> master
+
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -12,7 +10,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-<<<<<<< HEAD
         // Firebase 초기화
         FirebaseApp.configure()
 
@@ -42,7 +39,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // 푸시 메시지를 처리하는 코드
         completionHandler(.newData)
     }
-=======
         // Override point for customization after application launch.
         return true
     }
@@ -81,6 +77,4 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // tracking app url opens, make sure to keep this call
         return ApplicationDelegateProxy.shared.application(application, continue: userActivity, restorationHandler: restorationHandler)
     }
-
->>>>>>> master
 }
