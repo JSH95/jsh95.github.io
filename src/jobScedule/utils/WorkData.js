@@ -30,7 +30,6 @@ const useWorkData = (year, month, id) => {
                 // console.log("근무 데이터 요청 결과:", response.data)
                 const newWorkDataList = {};
                 if(response.data.length === 0){
-                    // console.log("없음");
                     setWorkData(newWorkDataList);
                 } else {
                     response.data.forEach((event) => {
@@ -54,10 +53,13 @@ const useWorkData = (year, month, id) => {
                             fileName : event.workScheduleFileList[0]?.fileName || "",
                             fileUrl : event.workScheduleFileList[0]?.url || "",
                             fileId : event.workScheduleFileList[0]?.id || "",
+                            workStatus: event.workScheduleState || "",
+                            checkState : event.checkState || "",
                         };
                     });
                     cachedHolidays = newWorkDataList; // 캐싱하여 중복 요청 방지
                     setWorkData(newWorkDataList);
+                    console.log("근무 데이터 요청 결과:", newWorkDataList)
                 }
             } catch (err) {
                 setError("근무 데이터를 불러오는 중 오류가 발생했습니다.");

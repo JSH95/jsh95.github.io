@@ -53,17 +53,19 @@ const AdminWorkScheduleDashboard = () => {
                 const basicWorkTime = {};
                 const usernames = {}; // 기존 username과 변수명 충돌 방지
                 const businessDaysInMonth = GetBusinessDays(year, month, japanHolidays);
+                const status = {};
+
                 filteredData.forEach((entry) => {
+
                     const { id } = entry.employee;
                     const checkIn = new Date(`${entry.checkInDate}T${entry.checkInTime}`);
                     const checkOut = new Date(`${entry.checkOutDate}T${entry.checkOutTime}`);
                     const breakStart = new Date(`${entry.checkInDate}T${entry.breakTimeIn}`);
                     const breakEnd = new Date(`${entry.checkInDate}T${entry.breakTimeOut}`);
-
-                    const BasicCheckInMinutes = timeStringToMinutes(entry.employeeWorkDate.checkInTime);
-                    const BasicCheckOutMinutes = timeStringToMinutes(entry.employeeWorkDate.checkOutTime);
-                    const BasicBreakInMinutes = timeStringToMinutes( entry.employeeWorkDate.breakTimeIn);
-                    const BasicBreakOutMinutes = timeStringToMinutes(entry.employeeWorkDate.breakTimeOut);
+                    const BasicCheckInMinutes = timeStringToMinutes(entry.employeeWorkDate?.checkInTime || "");
+                    const BasicCheckOutMinutes = timeStringToMinutes(entry.employeeWorkDate?.checkOutTime|| "");
+                    const BasicBreakInMinutes = timeStringToMinutes( entry.employeeWorkDate?.breakTimeIn|| "");
+                    const BasicBreakOutMinutes = timeStringToMinutes(entry.employeeWorkDate?.breakTimeOut|| "");
                     const basicWorkTimeInHours = (
                         (
                             (BasicCheckOutMinutes - BasicCheckInMinutes)
@@ -79,14 +81,31 @@ const AdminWorkScheduleDashboard = () => {
                     employeeHours[id] = (employeeHours[id] || 0) + Number(workDuration);
                     basicWorkTime[id] = monthlyBasicWorkTime;
                     usernames[id] = entry.employee.name;
-                });
 
+                    // status 계산
+                    const workScheduleState = entry.workScheduleState; // 단일 값으로 확인
+                    if (workScheduleState === '반려') {
+                        status[id] = '반려'; // 반려가 하나라도 있으면 '반려'
+                    } else if (workScheduleState === '승인완료') {
+                        if (!status[id]) {
+                            status[id] = '승인완료'; // 승인만 있으면 '승인'
+                        }
+                    } else if (workScheduleState === '미제출') {
+                        if (!status[id]) {
+                            status[id] = '미제출'; // 미제출 상태가 있으면 '미제출'
+                        }
+                    } else if (!status[id]) {
+                        status[id] = '검토중'; // 나머지는 '검토중'
+                    }
+                });
                 setChartData(Object.keys(employeeHours).map((id) => ({
                     id,
+                    status : status[id],
                     username: usernames[id],
                     hours: employeeHours[id],
                     basicWorkTime: basicWorkTime[id],
-                })));
+                })
+                ));
             } catch (error) {
                 alert("데이터를 불러올 수 없습니다. \n 다시 시도해주세요.")
                 console.error("Error fetching work schedule data:");
@@ -132,6 +151,7 @@ const AdminWorkScheduleDashboard = () => {
                 style={{ tableLayout: 'fixed', width: '100%' }}">
                     <thead>
                     <tr>
+                        <th className="table-header" style={{ minWidth: '150px', whiteSpace: 'nowrap' }}>승인 단계</th>
                         <th className="table-header" style={{ minWidth: '150px', whiteSpace: 'nowrap' }}>이름</th>
                         <th className="table-header" style={{ minWidth: '150px', whiteSpace: 'nowrap' }}>기본 근무시간</th>
                         <th className="table-header" style={{ minWidth: '150px', whiteSpace: 'nowrap' }}>총 근무시간</th>
@@ -151,6 +171,7 @@ const AdminWorkScheduleDashboard = () => {
                     <tbody>
                     {chartData.map((entry) => (
                         <tr key={entry.username}>
+                            <td className="table-data"> {entry.status}</td>
                             <td className="table-data" >
                                 <i onClick={() => moveToDetail(entry.id)}>
                                     {entry.username}

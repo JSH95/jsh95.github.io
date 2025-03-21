@@ -154,7 +154,16 @@ const WorkScheduleList = () =>  {
                                 <td className={day.styleClass}>{day.workType} </td>
                                 <td className={day.styleClass}>{day.workPosition}</td>
                                 <td className={day.styleClass}>{day.checkInTime} </td>
-                                <td className={day.styleClass}>{day.checkOutTime} </td>
+                                <td className={day.styleClass}
+                                    style={(day.checkOutDate !== day.key)  ?
+                                        { color: 'red', fontWeight: 'bold' }
+                                        : {}}
+                                >
+                                    {day.checkOutTime ? ((day.checkOutDate !== day.key)  ?
+                                        "次の日 " : "" )
+                                        : ""}
+                                   {day.checkOutTime}
+                                </td>
                                 <td className={`${day.styleClass} text-truncate`}
                                     style={{ maxWidth: "300px" , minWidth: "200px"}}
                                 >

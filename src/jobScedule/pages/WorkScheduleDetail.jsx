@@ -17,7 +17,6 @@ function WorkScheduleDashboard (){
     const [uploading, setUploading] = useState(false);
     const [selectedFile, setSelectedFile] = useState(null);
     const [progress, setProgress] = useState(0); // 업로드 진행 상태
-    const [fileStatus, setFileStatus ] = useState(false);
     const workData = useWorkData(year, month); // ✅ 최상위에서 호출
     const data = workDataDefault();
     const [defaultItem] = useState({
@@ -104,7 +103,8 @@ function WorkScheduleDashboard (){
                     editedItem.workPosition = "휴가";
                 }
                 if(!(editedItem.workType !== "출근" && editedItem.workType !== "휴일출근"
-                    || editedItem.checkInTime !== data.checkInTime)){
+                    || editedItem.checkInTime > data.checkInTime
+                    || editedItem.checkInDate !== editedItem.checkOutDate)){
                     editedItem.memo = "";
                 }
                 const axiosInstance = createAxiosInstance(); // 인스턴스 생성
@@ -334,7 +334,8 @@ function WorkScheduleDashboard (){
                                 </select>
                             </div>
                             {editedItem.workType !== "출근" && editedItem.workType !== "휴일출근"
-                                 || editedItem.checkInTime !== data.checkInTime ? (
+                                || editedItem.checkInTime > data.checkInTime
+                                || editedItem.checkInDate !== editedItem.checkOutDate? (
                                 <div className="form-group">
                                     <label>사유</label>
                                     <input
@@ -392,7 +393,7 @@ function WorkScheduleDashboard (){
                                     onChange={handleInputChange}
                                 />
                             </div>
-                            {editedItem.checkInTime !== data.checkInTime ? ( // 체크인 시간이 다르면 표시
+                            {editedItem.checkInTime > data.checkInTime ? ( // 체크인 시간이 다르면 표시
                                 <>
                                     <label className="label">지연표를 업로드 해주세요</label>
                                     <div className="row-cols-1">
@@ -451,16 +452,18 @@ function WorkScheduleDashboard (){
                                     <label className="label">출퇴근 시간</label>
                                     <div className="d-flex">
                                         <input
-                                            type="time"
+                                            type="text"
                                             className="input"
                                             value={item?.checkInTime || defaultItem.checkInTime}
                                             readOnly
                                         />
                                         <span> ~ </span>
                                         <input
-                                            type="time"
+                                            type="text"
                                             className="input"
-                                            value={item?.checkOutTime || defaultItem.checkOutTime}
+                                            value={item.checkOutDate !== item.checkInDate  ?
+                                                        "次の日 " + item.checkOutTime : item.checkOutTime
+                                            }
                                             readOnly
                                         />
                                     </div>
@@ -469,14 +472,14 @@ function WorkScheduleDashboard (){
                                     <label className="label">휴게시간</label>
                                     <div className="d-flex">
                                         <input
-                                            type="time"
+                                            type="text"
                                             className="input"
                                             value={item?.breakTimeIn || defaultItem.breakTimeIn}
                                             readOnly
                                         />
                                         <span className="text-gray-500 me-2 fs-5"> ~ </span>
                                         <input
-                                            type="time"
+                                            type="text"
                                             className="input"
                                             value={item?.breakTimeOut|| defaultItem.breakTimeOut}
                                             readOnly
@@ -515,7 +518,7 @@ function WorkScheduleDashboard (){
                                     <input
                                         type="text"
                                         className="input"
-                                        value={item?.memo|| defaultItem.checkInTime}
+                                        value={item?.memo || defaultItem.checkInTime}
                                         readOnly
                                     />
                                 </div>

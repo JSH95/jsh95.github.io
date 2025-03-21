@@ -1,10 +1,11 @@
 
 import React, {useEffect, useState} from 'react';
-import {useLocation, useNavigate, useParams} from "react-router-dom";
+import { useLocation, useNavigate, useParams} from "react-router-dom";
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import "../../config/index.css";
 import holidayListData from "../../utils/holidayListData";
 import useWorkData from "../../jobScedule/utils/WorkData";
+import createAxiosInstance from "../../config/api";
 
 const AdminWorkScheduleList = () =>  {
     const { id } = useParams();
@@ -13,6 +14,11 @@ const AdminWorkScheduleList = () =>  {
     const [year, setYear] = useState(selectedYear);
     const [month, setMonth] = useState(selectedMonth);
     const [schedule, setSchedule] = useState([]);
+    const [checkedItems, setCheckedItems] = useState(() => {
+        // 로컬스토리지에서 불러오거나 기본값 빈 객체로 설정
+        const savedChecks = localStorage.getItem("checkedItems");
+        return savedChecks ? JSON.parse(savedChecks) : {};
+    });
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
@@ -53,9 +59,11 @@ const AdminWorkScheduleList = () =>  {
                         fileName : workType.fileName || "",
                         fileUrl : workType.fileUrl || "",
                         fileId : workType.fileId || "",
+                        checkState: workType.checkState || "",
                     };
                 });
                 setSchedule(newSchedule);
+                console.log(newSchedule);
                 setLoading(false);
             }catch (error){
                 setError("근무 데이터를 불러오는데 실패했습니다." + error);
@@ -94,6 +102,43 @@ const AdminWorkScheduleList = () =>  {
         navigate(`/workSchedule/receipt/${year}-${String(month).padStart(2, '0')}/${id}`);
     }
 
+    useEffect(() => {
+        const savedChecks = localStorage.getItem("checkedItems");
+        if (savedChecks) {
+            setCheckedItems(JSON.parse(savedChecks)); // 로컬스토리지에서 가져오기
+        }
+    }, []);
+
+    const handleCheckboxChange = (id) => {
+        const newChecked = { ...checkedItems, [id]: !checkedItems[id] };
+        setCheckedItems(newChecked);
+        localStorage.setItem("checkedItems", JSON.stringify(newChecked)); // 변경된 상태 저장
+    };
+    const handleSave = async () => {
+        const checkedDates = schedule
+            .filter((item) => checkedItems[item.key]) // 체크된 항목들만 필터링
+            .map((item) => item.key); // 해당 항목들의 날짜를 가져옴
+        if (checkedDates.length === 0) {
+            alert("체크된 항목이 없습니다.");
+            return;
+        }
+        alert(checkedDates);
+        try {
+            // 여기에 수정 요청 로직 추가
+            const axiosInstance = createAxiosInstance();
+            await axiosInstance.post(`/workScheduleAdmin/${id}`,
+                {checkDate: checkedDates}
+            );
+            alert(id + "의 수정요청이 완료되었습니다.");
+
+        } catch (error) {
+            console.error(error);
+            alert("저장 중 오류가 발생했습니다.");
+        }
+
+    };
+
+
     if (loading) return <p>Loading...</p>;
     if (error) return <p>{error}</p>;
     return (
@@ -107,14 +152,17 @@ const AdminWorkScheduleList = () =>  {
                     <button onClick={() => changeMonth(1)} className="btn">
                         <i class="bi bi-arrow-right-circle-fill fs-3"></i>
                     </button>
+
                 </div>
                 <button type="button" className="btn btn-secondary" onClick={handleClickReceipt}>
                     {month}월 영수증 첨부
                 </button>
+                <button onClick={handleSave}  className="btn btn-secondary" type="button">수정요청</button>
                 <div className="table-responsive">
                     <table className="table table-striped">
                         <thead>
                         <tr>
+                            <th className="text-center">수정 사항</th>
                             <th className="text-center">日付</th>
                             <th className="text-center">曜日</th>
                             <th className="text-center">休暇・勤怠</th>
@@ -126,14 +174,20 @@ const AdminWorkScheduleList = () =>  {
                         </thead>
                         <tbody>
                         {schedule.map((day, index) => (
-                            <tr key={index} >
+                            <tr key={index} onClick={() => handleClickEdit(day.key)}>
+                                <td className={day.styleClass}
+                                    onClick={(e) => e.stopPropagation()} // row 클릭 방지
+                                >
+                                    <input
+                                        type="checkbox"
+                                        checked={!!checkedItems[day.key]}
+                                        onChange={() => handleCheckboxChange(day.key)}
+                                        className="checkbox-container"
+                                        style={{ transform: "scale(1.4)", cursor: "pointer" }}
+                                    />
+                                </td>
                                 <td className={day.styleClass}>
-                                    {day.date}日 &nbsp;
-                                    {day.workType? (
-                                        <i className="bi bi-pencil-fill"
-                                           onClick={() => handleClickEdit(day.key)}
-                                        ></i>
-                                    ) : null}
+                                    {day.date}日
                                 </td>
                                 <td className={day.styleClass}>{day.weekday}</td>
                                 <td className={day.styleClass}>{day.workType} </td>
@@ -150,7 +204,6 @@ const AdminWorkScheduleList = () =>  {
                                         </>
                                     ) : null}
                                 </td>
-
                             </tr>
                         ))}
                         </tbody>
