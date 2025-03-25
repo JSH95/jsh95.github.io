@@ -5,11 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-<<<<<<< HEAD
-	<string>react</string>
-=======
         <string>react</string>
->>>>>>> master
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -49,17 +45,5 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
-<<<<<<< HEAD
-
-	<!-- 푸시 알림 권한 요청 -->
-	<key>UIUserNotificationUsageDescription</key>
-	<string>푸시 알림을 수신하려면 권한을 허용해주세요.</string>
-
-	<!-- 푸시 알림 환경 설정 -->
-	<key>aps-environment</key>
-	<string>development</string> <!-- 또는 "production" -->
-
-=======
->>>>>>> master
 </dict>
 </plist>
