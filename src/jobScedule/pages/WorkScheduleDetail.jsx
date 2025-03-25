@@ -210,7 +210,8 @@ function WorkScheduleDashboard (){
                         if (currentTime - lastUpdateTime > delay) {
                             setProgress(percentCompleted);
                             lastUpdateTime = currentTime; // 마지막 업데이트 시간을 기록
-                        }                    },
+                            }
+                        },
                 });
                 setProgress(100);
                 window.alert("파일 업로드 성공!");

@@ -1,5 +1,5 @@
 
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {useNavigate} from "react-router-dom";
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import "../../config/index.css";
@@ -71,6 +71,7 @@ const WorkScheduleList = () =>  {
                     };
                 });
                 setSchedule(newSchedule);
+                // console.log("newSchedule : ", newSchedule)
                 setLoading(false);
             }catch (error){
                 setError("근무 데이터를 불러오는데 실패했습니다." + error);
@@ -109,36 +110,78 @@ const WorkScheduleList = () =>  {
     const handleClickEdit = (date) => {
         navigate(`/workSchedule/detail/${date}`);
     }
-    useEffect(() => {
+
+    const checkStatesHandle = useCallback((schedule) => {
         const checkStates = Object.values(schedule).map(item => item.checkState);
         const text = getCheckStateText(checkStates);
-        console.log("text : ", checkStates)
-        setDisplayText(text)
-    }, [schedule]);
+        setDisplayText(text);
+        console.log("displayText: ", checkStates);
+    }, []);
 
+    useEffect(() => {
+        checkStatesHandle(schedule);
+    }, [schedule, checkStatesHandle]);
 
     function handleClickReceipt() {
         navigate(`/workSchedule/receipt/${year}-${String(month).padStart(2, '0')}`)
     }
 
-
-
     function handleClickModal() {
         alert("준비중입니다.")
     }
 
-    const handleClickSummit = async () => {
-        try{
-            const axiosInstance = createAxiosInstance();
-            const response = await axiosInstance.get(
-                `/workScheduleAdmin/summit`
-            );
-            console.log("response : ", response);
-            alert("근무표를 제출하였습니다.")
-        }catch (error){
-            alert("근무표를 제출을 다시 시도해 주세요.")
+    const handleClickSummit = async (key) => {
+        switch (key) {
+            case 0:
+                if (window.confirm("근무표를 제출하시겠습니까?") === false) return;
+                break;
+            case 1:
+                if (window.confirm("근무표를 재제출하시겠습니까?") === false) return;
+                break;
+            case 2:
+                if (window.confirm("근무표 제출을 취소하시겠습니까?") === false) return;
+                break;
         }
-
+        setLoading(true);
+        try{
+            const formData = new FormData();
+            formData.append("year", year);
+            formData.append("month", month);
+            formData.append("workStatus", key);
+            const axiosInstance = createAxiosInstance();
+            await axiosInstance.post(
+                "/workScheduleAdmin/summit", formData, {
+                    headers: {
+                        "Content-Type": "multipart/form-data",
+                    }
+                });
+            switch(key) {
+                case 0:
+                    alert("근무표를 제출하였습니다.")
+                    setDisplayText("제출 중")
+                    break;
+                case 1:
+                    alert("근무표를 재제출하였습니다.")
+                    setDisplayText("재제출 중")
+                    break;
+                case 2:
+                    alert("근무표 제출을 취소하였습니다.")
+                    setDisplayText("미제출")
+                    break;
+            }
+            // useWorkDefaultData();
+        }catch (error){
+            switch(key) {
+                case 0, 1:
+                    alert("근무표를 제출을 다시 시도해 주세요.")
+                    break;
+                case 2:
+                    alert("근무표 취소를 다시 시도해 주세요.")
+                    break;
+            }
+        }finally {
+            setLoading(false);
+        }
     }
 
     if (loading) return <p>Loading...</p>;
@@ -162,10 +205,26 @@ const WorkScheduleList = () =>  {
                     <button type="button" className="btn btn-secondary me-4" onClick={handleClickReceipt}>
                         {month}월 영수증
                     </button>
-                    <button type="button" className="btn btn-info fw-bold me-3" onClick={handleClickModal}>상태 : {displayText}</button>
-                    {i ? "": <button type="button" className="btn btn-secondary" onClick={handleClickSummit}>
-                        근무표 제출
-                    </button>}
+                    { loading? "loading..." :
+                        <>
+                            <button type="button" className="btn btn-info fw-bold me-3" onClick={handleClickModal}>
+                                상태 : {displayText}</button>
+                            {displayText === "수정 요청" ?
+                                <button type="button" className="btn btn-secondary" onClick={() => handleClickSummit(1)}>
+                                    근무표 재제출
+                                </button>
+                                : displayText === "제출 중" || displayText === "재제출 중"?
+                                    <button type="button" className="btn btn-secondary" onClick={() => handleClickSummit(2)}>
+                                        제출 취소
+                                    </button>
+                                    :
+                                    <button type="button" className="btn btn-secondary" onClick={() => handleClickSummit(0)}>
+                                        근무표 제출
+                                    </button>
+                            }
+                        </>
+                    }
+
                 </div>
                <div className="table-responsive">
                     <table className="table table-striped">

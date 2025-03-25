@@ -1,11 +1,12 @@
 
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import { useLocation, useNavigate, useParams} from "react-router-dom";
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import "../../config/index.css";
 import holidayListData from "../../utils/holidayListData";
 import useWorkData from "../../jobScedule/utils/WorkData";
 import createAxiosInstance from "../../config/api";
+import {getCheckStateText} from "../../jobScedule/utils/getCheckStateText";
 
 const AdminWorkScheduleList = () =>  {
     const { id } = useParams();
@@ -23,6 +24,7 @@ const AdminWorkScheduleList = () =>  {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const workDataList = useWorkData(year, month, id); // ✅ 데이터와 갱신 함수 가져오기
+    const [displayText, setDisplayText] = useState("");
 
     useEffect(() => {
         const fetchSchedule = async () => {
@@ -143,12 +145,22 @@ const AdminWorkScheduleList = () =>  {
     }, [checkedItems]);
 
     const handleSave = async () => {
+        switch (displayText) {
+            case "미제출":
+                alert("아직 근무표를 제출하지 않은 사원입니다.");
+                return;
+            case "수정 요청":
+                alert("아직 근무표를 재수정하지 않았습니다.");
+                return;
+        }
+
         const checkedItemsData = Object.entries(checkedItems)
             .filter(([key, item]) => item.checked)
             .map(([key, item]) => ({
                 checkDate: key,
                 checkStateMemo: item.checkStateMemo || ""
             }));
+
         if (checkedItemsData.length === 0) {
             alert("체크된 항목이 없습니다.");
             return;
@@ -160,11 +172,12 @@ const AdminWorkScheduleList = () =>  {
             return;
         }
         try {
-            // 여기에 수정 요청 로직 추가
             const axiosInstance = createAxiosInstance();
-            await axiosInstance.post(`/workScheduleAdmin/${id}`,
-                checkedItemsData
-            );
+            await axiosInstance.post(`/workScheduleAdmin/${id}`,{
+                year,
+                month,
+                checkedDatesDto: checkedItemsData
+            });
             alert(id + "의 수정요청이 완료되었습니다.");
             localStorage.removeItem("checkedItems");
             setCheckedItems({});
@@ -175,7 +188,16 @@ const AdminWorkScheduleList = () =>  {
 
     };
 
+    const checkStatesHandle = useCallback((schedule) => {
+        const checkStates = Object.values(schedule).map(item => item.checkState);
+        const text = getCheckStateText(checkStates);
+        setDisplayText(text);
+        console.log("displayText: ", text);
+    }, []);
 
+    useEffect(() => {
+        checkStatesHandle(schedule);
+    }, [schedule, checkStatesHandle]);
 
     if (loading) return <p>Loading...</p>;
     if (error) return <p>{error}</p>;
@@ -192,10 +214,13 @@ const AdminWorkScheduleList = () =>  {
                     </button>
 
                 </div>
-                <button type="button" className="btn btn-secondary" onClick={handleClickReceipt}>
-                    {month}월 영수증 첨부
-                </button>
-                <button onClick={handleSave}  className="btn btn-secondary" type="button">수정요청</button>
+                <div className="d-flex justify-content-center align-items-center mb-2">
+                    <button type="button" className="btn btn-secondary me-3" onClick={handleClickReceipt}>
+                        {month}월 영수증 첨부
+                    </button>
+                    <button onClick={handleSave} className="btn btn-secondary me-4"  type="button">수정요청</button>
+                    <h5 className="">상태 : {displayText} </h5>
+                </div>
                 <div className="table-responsive">
                     <table className="table table-striped">
                         <thead>

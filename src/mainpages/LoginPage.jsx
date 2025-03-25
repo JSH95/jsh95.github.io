@@ -18,7 +18,7 @@ function LoginPage() {
   const [remember, setRemember] = useState(false);
 
 
-  usePushNotificationPermission(); // (앱전용 웹 사용불가)푸시 알림 권한 요청 훅 사용
+  // usePushNotificationPermission(); // (앱전용 웹 사용불가)푸시 알림 권한 요청 훅 사용
 
   // 모바일
   useEffect(() => {
