@@ -1,7 +1,0 @@
-<?xml version='1.0' encoding='utf-8'?>
-<resources>
-    <string name="app_name">WEAVUS</string>
-    <string name="title_activity_main">WEAVUS</string>
-    <string name="package_name">com.weavus.app</string>
-    <string name="custom_url_scheme">com.weavus.app</string>
-</resources>
