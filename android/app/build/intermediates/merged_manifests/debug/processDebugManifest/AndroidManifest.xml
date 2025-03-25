@@ -8,8 +8,7 @@
         android:minSdkVersion="23"
         android:targetSdkVersion="35" />
 
-    <!-- Permissions -->
-
+    <!-- 권한 설정 -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
@@ -31,19 +30,31 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
+        android:testOnly="true"
         android:theme="@style/AppTheme" >
+
+        <!-- SplashActivity를 시작 액티비티로 설정 -->
         <activity
-            android:name="com.weavus.app.MainActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode|navigation"
+            android:name="com.weavus.app.SplashActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|screenLayout|fontScale"
             android:exported="true"
-            android:label="@string/title_activity_main"
-            android:launchMode="standard"
-            android:theme="@style/AppTheme.NoActionBarLaunch" >
+            android:label="@string/app_name"
+            android:launchMode="singleTask"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+
+        <!-- MainActivity는 SplashActivity 종료 후 호출됩니다 -->
+        <activity
+            android:name="com.weavus.app.MainActivity"
+            android:exported="true"
+            android:label="@string/title_activity_main"
+            android:launchMode="standard"
+            android:theme="@style/AppTheme.NoActionBarLaunch" >
         </activity>
 
         <provider

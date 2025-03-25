@@ -4,7 +4,7 @@
             "outputFile": "com.weavus.app-mergeDebugResources-30:/values-watch-v20/values-watch-v20.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\user\\.gradle\\caches\\8.11.1\\transforms\\dda665aa4a1576cfb1759fb2bbcd5279\\transformed\\appcompat-1.7.0\\res\\values-watch-v20\\values-watch-v20.xml",
+                    "source": "/Users/gubonwoo/.gradle/caches/8.11.1/transforms/1b27c8eb292ee04c52002dde7efda74d/transformed/appcompat-1.7.0/res/values-watch-v20/values-watch-v20.xml",
                     "from": {
                         "startLines": "2,5,8",
                         "startColumns": "4,4,4",
@@ -23,7 +23,7 @@
                     }
                 },
                 {
-                    "source": "C:\\Users\\user\\.gradle\\caches\\8.11.1\\transforms\\ef234481c09f01fb9f0508a5da2b1126\\transformed\\core-splashscreen-1.0.1\\res\\values-watch-v20\\values-watch-v20.xml",
+                    "source": "/Users/gubonwoo/.gradle/caches/8.11.1/transforms/b193719dc1a3178a2aa4f792ac6d952d/transformed/core-splashscreen-1.0.1/res/values-watch-v20/values-watch-v20.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9",
                         "startColumns": "4,4,4,4,4,4,4,4",
