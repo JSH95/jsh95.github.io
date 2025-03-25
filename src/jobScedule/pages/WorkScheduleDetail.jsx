@@ -68,6 +68,7 @@ function WorkScheduleDashboard (){
             setIsEditing(false);  // 데이터가 있으면 편집 상태를 false로 설정
         }
     }
+
     function handleClickBack() {
         navigate("/workSchedule/list");
     }
@@ -462,7 +463,7 @@ function WorkScheduleDashboard (){
                                             type="text"
                                             className="input"
                                             value={item.checkOutDate !== item.checkInDate  ?
-                                                        "次の日 " + item.checkOutTime : item.checkOutTime
+                                                        "次の日 " + item.checkOutTime : item.checkOutTime || ""
                                             }
                                             readOnly
                                         />

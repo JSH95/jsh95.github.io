@@ -14,11 +14,11 @@ const AdminWorkScheduleList = () =>  {
     const [year, setYear] = useState(selectedYear);
     const [month, setMonth] = useState(selectedMonth);
     const [schedule, setSchedule] = useState([]);
-    const [checkedItems, setCheckedItems] = useState(() => {
-        // 로컬스토리지에서 불러오거나 기본값 빈 객체로 설정
-        const savedChecks = localStorage.getItem("checkedItems");
-        return savedChecks ? JSON.parse(savedChecks) : {};
-    });
+    const loadFromLocalStorage = () => {
+        const savedData = localStorage.getItem('checkedItems');
+        return savedData ? JSON.parse(savedData) : {};
+    };
+    const [checkedItems, setCheckedItems] = useState(loadFromLocalStorage());
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
@@ -55,11 +55,13 @@ const AdminWorkScheduleList = () =>  {
                         breakTimeIn: workType.breakTimeIn || "",
                         breakTimeOut: workType.breakTimeOut || "",
                         styleClass: key === todayKey ? "today" : (HolidayType ? "holiday" : isWeekend ? "weekend" : ""),
+
                         file: workType.workFileStatus > 0 ? "true" : "false",
                         fileName : workType.fileName || "",
                         fileUrl : workType.fileUrl || "",
                         fileId : workType.fileId || "",
-                        checkState: workType.checkState || "",
+                        checkState: workType.workStatus || "",
+                        checkMemo: workType.checkMemo || "",
                     };
                 });
                 setSchedule(newSchedule);
@@ -109,34 +111,70 @@ const AdminWorkScheduleList = () =>  {
         }
     }, []);
 
-    const handleCheckboxChange = (id) => {
-        const newChecked = { ...checkedItems, [id]: !checkedItems[id] };
-        setCheckedItems(newChecked);
-        localStorage.setItem("checkedItems", JSON.stringify(newChecked)); // 변경된 상태 저장
+    const handleCheckboxChange = (key) => {
+        setCheckedItems((prev) => {
+            const updated = { ...prev };
+            if (updated[key]?.checked) {
+                delete updated[key]; // 체크 해제 시 제거
+            } else {
+                updated[key] = { checked: true, checkStateMemo: "" }; // 체크 시 추가
+            }
+            saveToLocalStorage(updated); // 변경된 상태 저장
+            return updated;
+        });
     };
+
+    const handleMemoChange = (key, memo) => {
+        setCheckedItems((prev) => {
+            const updated = { ...prev, [key]: { ...prev[key], checkStateMemo: memo } };
+            saveToLocalStorage(updated); // 변경된 상태 저장
+            return updated;
+        });
+    };
+
+
+
+    const saveToLocalStorage = (data) => {
+        localStorage.setItem('checkedItems', JSON.stringify(data));
+    };
+
+    useEffect(() => {
+        saveToLocalStorage(checkedItems);
+    }, [checkedItems]);
+
     const handleSave = async () => {
-        const checkedDates = schedule
-            .filter((item) => checkedItems[item.key]) // 체크된 항목들만 필터링
-            .map((item) => item.key); // 해당 항목들의 날짜를 가져옴
-        if (checkedDates.length === 0) {
+        const checkedItemsData = Object.entries(checkedItems)
+            .filter(([key, item]) => item.checked)
+            .map(([key, item]) => ({
+                checkDate: key,
+                checkStateMemo: item.checkStateMemo || ""
+            }));
+        if (checkedItemsData.length === 0) {
             alert("체크된 항목이 없습니다.");
             return;
         }
-        alert(checkedDates);
+
+        const missingMemo = checkedItemsData.some((item) => !item.checkStateMemo || item.checkStateMemo.trim() === "");
+        if (missingMemo) {
+            alert("사유를 입력하지 않은 항목이 있습니다.");
+            return;
+        }
         try {
             // 여기에 수정 요청 로직 추가
             const axiosInstance = createAxiosInstance();
             await axiosInstance.post(`/workScheduleAdmin/${id}`,
-                {checkDate: checkedDates}
+                checkedItemsData
             );
             alert(id + "의 수정요청이 완료되었습니다.");
-
+            localStorage.removeItem("checkedItems");
+            setCheckedItems({});
         } catch (error) {
             console.error(error);
             alert("저장 중 오류가 발생했습니다.");
         }
 
     };
+
 
 
     if (loading) return <p>Loading...</p>;
@@ -185,6 +223,15 @@ const AdminWorkScheduleList = () =>  {
                                         className="checkbox-container"
                                         style={{ transform: "scale(1.4)", cursor: "pointer" }}
                                     />
+                                    {checkedItems[day.key]?.checked && (
+                                        <input
+                                            type="text"
+                                            placeholder="사유 입력"
+                                            value={checkedItems[day.key]?.checkStateMemo || ""}
+                                            onChange={(e) => handleMemoChange(day.key, e.target.value)}
+                                            style={{ marginLeft: "8px", width: "150px" }}
+                                        />
+                                    )}
                                 </td>
                                 <td className={day.styleClass}>
                                     {day.date}日
@@ -192,8 +239,18 @@ const AdminWorkScheduleList = () =>  {
                                 <td className={day.styleClass}>{day.weekday}</td>
                                 <td className={day.styleClass}>{day.workType} </td>
                                 <td className={day.styleClass}>{day.workPosition}</td>
-                                <td className={day.styleClass}>{day.checkInTime} </td>
-                                <td className={day.styleClass}>{day.checkOutTime} </td>
+                                <td className={day.styleClass}>
+                                    {day.workType === "유급휴가" ? "-" : day.checkInTime}
+                                </td>
+                                <td className={day.styleClass}
+                                    style={(day.checkOutDate !== day.key)  ?
+                                        { color: 'red', fontWeight: 'bold' }
+                                        : {}}
+                                >
+                                    {(day.checkOutTime ? ((day.checkOutDate !== day.key)  ?
+                                    "次の日 " : "" )
+                                    : "" )
+                                    + day.checkOutTime} </td>
                                 <td className={`${day.styleClass} text-truncate`}
                                     style={{ maxWidth: "300px" , minWidth: "200px"}}
                                 >{day.memo}

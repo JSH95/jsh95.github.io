@@ -6,6 +6,8 @@ import "../../config/index.css";
 import holidayListData from "../../utils/holidayListData";
 import useWorkData from "../utils/WorkData";
 import useWorkDefaultData from "../utils/WorkDataDefault";
+import {getCheckStateText} from "../utils/getCheckStateText";
+import createAxiosInstance from "../../config/api";
 const WorkScheduleList = () =>  {
 
         const today = new Date();
@@ -17,6 +19,7 @@ const WorkScheduleList = () =>  {
         const [error, setError] = useState("");
     const workDataList = useWorkData(year, month); // ✅ 데이터와 갱신 함수 가져오기
     const workDefaultData = useWorkDefaultData();
+    const [displayText, setDisplayText] = useState("");
 
     //     "2025-01-01": { attendanceType: "휴일", workType: "", checkInTime: "", checkOutTime: "", memo: "공휴일" },
 
@@ -57,10 +60,14 @@ const WorkScheduleList = () =>  {
                         breakTimeIn: workType.breakTimeIn || "",
                         breakTimeOut: workType.breakTimeOut || "",
                         styleClass: key === todayKey ? "today" : (HolidayType ? "holiday" : isWeekend ? "weekend" : ""),
+                        styleClass2: workType.workStatus === "" ? "" :
+                            (workType.workStatus ==="수정요청" ? "change" :
+                                workType.workStatus ==="재수정요청" ? "change2" : "") ,
                         file: workType.workFileStatus > 0 ? "true" : "false",
                         fileName : workType.fileName || "",
                         fileUrl : workType.fileUrl || "",
                         fileId : workType.fileId || "",
+                        checkState: workType.workStatus || "",
                     };
                 });
                 setSchedule(newSchedule);
@@ -102,9 +109,36 @@ const WorkScheduleList = () =>  {
     const handleClickEdit = (date) => {
         navigate(`/workSchedule/detail/${date}`);
     }
+    useEffect(() => {
+        const checkStates = Object.values(schedule).map(item => item.checkState);
+        const text = getCheckStateText(checkStates);
+        console.log("text : ", checkStates)
+        setDisplayText(text)
+    }, [schedule]);
+
 
     function handleClickReceipt() {
         navigate(`/workSchedule/receipt/${year}-${String(month).padStart(2, '0')}`)
+    }
+
+
+
+    function handleClickModal() {
+        alert("준비중입니다.")
+    }
+
+    const handleClickSummit = async () => {
+        try{
+            const axiosInstance = createAxiosInstance();
+            const response = await axiosInstance.get(
+                `/workScheduleAdmin/summit`
+            );
+            console.log("response : ", response);
+            alert("근무표를 제출하였습니다.")
+        }catch (error){
+            alert("근무표를 제출을 다시 시도해 주세요.")
+        }
+
     }
 
     if (loading) return <p>Loading...</p>;
@@ -121,13 +155,19 @@ const WorkScheduleList = () =>  {
                         <i class="bi bi-arrow-right-circle-fill fs-3"></i>
                     </button>
                 </div>
-                <button type="button" className="btn btn-primary me-4" onClick={handleClickMyPage}>
-                    기본 정보 수정
-                </button>
-                <button type="button" className="btn btn-secondary" onClick={handleClickReceipt}>
-                    {month}월 영수증 첨부
-                </button>
-                <div className="table-responsive">
+                <div className="d-flex justify-content-center align-items-center">
+                    <button type="button" className="btn btn-primary me-3" onClick={handleClickMyPage}>
+                        기본 정보
+                    </button>
+                    <button type="button" className="btn btn-secondary me-4" onClick={handleClickReceipt}>
+                        {month}월 영수증
+                    </button>
+                    <button type="button" className="btn btn-info fw-bold me-3" onClick={handleClickModal}>상태 : {displayText}</button>
+                    {i ? "": <button type="button" className="btn btn-secondary" onClick={handleClickSummit}>
+                        근무표 제출
+                    </button>}
+                </div>
+               <div className="table-responsive">
                     <table className="table table-striped">
                         <thead>
                         <tr>
@@ -153,16 +193,21 @@ const WorkScheduleList = () =>  {
                                 <td className={day.styleClass}>{day.weekday}</td>
                                 <td className={day.styleClass}>{day.workType} </td>
                                 <td className={day.styleClass}>{day.workPosition}</td>
-                                <td className={day.styleClass}>{day.checkInTime} </td>
+                                <td className={day.styleClass}>
+                                    {day.workType !== "출근" && day.workType !== "휴일출근" ? "-" : day.checkInTime}
+                                </td>
                                 <td className={day.styleClass}
                                     style={(day.checkOutDate !== day.key)  ?
                                         { color: 'red', fontWeight: 'bold' }
                                         : {}}
                                 >
-                                    {day.checkOutTime ? ((day.checkOutDate !== day.key)  ?
+
+                                    {day.workType !== "출근" && day.workType !== "휴일출근" ? "-" :
+                                        (day.checkOutTime ? ((day.checkOutDate !== day.key)  ?
                                         "次の日 " : "" )
-                                        : ""}
-                                   {day.checkOutTime}
+                                        : "" )
+                                        + day.checkOutTime}
+
                                 </td>
                                 <td className={`${day.styleClass} text-truncate`}
                                     style={{ maxWidth: "300px" , minWidth: "200px"}}

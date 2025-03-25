@@ -248,6 +248,20 @@ select:focus {
   padding: 20px;
   text-align: center; /* 텍스트를 수평 중앙 정렬 */
 }
+
+.change {
+  background: #41ff00 !important;
+  color: white;
+  padding: 20px;
+  text-align: center; /* 텍스트를 수평 중앙 정렬 */
+}
+.change2 {
+  background: #ff0000 !important;
+  color: white;
+  padding: 20px;
+  text-align: center; /* 텍스트를 수평 중앙 정렬 */
+}
+
 .today {
   background: #ffffaa !important;
   color: white;
