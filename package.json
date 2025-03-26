@@ -54,7 +54,7 @@
     "eject": "react-scripts eject",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d build",
-    "android-build": "npx cap copy android && cd android && gradlew assembleDebug",
+    "android-build": "npx cap sync android && cd android && gradlew assembleDebug",
     "start-android-studio": "start \"\" \"C:\\Program Files\\Android\\Android Studio\\bin\\studio64.exe\" \"C:\\Users\\user\\Desktop\\ReactFront\\android\"",
     "gitUpload": "git pull origin master && git add . && git commit -m \"update\" && git push origin JSH"
   },

@@ -13,6 +13,7 @@ import usePushNotificationPermission from '../../hooks/usePushNotificationPermis
 function Dashboard() {
   const navigate = useNavigate();
   const { userData, userError, userLoading } = useFetchAccual(); // 유저 정보 호출
+
   usePushNotificationPermission(); // 푸시 알림 토큰 가져오기
 
   const handleEmployeeClick = (employeeId) => {

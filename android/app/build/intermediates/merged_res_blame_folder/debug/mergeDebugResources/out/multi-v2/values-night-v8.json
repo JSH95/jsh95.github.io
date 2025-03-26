@@ -4,17 +4,7 @@
             "outputFile": "com.weavus.app-mergeDebugResources-30:/values-night-v8/values-night-v8.xml",
             "map": [
                 {
-                    "source": "/Users/gubonwoo/.gradle/caches/8.11.1/transforms/b193719dc1a3178a2aa4f792ac6d952d/transformed/core-splashscreen-1.0.1/res/values-night-v8/values-night-v8.xml",
-                    "from": {
-                        "startLines": "2",
-                        "startColumns": "4",
-                        "startOffsets": "55",
-                        "endColumns": "85",
-                        "endOffsets": "136"
-                    }
-                },
-                {
-                    "source": "/Users/gubonwoo/.gradle/caches/8.11.1/transforms/1b27c8eb292ee04c52002dde7efda74d/transformed/appcompat-1.7.0/res/values-night-v8/values-night-v8.xml",
+                    "source": "C:\\Users\\user\\.gradle\\caches\\8.11.1\\transforms\\f1665f08e88648c35bdbb5edb9f2254a\\transformed\\appcompat-1.7.0\\res\\values-night-v8\\values-night-v8.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9",
                         "startColumns": "4,4,4,4,4,4,4,4",
@@ -28,6 +18,16 @@
                         "startOffsets": "141,211,295,379,475,577,679,773",
                         "endColumns": "69,83,83,95,101,101,93,88",
                         "endOffsets": "206,290,374,470,572,674,768,857"
+                    }
+                },
+                {
+                    "source": "C:\\Users\\user\\.gradle\\caches\\8.11.1\\transforms\\a55517ce78aa851d61caf901f984905a\\transformed\\core-splashscreen-1.0.1\\res\\values-night-v8\\values-night-v8.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endColumns": "85",
+                        "endOffsets": "136"
                     }
                 }
             ]

@@ -1,9 +1,14 @@
 import { useEffect, useState } from 'react';
 import { Capacitor } from '@capacitor/core';
 import { PushNotifications } from '@capacitor/push-notifications';
+import {useAuth} from "../config/AuthContext";
 
 const usePushNotificationPermission = () => {
+
   const [token, setToken] = useState(null);
+  const { username } = useAuth();
+  sendTokenToBackend(token, username);
+
 
   useEffect(() => {
     const requestPermissions = async () => {
@@ -38,7 +43,6 @@ const usePushNotificationPermission = () => {
         console.log('푸시 알림 권한 거부됨');
       }
     };
-
     requestPermissions();
   }, []);
 
@@ -52,7 +56,8 @@ const usePushNotificationPermission = () => {
 };
 
 // 토큰을 서버로 전송하는 함수
-const sendTokenToBackend = async (token) => {
+
+const sendTokenToBackend = async (token, username) => {
   console.log('서버로 토큰 전송 시작:', token); // ✅ 서버 전송 로그 추가
   try {
     const response = await fetch(
@@ -62,7 +67,10 @@ const sendTokenToBackend = async (token) => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ token }),
+        body: JSON.stringify({
+          token: token,
+          userId: username,
+        }),
       }
     );
 

@@ -4,7 +4,7 @@
             "outputFile": "com.weavus.app-mergeDebugResources-30:/values-v27/values-v27.xml",
             "map": [
                 {
-                    "source": "/Users/gubonwoo/.gradle/caches/8.11.1/transforms/b193719dc1a3178a2aa4f792ac6d952d/transformed/core-splashscreen-1.0.1/res/values-v27/values-v27.xml",
+                    "source": "C:\\Users\\user\\.gradle\\caches\\8.11.1\\transforms\\a55517ce78aa851d61caf901f984905a\\transformed\\core-splashscreen-1.0.1\\res\\values-v27\\values-v27.xml",
                     "from": {
                         "startLines": "2,3,4,7",
                         "startColumns": "4,4,4,4",
