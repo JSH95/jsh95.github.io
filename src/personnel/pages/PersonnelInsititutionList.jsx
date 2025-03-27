@@ -22,24 +22,23 @@ function PersonnelInsititutionList() {
         const response = await axiosInstance.get("/personnel/institution/list");
         if (Array.isArray(response.data)) {
           setData(response.data);
-          // console.log("데이터",response.data);
         } else {
           setError("서버에서 받은 데이터 형식이 올바르지 않습니다.");
         }
         setIsFetched(true); // 데이터 로드 완료
       } catch (error) {
         if (error.response) {
-          console.error(
-            "서버 에러:",
-            error.response.status,
-            error.response.data
-          );
+          // console.error(
+          //   "서버 에러:",
+          //   error.response.status,
+          //   error.response.data
+          // );
           setError("서버 오류가 발생했습니다.");
         } else if (error.request) {
-          console.error("응답 없음:", error.request);
+          // console.error("응답 없음:", error.request);
           setError("서버로부터 응답이 없습니다.");
         } else {
-          console.error("요청 설정 에러:", error.message);
+          // console.error("요청 설정 에러:", error.message);
           setError("요청에 문제가 발생했습니다.");
         }
       } finally {

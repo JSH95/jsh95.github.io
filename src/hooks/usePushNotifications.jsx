@@ -5,21 +5,18 @@ import { getToken, onMessage, onTokenRefresh } from 'firebase/messaging';
 const usePushNotification = () => {
   useEffect(() => {
     if (!Capacitor.isNativePlatform()) {
-      console.log('네이티브 환경이 아니므로 푸시 알림을 지원하지 않습니다.');
       return;
     }
 
     const handleForegroundMessage = (payload) => {
-      console.log('푸시 알림 수신:', payload);
     };
 
     const handleTokenRefresh = async () => {
       try {
         const newToken = await getToken();
-        console.log('FCM 토큰 갱신됨:', newToken);
         sendTokenToBackend(newToken);
       } catch (error) {
-        console.error('토큰 갱신 실패:', error);
+        // console.error('토큰 갱신 실패:', error);
       }
     };
 
@@ -32,7 +29,7 @@ const usePushNotification = () => {
 // 토큰을 서버로 전송하는 함수
 const sendTokenToBackend = async (token) => {
   try {
-    const response = await fetch(
+    await fetch(
       'https://port-0-severance-m4yzyreu8bbe535f.sel4.cloudtype.app/api/fcm/save',
       {
         method: 'POST',
@@ -42,14 +39,8 @@ const sendTokenToBackend = async (token) => {
         body: JSON.stringify({ token }),
       }
     );
-
-    if (response.ok) {
-      console.log('토큰 전송 성공');
-    } else {
-      console.error('토큰 전송 실패');
-    }
   } catch (error) {
-    console.error('서버 연결 실패:', error);
+    // console.error('서버 연결 실패:', error);
   }
 };
 

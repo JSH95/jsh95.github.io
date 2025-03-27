@@ -59,7 +59,7 @@ const NavigationBar = () => {
                           <Dropdown.Menu>
                             <Dropdown.Item as={Link} to="/workSchedule/main">근무기록</Dropdown.Item>
                             <Dropdown.Item as={Link} to="workSchedule/list">근무표 일람</Dropdown.Item>
-                            <Dropdown.Item as={Link} to="workSchedule/dashBoard">MyPage</Dropdown.Item>
+                            <Dropdown.Item as={Link} to="workSchedule/dashBoard">근무표 기본 정보</Dropdown.Item>
                           </Dropdown.Menu>
                         </Dropdown>
                         <li className="nav-item">
@@ -104,7 +104,7 @@ const NavigationBar = () => {
                         </li>
                       </>
                   )}
-                  {isLoggedIn && role === "ROLE_TEAM" && (
+                  {isLoggedIn && (role === "ROLE_TEAM" || role === "ROLE_TEAM_LEADER") && (
                       <>
                         <Dropdown>
                           <Dropdown.Toggle variant="link" className="nav-link text-dark fw-bold">
@@ -113,7 +113,7 @@ const NavigationBar = () => {
                           <Dropdown.Menu>
                             <Dropdown.Item as={Link} to="/workSchedule/main">근무기록</Dropdown.Item>
                             <Dropdown.Item as={Link} to="workSchedule/list">근무표 일람</Dropdown.Item>
-                            <Dropdown.Item as={Link} to="workSchedule/dashBoard">MyPage</Dropdown.Item>
+                            <Dropdown.Item as={Link} to="workSchedule/dashBoard">근무표 기본 정보</Dropdown.Item>
                           </Dropdown.Menu>
                         </Dropdown>
                         <li className="nav-item" >
@@ -122,7 +122,7 @@ const NavigationBar = () => {
                                          fw-bold
                                          "
                                 to="/admin/list"
-                                onClick={handleLinkClick}>팀원관리(테스트)</Link>
+                                onClick={handleLinkClick}>근무표 관리</Link>
                         </li>
                       </>
                   )}

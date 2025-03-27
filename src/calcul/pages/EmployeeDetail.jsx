@@ -31,11 +31,8 @@ function EmployeeDetail() {
         setEditedItem(response.data);
         setEmployeeRole(response2.data.roles? response2.data.roles : "");
         setTeamId(response.data.team.id);
-        // console.log("1 : ", response.data)
-        // console.log("2 : ",response2.data.roles)
       } catch (err) {
         setError("직원 정보를 불러오지 못했습니다. \n 새로고침 해보세요.");
-        // console.error(err);
       } finally {
         setLoading(false);
       }
@@ -65,7 +62,6 @@ function EmployeeDetail() {
     if (!confirmSave) {
       return;
     } else {
-      console.log("editedItem : ", editedItem);
       const employeeDto = {
         id: editedItem.id,
         name: editedItem.name,
@@ -93,7 +89,6 @@ function EmployeeDetail() {
               },
             }
         );
-        console.log("employeeDto : ", employeeDto);
         setItem(response.data);
         setIsEditing(false);
         window.alert("직원 수정을 완료했습니다");
@@ -142,7 +137,7 @@ function EmployeeDetail() {
       }
     } catch (err) {
       alert("직원 삭제에 실패했습니다.");
-      console.error(err);
+      // console.error(err);
     }
   };
 
@@ -175,7 +170,7 @@ function EmployeeDetail() {
             alert('비밀번호가 변경되었습니다.');
             window.location.reload(); // 부모 창 새로고침
         }catch (err) {
-          console.error('비밀번호 변경 중 오류 발생:', err);
+          // console.error('비밀번호 변경 중 오류 발생:', err);
           alert('비밀번호 변경 중 오류가 발생했습니다.');
         }
       }
@@ -355,8 +350,10 @@ function EmployeeDetail() {
                   >
                     <option value="" disabled>계정 권한을 선택해 주세요</option>
                     <option value="ADMIN">관리자권한</option>
+                    <option value="TEAM_LEADER">서브관리자권한</option>
                     <option value="TEAM">팀장</option>
                     <option value="GENERAL">일반사원</option>
+                   
                   </select>
                 </div>
               </>

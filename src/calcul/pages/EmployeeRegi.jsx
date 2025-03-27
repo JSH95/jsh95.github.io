@@ -28,7 +28,6 @@ const EmployeeRegi = () => {
     rank: "",
     status: 0,
   });
-  // console.log("teamList", teamList);
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -232,6 +231,7 @@ const EmployeeRegi = () => {
                 계정 권한을 선택해 주세요.
               </option>
               <option value="ADMIN">관리자권한</option>
+              <option value="TEAM_LEADER">서브관리자권한</option>
               <option value="TEAM">팀장</option>
               <option value="GENERAL">일반사원</option>
             </select>
@@ -254,7 +254,7 @@ const EmployeeRegi = () => {
                   ) : teamList && teamList.length > 0 ? (
                       teamList.map((team) => (
                           <option key={team.id} value={team.id}>
-                            {team.teamLeaderName}
+                            {team.teamLeaderName === "adminname" ? "미정" : team.teamLeaderName}
                           </option>
                       ))
                   ) : (

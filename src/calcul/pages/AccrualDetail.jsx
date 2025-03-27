@@ -27,7 +27,7 @@ const EmployeeDetailPage = () => {
         setItem(response.data);
       } catch (err) {
         setError("유저 정보를 불러오지 못했습니다.");
-        console.error(err);
+        // console.error(err);
       } finally {
         setLoading(false);
       }
@@ -98,56 +98,3 @@ const EmployeeDetailPage = () => {
 };
 
 export default EmployeeDetailPage;
-
-// Styled Components
-// const Container = styled.div`
-//   padding: 2rem;
-//   max-width: 700px;
-//   margin: 0 auto;
-// `;
-
-// const Title = styled.h1`
-//   font-size: 2rem;
-//   margin-bottom: 1.5rem;
-//   text-align: center;
-// `;
-
-// const DetailsTable = styled.div`
-//   display: table;
-//   width: 100%;
-//   border-collapse: collapse;
-//   background-color: #f9f9f9;
-//   border: 1px solid #ddd;
-// `;
-
-// const Row = styled.div`
-//   display: table-row;
-// `;
-// const CellLeft = styled.div`
-//   display: table-cell;
-//   padding: 0.8rem 1rem;
-//   background-color: #f0f0f0;
-//   font-weight: bold;
-//   border: 1px solid #ddd;
-//   text-align: left;
-// `;
-
-// const CellRight = styled.div`
-//   display: table-cell;
-//   padding: 0.8rem 1rem;
-//   border: 1px solid #ddd;
-//   text-align: left;
-// `;
-
-// const Loading = styled.div`
-//   text-align: center;
-//   font-size: 1.5rem;
-//   margin-top: 2rem;
-// `;
-
-// const Error = styled.div`
-//   color: red;
-//   text-align: center;
-//   font-size: 1.2rem;
-//   margin-top: 2rem;
-// `;

@@ -21,10 +21,9 @@ function PersonnelInstitutionDetail() {
         const response = await axiosInstance.get(`/personnel/institution/${Id}`);
         setItem(response.data);
         setEditedItem(response.data);
-        // console.log("데이터", response.data);
       } catch (err) {
         setError("교육 기관 정보를 불러오지 못했습니다.");
-        console.error(err);
+        // console.error(err);
       } finally {
         setLoading(false);
       }
@@ -93,7 +92,7 @@ function PersonnelInstitutionDetail() {
       }
     } catch (err) {
       alert("교육 기관의 삭제에 실패했습니다. 다시 한번 시도해 주세요.");
-      console.error(err);
+      // console.error(err);
     }
   };
 

@@ -14,7 +14,6 @@ export function TeamListApi() {
                     const axiosInstance = createAxiosInstance(); // 인스턴스 생성
                     const response = await axiosInstance.get("/employees/team/allList");
                     setTeamListApi(response.data);
-                    // console.log("팀장 목록: ", response.data);
                 } catch (err) {
                     setErrorMsg("팀장 목록을 불러오지 못했습니다. \n 다시 시도해주세요.");
                 } finally {

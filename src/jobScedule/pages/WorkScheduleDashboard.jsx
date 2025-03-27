@@ -2,7 +2,8 @@ import React, {useEffect, useState} from "react";
 import {useLocation, useNavigate} from "react-router-dom";
 import useWorkDefaultData from "../utils/WorkDataDefault";
 import {useAuth} from "../../config/AuthContext";
-import createAxiosInstance from "../../config/api"; // 로그인 유저 정보를 가져오는 함수
+import createAxiosInstance from "../../config/api";
+import {color} from "chart.js/helpers"; // 로그인 유저 정보를 가져오는 함수
 
 function WorkScheduleDashboard (){
     const { username } = useAuth();
@@ -11,7 +12,6 @@ function WorkScheduleDashboard (){
     const [isEditing, setIsEditing] = useState(false);
     const [editedItem, setEditedItem] = useState({});
     const navigate = useNavigate();
-    const location = useLocation();
     const workDefaultData = useWorkDefaultData();
 
     useEffect(() => {
@@ -91,12 +91,12 @@ function WorkScheduleDashboard (){
                     <div className="card">
                         <form onSubmit={handleSubmit}>
                             <div className="card-header">
-                                <h3>근무표 {editedItem.employeeName}의 마이페이지</h3>
+                                <h3 className="title mb-0" style={{ color: "white"}}>근무표 기본 정보</h3>
                             </div>
                             <div className="card-body">
                                 <div>
                                     <div className="form-group">
-                                        <label className="label">ID</label>
+                                        {/*<label className="label">ID</label>*/}
                                         <div>
                                             <input
                                                 className="input"
@@ -105,11 +105,12 @@ function WorkScheduleDashboard (){
                                                 value={editedItem.employeeId? editedItem.employeeId : username}
                                                 onChange={handleChange}
                                                 disabled
+                                                hidden
                                             />
                                         </div>
                                     </div>
                                     <div className="form-group">
-                                        <label className="label">이름</label>
+                                        {/*<label className="label">이름</label>*/}
                                         <div>
                                             <input
                                                 className="input"
@@ -118,9 +119,32 @@ function WorkScheduleDashboard (){
                                                 value={editedItem.employeeName}
                                                 onChange={handleChange}
                                             disabled
+                                                hidden
                                             />
                                         </div>
                                     </div>
+                                    {/*<div>*/}
+                                    {/*    <label className="label">변경할 비밀번호</label>*/}
+                                    {/*    <div>*/}
+                                    {/*        <input*/}
+                                    {/*            className="input"*/}
+                                    {/*            type="password"*/}
+                                    {/*            name="passwordChange"*/}
+                                    {/*            value={editedItem.passwordChange}*/}
+                                    {/*            onChange={handleChange}*/}
+                                    {/*        />*/}
+                                    {/*    </div>*/}
+                                    {/*    <label className="label">비밀번호 확인</label>*/}
+                                    {/*    <div>*/}
+                                    {/*        <input*/}
+                                    {/*            className="input"*/}
+                                    {/*            type="passwordChange2"*/}
+                                    {/*            name="passwordChange2"*/}
+                                    {/*            value={editedItem.passwordChange}*/}
+                                    {/*            onChange={handleChange}*/}
+                                    {/*        />*/}
+                                    {/*    </div>*/}
+                                    {/*</div>*/}
                                     <div className="form-group">
                                         <label className="label">근무지</label>
                                         <div>

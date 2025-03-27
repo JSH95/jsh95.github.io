@@ -1,6 +1,7 @@
 
 import React, {useCallback, useEffect, useState} from 'react';
 import {useNavigate} from "react-router-dom";
+import { Button } from "react-bootstrap";
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import "../../config/index.css";
 import holidayListData from "../../utils/holidayListData";
@@ -8,6 +9,7 @@ import useWorkData from "../utils/WorkData";
 import useWorkDefaultData from "../utils/WorkDataDefault";
 import {getCheckStateText} from "../utils/getCheckStateText";
 import createAxiosInstance from "../../config/api";
+import ScheduleMemoPopup from "../utils/ScheduleMemoPopup";
 const WorkScheduleList = () =>  {
 
         const today = new Date();
@@ -20,6 +22,7 @@ const WorkScheduleList = () =>  {
     const workDataList = useWorkData(year, month); // ✅ 데이터와 갱신 함수 가져오기
     const workDefaultData = useWorkDefaultData();
     const [displayText, setDisplayText] = useState("");
+    const [modalOpen, setModalOpen] = useState(false);
 
     //     "2025-01-01": { attendanceType: "휴일", workType: "", checkInTime: "", checkOutTime: "", memo: "공휴일" },
 
@@ -68,10 +71,10 @@ const WorkScheduleList = () =>  {
                         fileUrl : workType.fileUrl || "",
                         fileId : workType.fileId || "",
                         checkState: workType.workStatus || "",
+                        checkMemo: workType.checkMemo || "",
                     };
                 });
                 setSchedule(newSchedule);
-                // console.log("newSchedule : ", newSchedule)
                 setLoading(false);
             }catch (error){
                 setError("근무 데이터를 불러오는데 실패했습니다." + error);
@@ -113,9 +116,9 @@ const WorkScheduleList = () =>  {
 
     const checkStatesHandle = useCallback((schedule) => {
         const checkStates = Object.values(schedule).map(item => item.checkState);
+        const checkMemo = Object.values(schedule).map(item => item.checkMemo);
         const text = getCheckStateText(checkStates);
         setDisplayText(text);
-        console.log("displayText: ", checkStates);
     }, []);
 
     useEffect(() => {
@@ -126,9 +129,9 @@ const WorkScheduleList = () =>  {
         navigate(`/workSchedule/receipt/${year}-${String(month).padStart(2, '0')}`)
     }
 
-    function handleClickModal() {
-        alert("준비중입니다.")
-    }
+    const handleClickModal = () => {
+        setModalOpen(true);
+    };
 
     const handleClickSummit = async (key) => {
         switch (key) {
@@ -169,7 +172,6 @@ const WorkScheduleList = () =>  {
                     setDisplayText("미제출")
                     break;
             }
-            // useWorkDefaultData();
         }catch (error){
             switch(key) {
                 case 0, 1:
@@ -184,7 +186,7 @@ const WorkScheduleList = () =>  {
         }
     }
 
-    if (loading) return <p>Loading...</p>;
+    // if (loading) return <p>Loading...</p>;
     if (error) return <p>{error}</p>;
     return (
             <div className="container">
@@ -198,7 +200,7 @@ const WorkScheduleList = () =>  {
                         <i class="bi bi-arrow-right-circle-fill fs-3"></i>
                     </button>
                 </div>
-                <div className="d-flex justify-content-center align-items-center">
+                <div className="d-flex justify-content-center align-items-center mb-4">
                     <button type="button" className="btn btn-primary me-3" onClick={handleClickMyPage}>
                         기본 정보
                     </button>
@@ -207,8 +209,21 @@ const WorkScheduleList = () =>  {
                     </button>
                     { loading? "loading..." :
                         <>
-                            <button type="button" className="btn btn-info fw-bold me-3" onClick={handleClickModal}>
-                                상태 : {displayText}</button>
+                            <div>
+                                {displayText !== "수정 요청" ? <></>:
+                                    <>
+                                        <Button type="button" className="btn btn-info fw-bold me-3" onClick={handleClickModal}>
+                                            수정 요청 사항
+                                        </Button>
+                                        <ScheduleMemoPopup
+                                            schedule={schedule}
+                                            open={modalOpen}
+                                            onOpenChange={setModalOpen}
+                                        />
+                                    </>
+                                }
+                            </div>
+
                             {displayText === "수정 요청" ?
                                 <button type="button" className="btn btn-secondary" onClick={() => handleClickSummit(1)}>
                                     근무표 재제출
@@ -226,9 +241,12 @@ const WorkScheduleList = () =>  {
                     }
 
                 </div>
-               <div className="table-responsive">
+                <div
+                    className="table-responsive"
+                    style={{ maxHeight: "700px", overflowY: "auto", border: "1px solid #ddd" }}
+                >
                     <table className="table table-striped">
-                        <thead>
+                        <thead className="table-light sticky-top" style={{ top: "0", zIndex: 1 }}>
                         <tr>
                             <th className="text-center">日付</th>
                             <th className="text-center">曜日</th>
@@ -240,14 +258,16 @@ const WorkScheduleList = () =>  {
                         </tr>
                         </thead>
                         <tbody>
-                        {schedule.map((day, index) => (
+                        {loading ? "loading...":schedule.map((day, index) => (
                             <tr key={index} >
                                 <td className={day.styleClass}>
                                     {day.date}日 &nbsp;
+                                    {displayText === "제출 중" || displayText === "재제출 중"? null :
                                         <i className="bi bi-pencil-fill"
-                                           onClick={() => handleClickEdit(day.key)}
+                                           onClick={() => handleClickEdit(day.key, displayText)}
                                         >
                                         </i>
+                                    }
                                 </td>
                                 <td className={day.styleClass}>{day.weekday}</td>
                                 <td className={day.styleClass}>{day.workType} </td>

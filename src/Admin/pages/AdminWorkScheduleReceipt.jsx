@@ -7,7 +7,6 @@ const AdminWorkScheduleReceipt = () => {
     const { date } = useParams();
     const navigate = useNavigate();
     const [receipts, setReceipts] = useState([]);  // 영수증 리스트
-    // console.log("1",newReceipt)
 
     useEffect(() => {
         fetchReceipts();
@@ -20,9 +19,9 @@ const AdminWorkScheduleReceipt = () => {
                 params: {manager: true}
             });
             setReceipts(response.data);
-            console.log('영수증 전체 데이터', response.data);
         } catch (error) {
-            console.error('영수증 데이터를 불러오는 데 실패했습니다:', error);
+            // console.error('영수증 데이터를 불러오는 데 실패했습니다:', error);
+            alert('영수증 데이터를 불러오는 데 실패했습니다.');
         }
     };
 

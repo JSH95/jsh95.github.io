@@ -37,7 +37,6 @@ const WorkScheduleMain = () => {
 
     // 기본 데이터 설정 (초기 실행)
     useEffect(() => {
-        // console.log("1", workData[today])
         if (data.checkInTime === null) {
             window.alert("기본 근무시간을 설정해 주세요.");
             navigate("/workSchedule/dashBoard");

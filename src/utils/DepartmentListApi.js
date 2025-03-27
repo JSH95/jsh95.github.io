@@ -14,7 +14,6 @@ export function DepartmentListApi() {
                     const axiosInstance = createAxiosInstance(); // 인스턴스 생성
                     const response = await axiosInstance.get("/employees/department/allList");
                     setDepartmentList(response.data);
-                    // console.log("부서 목록: ", response.data);
                 } catch (err) {
                     setErrorMsg("부서 목록을 불러오지 못했습니다. \n 다시 시도해주세요.");
                 } finally {

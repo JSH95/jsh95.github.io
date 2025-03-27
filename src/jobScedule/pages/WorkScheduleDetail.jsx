@@ -1,8 +1,9 @@
-import React, {useEffect, useState} from "react";
+import React, {useCallback, useEffect, useState} from "react";
 import { useNavigate, useParams} from "react-router-dom";
 import useWorkData from "../utils/WorkData";
 import createAxiosInstance from "../../config/api";
 import workDataDefault from "../utils/WorkDataDefault";
+import {getCheckStateText} from "../utils/getCheckStateText";
 
 function WorkScheduleDashboard (){
     const { date } = useParams();
@@ -41,7 +42,7 @@ function WorkScheduleDashboard (){
         if (workData.workData[date]) {
             setItem(workData.workData[date]);
             setEditedItem(workData.workData[date]);
-            // console.log ("item 가공데이터 : " ,item)
+
         } else {
             const newDefaultItem = {
                 ...defaultItem,
@@ -134,7 +135,6 @@ function WorkScheduleDashboard (){
         } else {
             setLoading(true);
             setError("");
-            // console.log("체크",editedItem.id)
                 try{
                     const axiosInstance = createAxiosInstance(); // 인스턴스 생성
                     await axiosInstance.delete(`/workSchedule/delete/${editedItem.id}/${item.fileId? item.fileId : "0"}`);
@@ -173,7 +173,7 @@ function WorkScheduleDashboard (){
             window.alert("지연표를 삭제하였습니다.");
             dataLoging();
         } catch (error) {
-            console.error("지연표 삭제 실패:", error);
+            // console.error("지연표 삭제 실패:", error);
             alert("지연표 삭제 중 오류가 발생했습니다. \n 다시 시도해 주세요.");
         }
     }
@@ -230,6 +230,7 @@ function WorkScheduleDashboard (){
                 setUploading(false);
             }
         };
+
 
     if (loading) return <div>로딩 중...</div>;
     if (error) return <div>{error}</div>;
@@ -578,7 +579,7 @@ function WorkScheduleDashboard (){
                             </button>
                         ) : (<></>)}
 
-                        {isEditing ? (<></>) : (
+                        {isEditing || workData.workData[date]?.workStatus === "신청중" ? (<></>) : (
                             <button
                                 type="button"
                                 className="btn btn-primary me-4"

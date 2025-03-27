@@ -27,7 +27,6 @@ const useWorkData = (year, month, id) => {
             const response = await axiosInstance.get(
                     `/workSchedule/${ID}/${year}/${month}`
                 );
-                // console.log("근무 데이터 요청 결과1:", response.data)
                 const newWorkDataList = {};
                 if(response.data.length === 0){
                     setWorkData(newWorkDataList);
@@ -59,7 +58,6 @@ const useWorkData = (year, month, id) => {
                     });
                     cachedHolidays = newWorkDataList; // 캐싱하여 중복 요청 방지
                     setWorkData(newWorkDataList);
-                    // console.log("근무 데이터 요청 결과2:", newWorkDataList)
                 }
             } catch (err) {
                 setError("근무 데이터를 불러오는 중 오류가 발생했습니다.");

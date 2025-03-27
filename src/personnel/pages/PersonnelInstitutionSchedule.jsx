@@ -19,7 +19,7 @@ function PersonnelInstitutionDetail() {
         setItem(response.data);
       } catch (err) {
         setError("일정 정보를 불러오지 못했습니다. 새로고침 해보세요");
-        console.error(err);
+        // console.error(err);
       } finally {
         setLoading(false);
       }

@@ -26,7 +26,7 @@ const EmployeeSettings = () => {
       } catch (err) {
         setError("유저 정보를 불러오지 못했습니다.");
         setLoading(false);
-        console.error(err); // 에러 로깅
+        // console.error(err); // 에러 로깅
       }
     };
     fetchEmployee();

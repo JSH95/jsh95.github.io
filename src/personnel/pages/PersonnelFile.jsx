@@ -100,7 +100,7 @@ export function FileUploadDownload(editedItem, setEditedItem) {
         resumeFileName3: []
       });
     } catch (error) {
-      console.error("파일 업로드 실패:", error);
+      // console.error("파일 업로드 실패:", error);
       alert("파일 업로드 중 오류가 발생했습니다.");
     } finally {
       setUploading(false);
@@ -123,7 +123,6 @@ export function FileUploadDownload(editedItem, setEditedItem) {
           setProgress(percentCompleted);
         },
       });
-      // console.log(response.data);
       // 파일 다운로드 실행
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
@@ -155,7 +154,7 @@ export function FileUploadDownload(editedItem, setEditedItem) {
         applicantFile: prevItem.applicantFile.filter((file) => file.id !== fileId),
       }));
     } catch (error) {
-      console.error("파일 삭제 실패:", error);
+      // console.error("파일 삭제 실패:", error);
       alert("파일 삭제 중 오류가 발생했습니다.");
     }
 

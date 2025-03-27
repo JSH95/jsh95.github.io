@@ -1,7 +1,8 @@
 import { gapi } from "gapi-script";
 
 const API_KEY = "AIzaSyBuoYwHGk4XLCfalv3_N5PLDG8gq5kc74U"; // Google API 키
-const CALENDAR_ID = "ko.japanese.official#holiday@group.v.calendar.google.com"; // 일본 공휴일 캘린더 ID
+const CALENDAR_ID ="ja.japanese.official#holiday@group.v.calendar.google.com" // 일본어 공휴일 캘린더 ID
+
 
 let cachedHolidays = null; // 캐싱하여 여러 번 호출해도 다시 요청하지 않음
 
@@ -26,7 +27,7 @@ const holidayListData = async () => {
         cachedHolidays = formattedHolidays; // 캐싱하여 중복 요청 방지
         return formattedHolidays;
     } catch (err) {
-        console.error("Error fetching holidays", err);
+        console.error("Error fetching holidays");
         return {};
     }
 };

@@ -31,7 +31,6 @@ const AdminWorkScheduleDashboard = () => {
             }
             date.setDate(date.getDate() + 1);
         }
-        console.log("businessDays",businessDays)
         return businessDays;
     }
 
@@ -46,7 +45,7 @@ const AdminWorkScheduleDashboard = () => {
                 const filteredData = response.data.filter(
                     (entry) =>
                         (entry.workType === '출근' || entry.workType === '휴일출근') &&
-                        (role === 'ROLE_ADMIN' || entry.employee.team.teamLeaderId === username) // 어드민이면 팀장 ID 조건 제거
+                        ((role === 'ROLE_ADMIN' ||role === 'ROLE_TEAM_LEADER')|| entry.employee.team.teamLeaderId === username) // 어드민이면 팀장 ID 조건 제거
                 );
 
                 const employeeHours = {};
@@ -108,7 +107,7 @@ const AdminWorkScheduleDashboard = () => {
                 ));
             } catch (error) {
                 alert("데이터를 불러올 수 없습니다. \n 다시 시도해주세요.")
-                console.error("Error fetching work schedule data:");
+                // console.error("Error fetching work schedule data:");
             }
         };
 

@@ -42,7 +42,7 @@ function PersonnelDetail() {
         setEditedItem(response.data);
       } catch (err) {
         setError("지원자 정보를 불러오지 못했습니다.");
-        console.error(err);
+        // console.error(err);
       } finally {
         setLoading(false);
       }
@@ -114,7 +114,7 @@ function PersonnelDetail() {
       }
     } catch (err) {
       alert("지원자 삭제에 실패했습니다.");
-      console.error(err);
+      // console.error(err);
     }
   };
 

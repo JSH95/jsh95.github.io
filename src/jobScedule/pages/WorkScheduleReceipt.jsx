@@ -1,6 +1,6 @@
 import React, {useEffect, useRef, useState} from 'react';
 import createAxiosInstance from "../../config/api";
-import {data, useNavigate, useParams} from "react-router-dom";
+import {useNavigate, useParams} from "react-router-dom";
 
 const ReceiptList = () => {
     const { month } = useParams();
@@ -19,7 +19,6 @@ const ReceiptList = () => {
     const [progress, setProgress] = useState(0); // 업로드 진행 상태
     const [uploading, setUploading] = useState(false);
     const [selectedFile, setSelectedFile] = useState(null);
-    // console.log("1",newReceipt)
     const fileInputRef = useRef(null);
 
     useEffect(() => {
@@ -31,9 +30,9 @@ const ReceiptList = () => {
             const axiosInstance = createAxiosInstance();
             const response = await axiosInstance.get(`/workSchedule/receipts/${month}`);  // API 엔드포인트 호출
             setReceipts(response.data);  // 서버로부터 받은 데이터를 상태에 저장
-            // console.log('데이터', response.data);
         } catch (error) {
-            console.error('영수증 데이터를 불러오는 데 실패했습니다:', error);
+            // console.error('영수증 데이터를 불러오는 데 실패했습니다:', error);
+            alert("영수증 데이터를 불러오는 데 실패했습니다.")
         }
     };
 
@@ -143,9 +142,9 @@ const ReceiptList = () => {
                 const response = await axiosInstance.delete(`/workSchedule/receipts/${id}`);
                 window.alert('영수증이 삭제되었습니다.');
                 fetchReceipts();
-                // console.log("레스",response);
             }catch (e){
-                console.error('영수증 삭제 실패:', e);
+                // console.error('영수증 삭제 실패:', e);
+                alert("영수증 삭제 실패");
             }
         }
     }

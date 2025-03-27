@@ -8,13 +8,16 @@ import {
 import '../../config/index.css';
 
 import { useFetchAccual } from '../utils/useFetchAccual'; // 유저 정보 요청 훅
-import usePushNotificationPermission from '../../hooks/usePushNotificationPermission'; // 경로 확인 후 수정
+import usePushNotificationPermission from '../../hooks/usePushNotificationPermission';
+import {Capacitor} from "@capacitor/core"; // 경로 확인 후 수정
 
 function Dashboard() {
   const navigate = useNavigate();
   const { userData, userError, userLoading } = useFetchAccual(); // 유저 정보 호출
 
-  usePushNotificationPermission(); // 푸시 알림 토큰 가져오기
+  if (Capacitor.isNativePlatform()) {
+    usePushNotificationPermission(); // 푸시 알림 토큰 가져오기
+  }
 
   const handleEmployeeClick = (employeeId) => {
     navigate(`/dashboard/${employeeId}`); // 상세 페이지로 이동

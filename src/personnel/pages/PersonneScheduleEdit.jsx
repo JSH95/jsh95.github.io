@@ -21,7 +21,7 @@ const { scheduleId } = useParams();
         setEditedItem(response.data);
       } catch (err) {
         setError("정보를 불러오지 못했습니다.");
-        console.error(err);
+        // console.error(err);
       } finally {
         setLoading(false);
       }

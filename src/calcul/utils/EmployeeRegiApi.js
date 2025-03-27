@@ -27,7 +27,6 @@ export function EmployeeRegiApi() {
       setEmployeeRole("");
       setTeamId("");
       setDepartment("");
-      // console.log("등록 응답: ", response.data);
       window.alert("등록이 완료되었습니다.");
     } catch (err) {
       setError("등록 실패 : " + err.response.data.message);

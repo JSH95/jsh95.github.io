@@ -7,9 +7,11 @@ import holidayListData from "../../utils/holidayListData";
 import useWorkData from "../../jobScedule/utils/WorkData";
 import createAxiosInstance from "../../config/api";
 import {getCheckStateText} from "../../jobScedule/utils/getCheckStateText";
+import {useAuth} from "../../config/AuthContext";
 
 const AdminWorkScheduleList = () =>  {
     const { id } = useParams();
+    const { role, username } = useAuth();
     const location = useLocation();
     const { year : selectedYear, month: selectedMonth } = location.state;
     const [year, setYear] = useState(selectedYear);
@@ -57,7 +59,6 @@ const AdminWorkScheduleList = () =>  {
                         breakTimeIn: workType.breakTimeIn || "",
                         breakTimeOut: workType.breakTimeOut || "",
                         styleClass: key === todayKey ? "today" : (HolidayType ? "holiday" : isWeekend ? "weekend" : ""),
-
                         file: workType.workFileStatus > 0 ? "true" : "false",
                         fileName : workType.fileName || "",
                         fileUrl : workType.fileUrl || "",
@@ -67,7 +68,6 @@ const AdminWorkScheduleList = () =>  {
                     };
                 });
                 setSchedule(newSchedule);
-                console.log(newSchedule);
                 setLoading(false);
             }catch (error){
                 setError("근무 데이터를 불러오는데 실패했습니다." + error);
@@ -144,7 +144,8 @@ const AdminWorkScheduleList = () =>  {
         saveToLocalStorage(checkedItems);
     }, [checkedItems]);
 
-    const handleSave = async () => {
+    const handleSave = async (keyData) => {
+
         switch (displayText) {
             case "미제출":
                 alert("아직 근무표를 제출하지 않은 사원입니다.");
@@ -160,46 +161,61 @@ const AdminWorkScheduleList = () =>  {
                 checkDate: key,
                 checkStateMemo: item.checkStateMemo || ""
             }));
+        if(keyData === 0 ) {
+            if (checkedItemsData.length === 0) {
+                alert("체크된 항목이 없습니다.");
+                return;
+            }
 
-        if (checkedItemsData.length === 0) {
-            alert("체크된 항목이 없습니다.");
-            return;
+            const missingMemo = checkedItemsData.some((item) => !item.checkStateMemo || item.checkStateMemo.trim() === "");
+            if (missingMemo) {
+                alert("사유를 입력하지 않은 항목이 있습니다.");
+                return;
+            }
+            try {
+                const axiosInstance = createAxiosInstance();
+                await axiosInstance.post(`/workScheduleAdmin/${id}`,{
+                    year,
+                    month,
+                    checkedDatesDto: checkedItemsData
+                });
+                alert(id + "의 수정요청이 완료되었습니다.");
+                localStorage.removeItem("checkedItems");
+                setCheckedItems({});
+                setDisplayText("수정 요청")
+            } catch (error) {
+                // console.error(error);
+                alert("저장 중 오류가 발생했습니다.");
+            }
+        } else {
+            try {
+                const axiosInstance = createAxiosInstance();
+                await axiosInstance.post(`/workScheduleAdmin/approval/${id}`,{
+                    year,
+                    month,
+                    checkedDatesDto: null,
+                    keyData
+                });
+                alert(id + "의 승인이 완료되었습니다.");
+                setDisplayText("승인 완료")
+            } catch (error) {
+                // console.error(error);
+                alert("저장 중 오류가 발생했습니다.");
+            }
         }
-
-        const missingMemo = checkedItemsData.some((item) => !item.checkStateMemo || item.checkStateMemo.trim() === "");
-        if (missingMemo) {
-            alert("사유를 입력하지 않은 항목이 있습니다.");
-            return;
-        }
-        try {
-            const axiosInstance = createAxiosInstance();
-            await axiosInstance.post(`/workScheduleAdmin/${id}`,{
-                year,
-                month,
-                checkedDatesDto: checkedItemsData
-            });
-            alert(id + "의 수정요청이 완료되었습니다.");
-            localStorage.removeItem("checkedItems");
-            setCheckedItems({});
-        } catch (error) {
-            console.error(error);
-            alert("저장 중 오류가 발생했습니다.");
-        }
-
     };
 
     const checkStatesHandle = useCallback((schedule) => {
         const checkStates = Object.values(schedule).map(item => item.checkState);
         const text = getCheckStateText(checkStates);
         setDisplayText(text);
-        console.log("displayText: ", text);
     }, []);
 
     useEffect(() => {
         checkStatesHandle(schedule);
     }, [schedule, checkStatesHandle]);
 
-    if (loading) return <p>Loading...</p>;
+    // if (loading) return <p>Loading...</p>;
     if (error) return <p>{error}</p>;
     return (
             <div className="container">
@@ -212,18 +228,28 @@ const AdminWorkScheduleList = () =>  {
                     <button onClick={() => changeMonth(1)} className="btn">
                         <i class="bi bi-arrow-right-circle-fill fs-3"></i>
                     </button>
-
                 </div>
-                <div className="d-flex justify-content-center align-items-center mb-2">
+                {loading ? "Loading ...":<div className="d-flex justify-content-center align-items-center mb-2">
                     <button type="button" className="btn btn-secondary me-3" onClick={handleClickReceipt}>
                         {month}월 영수증 첨부
                     </button>
-                    <button onClick={handleSave} className="btn btn-secondary me-4"  type="button">수정요청</button>
+                    <button onClick={() => handleSave(0)} className="btn btn-secondary me-4" type="button">수정 요청</button>
+                    {role === "ROLE_ADMIN" ?
+                        <button onClick={() => handleSave(1)} className="btn btn-secondary me-4" type="button">승 인</button>
+                        :
+                        role === "ROLE_TEAM_LEADER" ?
+                            <button onClick={() => handleSave(2)} className="btn btn-secondary me-4" type="button">승인 요청</button>
+                            :
+                            <button onClick={() => handleSave(3)} className="btn btn-secondary me-4" type="button">승인 요청</button>
+                    }
                     <h5 className="">상태 : {displayText} </h5>
-                </div>
-                <div className="table-responsive">
+                </div>}
+                <div
+                    className="table-responsive"
+                    style={{ maxHeight: "700px", overflowY: "auto", border: "1px solid #ddd" }}
+                >
                     <table className="table table-striped">
-                        <thead>
+                        <thead className="table-light sticky-top" style={{ top: "0", zIndex: 1 }}>
                         <tr>
                             <th className="text-center">수정 사항</th>
                             <th className="text-center">日付</th>
@@ -236,17 +262,17 @@ const AdminWorkScheduleList = () =>  {
                         </tr>
                         </thead>
                         <tbody>
-                        {schedule.map((day, index) => (
+                        {loading ? null : schedule.map((day, index) => (
                             <tr key={index} onClick={() => handleClickEdit(day.key)}>
-                                <td className={day.styleClass}
-                                    onClick={(e) => e.stopPropagation()} // row 클릭 방지
+                                {day.workType ? <td className={day.styleClass}
+                                     onClick={(e) => e.stopPropagation()} // row 클릭 방지
                                 >
                                     <input
                                         type="checkbox"
                                         checked={!!checkedItems[day.key]}
                                         onChange={() => handleCheckboxChange(day.key)}
                                         className="checkbox-container"
-                                        style={{ transform: "scale(1.4)", cursor: "pointer" }}
+                                        style={{transform: "scale(1.4)", cursor: "pointer"}}
                                     />
                                     {checkedItems[day.key]?.checked && (
                                         <input
@@ -254,10 +280,13 @@ const AdminWorkScheduleList = () =>  {
                                             placeholder="사유 입력"
                                             value={checkedItems[day.key]?.checkStateMemo || ""}
                                             onChange={(e) => handleMemoChange(day.key, e.target.value)}
-                                            style={{ marginLeft: "8px", width: "150px" }}
+                                            style={{marginLeft: "8px", width: "150px"}}
                                         />
                                     )}
-                                </td>
+                                </td> :
+                                    <td className={day.styleClass}>
+
+                                    </td>}
                                 <td className={day.styleClass}>
                                     {day.date}日
                                 </td>
@@ -265,26 +294,28 @@ const AdminWorkScheduleList = () =>  {
                                 <td className={day.styleClass}>{day.workType} </td>
                                 <td className={day.styleClass}>{day.workPosition}</td>
                                 <td className={day.styleClass}>
-                                    {day.workType === "유급휴가" ? "-" : day.checkInTime}
+                                    {day.workType !== "출근" && day.workType !== "휴일출근" ? "-" : day.checkInTime}
                                 </td>
                                 <td className={day.styleClass}
                                     style={(day.checkOutDate !== day.key)  ?
                                         { color: 'red', fontWeight: 'bold' }
                                         : {}}
                                 >
-                                    {(day.checkOutTime ? ((day.checkOutDate !== day.key)  ?
-                                    "次の日 " : "" )
-                                    : "" )
-                                    + day.checkOutTime} </td>
+                                    {day.workType !== "출근" && day.workType !== "휴일출근" ? "-" :
+                                        (day.checkOutTime ? ((day.checkOutDate !== day.key)  ?
+                                                "次の日 " : "" )
+                                            : "" )
+                                        + day.checkOutTime}
+                                </td>
                                 <td className={`${day.styleClass} text-truncate`}
-                                    style={{ maxWidth: "300px" , minWidth: "200px"}}
-                                >{day.memo}
+                                    style={{ maxWidth: "300px" , minWidth: "200px"}}>
                                     {day.file === "true" ? (
-                                        <>&nbsp;
+                                        <>
                                             <i className="bi bi-file-earmark-check-fill"
-                                                onClick={() => handleClickEdit(day.key)}></i>
+                                               onClick={() => handleClickEdit(day.key)}></i>
                                         </>
-                                    ) : null}
+                                    ) : (null)}&nbsp;
+                                    {day.memo}
                                 </td>
                             </tr>
                         ))}

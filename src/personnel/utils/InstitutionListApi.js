@@ -16,7 +16,7 @@ export function InstitutionListApi() {
                     setInstitutionList(response.data);
                 } catch (err) {
                     setError("교육기관 정보를 불러오지 못했습니다.");
-                    console.error(err);
+                    // console.error(err);
                 } finally {
                     setLoading(false);
                 }
