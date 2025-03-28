@@ -143,7 +143,6 @@ const { scheduleId } = useParams();
                         });
                       }}
                       className="input"
-                      required
                   />
                 </div>
               </div>
@@ -186,7 +185,7 @@ const { scheduleId } = useParams();
                         });
                       }}
                       className="input"
-                      required
+
                   />
                 </div>
               </div>

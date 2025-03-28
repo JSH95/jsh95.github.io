@@ -201,9 +201,9 @@ const WorkScheduleList = () =>  {
                     </button>
                 </div>
                 <div className="d-flex justify-content-center align-items-center mb-4">
-                    <button type="button" className="btn btn-primary me-3" onClick={handleClickMyPage}>
-                        기본 정보
-                    </button>
+                    {/*<button type="button" className="btn btn-primary me-3" onClick={handleClickMyPage}>*/}
+                    {/*    기본 정보*/}
+                    {/*</button>*/}
                     <button type="button" className="btn btn-secondary me-4" onClick={handleClickReceipt}>
                         {month}월 영수증
                     </button>
@@ -224,15 +224,15 @@ const WorkScheduleList = () =>  {
                                 }
                             </div>
                             {displayText === "수정 요청" ?
-                                <button type="button" className="btn btn-secondary" onClick={() => handleClickSummit(1)}>
+                                <button type="button" className="btn btn-success" onClick={() => handleClickSummit(1)}>
                                     근무표 재제출
                                 </button>
                                 : displayText === "제출 중" || displayText === "재제출 중"?
-                                    <button type="button" className="btn btn-secondary" onClick={() => handleClickSummit(2)}>
+                                    <button type="button" className="btn btn-danger" onClick={() => handleClickSummit(2)}>
                                         제출 취소
                                     </button>
                                     :
-                                    <button type="button" className="btn btn-secondary" onClick={() => handleClickSummit(0)}>
+                                    <button type="button" className="btn btn-success" onClick={() => handleClickSummit(0)}>
                                         근무표 제출
                                     </button>
                             }

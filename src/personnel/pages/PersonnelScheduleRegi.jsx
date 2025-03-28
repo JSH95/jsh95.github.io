@@ -68,6 +68,13 @@ function PersonneScheduleRegi() {
     }));
   };
 
+  const handleAllDayChange = () => {
+    setFormData((prev) => ({
+      ...prev,
+      allDay: prev.allDay === 1 ? 0 : 1, // 1 <-> 0 토글
+    }));
+  };
+
   const handleDateChange = (e, type) => {
     const dateValue = e.target.value;
     setFormData((prev) => {
@@ -98,10 +105,10 @@ function PersonneScheduleRegi() {
   if (error) return <p style={styles.errorMessage}>{error}</p>;
 
   return (
-      <div className="detail-container">
-        <div style={styles.card}>
-          <div style={styles.cardHeader}>
-            <h3>스케쥴 신규 추가 페이지</h3>
+      <div className="container d-flex flex-column justify-content-center align-items-center">
+        <div className="card">
+          <div className="card-header">
+              <h3 className="text-center">스케쥴 추가</h3>
           </div>
           <div style={styles.cardBody}>
             <form onSubmit={handleSave}>
@@ -145,13 +152,16 @@ function PersonneScheduleRegi() {
               <div className="form-group">
                 <label>내용</label>
                 <textarea
-                    type="text"
                     value={formData.scheduleInfo || ""}
                     name="scheduleInfo"
                     onChange={handleChange}
                     className="input"
                     required
                 />
+              </div>
+              <div className="d-flex align-items-center gap-2 mb-3">
+                <label>종일 일정?</label>
+                <input type="checkbox" checked={formData.allDay === 1} onChange={handleAllDayChange} className="form-check-input custom-checkbox" />
               </div>
               <div className="form-group">
                 <label>시작일, 시간</label>

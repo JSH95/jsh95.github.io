@@ -69,7 +69,7 @@ function PersonnelInstitutionDetail() {
           <div>
             <h3 className="title">교육기관 일정 관리</h3>
           </div>
-          <div className="col-12 mb-4">
+          <div className="d-flex justify-content-center align-items-center mb-3">
             <button
                 //버튼 오른쪽 끝으로 보내기
                 className="btn btn-primary me-3 "
@@ -82,10 +82,8 @@ function PersonnelInstitutionDetail() {
               돌아가기
             </button>
           </div>
-        <div className="row d-flex">
-          <div className="col-12 ">
-            <InstitutionSchedule schedules={item}/>
-          </div>
+        <div className="">
+          <InstitutionSchedule schedules={item}/>
         </div>
       </div>
   );
