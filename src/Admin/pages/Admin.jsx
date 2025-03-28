@@ -93,7 +93,6 @@ const EmployeeSettings = () => {
   if (loading) return <div className="loading">Loading...</div>;
   if (error) return <div className="error">{error}</div>;
 
-
   function handleGoList() {
     navigate("/admin/list");
   }
@@ -115,10 +114,12 @@ const EmployeeSettings = () => {
             <div className="card shadow-lg mb-4">
               <h2 className="card-header text-center bg-primary text-white">WEAVUS 관리자 페이지</h2>
               <div className="card-body">
-                <button className="btn btn-info w-100 mb-3" type="button" onClick={handleGoList}>
+                <button className="btn btn-info w-auto mb-3 me-4" type="button" onClick={handleGoList}>
                   사원 월별 근무 그래프
                 </button>
-
+                <button className="btn btn-warning w-auto mb-3" onClick={handleMessage}>
+                  App 테스트 알림 발송
+                </button>
                 <table className="table table-striped">
                   <thead>
                   <tr>
@@ -150,70 +151,70 @@ const EmployeeSettings = () => {
             </div>
 
             {/* 계정 생성 폼 */}
-            <div className="card shadow-lg mb-4">
-              <h2 className="card-header text-center bg-secondary text-white">계정 생성</h2>
-              <form onSubmit={adminSignUp} className="card-body">
-                <div className="mb-3">
-                  <label htmlFor="username" className="form-label">아이디 :</label>
-                  <input
-                      name="username"
-                      type="text"
-                      value={item.username}
-                      onChange={handleInputChange}
-                      placeholder="아이디"
-                      className="form-control"
-                      required
-                  />
-                </div>
+            {/*<div className="card shadow-lg mb-4">*/}
+            {/*  <h2 className="card-header text-center bg-secondary text-white">계정 생성</h2>*/}
+            {/*  <form onSubmit={adminSignUp} className="card-body">*/}
+            {/*    <div className="mb-3">*/}
+            {/*      <label htmlFor="username" className="form-label">아이디 :</label>*/}
+            {/*      <input*/}
+            {/*          name="username"*/}
+            {/*          type="text"*/}
+            {/*          value={item.username}*/}
+            {/*          onChange={handleInputChange}*/}
+            {/*          placeholder="아이디"*/}
+            {/*          className="form-control"*/}
+            {/*          required*/}
+            {/*      />*/}
+            {/*    </div>*/}
 
-                <div className="mb-3">
-                  <label htmlFor="password" className="form-label">비밀번호 :</label>
-                  <input
-                      name="password"
-                      type="password"
-                      value={item.password}
-                      onChange={handleInputChange}
-                      placeholder="비밀번호"
-                      className="form-control"
-                      required
-                  />
-                </div>
+            {/*    <div className="mb-3">*/}
+            {/*      <label htmlFor="password" className="form-label">비밀번호 :</label>*/}
+            {/*      <input*/}
+            {/*          name="password"*/}
+            {/*          type="password"*/}
+            {/*          value={item.password}*/}
+            {/*          onChange={handleInputChange}*/}
+            {/*          placeholder="비밀번호"*/}
+            {/*          className="form-control"*/}
+            {/*          required*/}
+            {/*      />*/}
+            {/*    </div>*/}
 
-                <div className="mb-3">
-                  <label htmlFor="password" className="form-label">비밀번호 확인 :</label>
-                  <input
-                      name="password2"
-                      type="password"
-                      value={password2}
-                      onChange={handlePassword2Change}
-                      placeholder="비밀번호 확인"
-                      className="form-control"
-                      required
-                  />
-                </div>
+            {/*    <div className="mb-3">*/}
+            {/*      <label htmlFor="password" className="form-label">비밀번호 확인 :</label>*/}
+            {/*      <input*/}
+            {/*          name="password2"*/}
+            {/*          type="password"*/}
+            {/*          value={password2}*/}
+            {/*          onChange={handlePassword2Change}*/}
+            {/*          placeholder="비밀번호 확인"*/}
+            {/*          className="form-control"*/}
+            {/*          required*/}
+            {/*      />*/}
+            {/*    </div>*/}
 
-                <div className="mb-3">
-                  <label htmlFor="role" className="form-label">권한 선택 :</label>
-                  <select
-                      name="role"
-                      value={item.role}
-                      onChange={handleInputChange}
-                      className="form-control"
-                      required
-                  >
-                    <option value="">권한 선택</option>
-                    <option value="GENERAL">일반사원</option>
-                    <option value="ADMIN">관리자권한</option>
-                    <option value="TEAM">팀장</option>
-                  </select>
-                </div>
-                <div>
-                  <button type="submit" className="btn btn-primary w-100">
-                    계정 생성
-                  </button>
-                </div>
-              </form>
-            </div>
+            {/*    <div className="mb-3">*/}
+            {/*      <label htmlFor="role" className="form-label">권한 선택 :</label>*/}
+            {/*      <select*/}
+            {/*          name="role"*/}
+            {/*          value={item.role}*/}
+            {/*          onChange={handleInputChange}*/}
+            {/*          className="form-control"*/}
+            {/*          required*/}
+            {/*      >*/}
+            {/*        <option value="">권한 선택</option>*/}
+            {/*        <option value="GENERAL">일반사원</option>*/}
+            {/*        <option value="ADMIN">관리자권한</option>*/}
+            {/*        <option value="TEAM">팀장</option>*/}
+            {/*      </select>*/}
+            {/*    </div>*/}
+            {/*    <div>*/}
+            {/*      <button type="submit" className="btn btn-primary w-100">*/}
+            {/*        계정 생성*/}
+            {/*      </button>*/}
+            {/*    </div>*/}
+            {/*  </form>*/}
+            {/*</div>*/}
 
             {/* 앱 테스트 알림 발송 버튼 */}
             <div className="text-center mt-4">

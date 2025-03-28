@@ -57,47 +57,54 @@ function EmployeeDashboard() {
   };
 
   return (
-    <div className="container d-flex flex-column justify-content-center align-items-center vh-100">
-      <h1 className="title">WEAVUS 사원 일람 리스트</h1>
-      {loading && <div className="loading">Loading...</div>}
-      {error && <div className="error-message">{error}</div>}
-      {!loading && !error && (
-          <div className="table-responsive d-flex flex-column">
-            <button className="btn btn-success ms-auto my-1" onClick={() => handleRowClick()}>
-              사원 등록
-            </button>
-        <table className="table table-striped">
-          <thead>
-            <tr>
-              <th className="text-center">이름</th>
-              <th className="text-center">입사일</th>
-              <th className="text-center">계약 상태</th>
-              <th className="text-center">부서</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.map((employee) => (
-              <tr key={employee.id}>
-                <td className="table-data ">
-                  <button
-                    className="action-button"
-                    onClick={() => handleEmployeeClick(employee.id)} // 클릭 시 handleEmployeeClick 함수 호출
-                  >
-                    {employee.name}
-                  </button>
-                </td>
-                <td className="table-data ">{employee.entryDate}</td>
-                <td className="table-data ">
-                  {getEmployeeTypeText(employee.employeeType, employee.status)}
-                </td>
-                <td className="table-data ">{employee.department.name}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-          </div>
-      )}
-    </div>
+      <div className="container">
+          <h1 className="title text-center">WEAVUS 사원 일람</h1>
+        <div className="d-flex justify-content-center align-items-center">
+          <button className="btn btn-success my-2" onClick={() => handleRowClick()}>
+            사원 등록
+          </button>
+          {error && <div className="error-message">{error}</div>}
+        </div>
+            <>
+              <div className="table-container d-flex justify-content-center">
+                <div className="table-responsive">
+                  <table className="table table-striped text-center">
+                    <thead>
+                    <tr>
+                      <th>이름</th>
+                      <th>입사일</th>
+                      <th>계약 상태</th>
+                      <th>부서</th>
+                    </tr>
+                    </thead>
+                    {loading && <div className="loading">Loading...</div>}
+                    {!loading && !error && (
+                    <tbody>
+                    {data.map((employee) => (
+                        <tr key={employee.id}>
+                          <td className="table-data">
+                            <button
+                                className="action-button"
+                                onClick={() => handleEmployeeClick(employee.id)}
+                            >
+                              {employee.name}
+                            </button>
+                          </td>
+                          <td className="table-data">{employee.entryDate}</td>
+                          <td className="table-data">
+                            {getEmployeeTypeText(employee.employeeType, employee.status)}
+                          </td>
+                          <td className="table-data">{employee.department.name}</td>
+                        </tr>
+                    ))}
+                    </tbody>
+                    )}
+                  </table>
+                </div>
+              </div>
+            </>
+      </div>
+
   );
 }
 

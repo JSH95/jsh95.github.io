@@ -6,6 +6,7 @@ import "../../config/index.css";
 import {TeamListApi} from "../../utils/TeamListApi";
 import {DepartmentListApi} from "../../utils/DepartmentListApi";
 import handleChangePass from "../utils/passwordChange";
+import ChangePassword from "../utils/passwordChange";
 
 
 function EmployeeDetail() {
@@ -20,6 +21,8 @@ function EmployeeDetail() {
   const { deLoadList, departmentList, deErrorMsg, deLoading} = DepartmentListApi();
   const [teamId, setTeamId] = useState(""); // 팀 아이디 설정
   const [employeeRole, setEmployeeRole] = useState(""); // 관리자 설정
+  const [showModal, setShowModal] = useState(false);
+  const [employeeIds, setEmployeeIds] = useState(null);
 
   useEffect(() => {
     const fetchEmployee = async () => {
@@ -152,8 +155,9 @@ function EmployeeDetail() {
   }
 
   const handlePassword = (id) => {
-    handleChangePass(id);  // id를 전달하여 비밀번호 변경 창을 엽니다.
-  }
+    setEmployeeIds(id); // id를 상태로 설정
+    setShowModal(true); // 모달을 열기
+  };
 
   useEffect(() => {
     const handlePasswordChange = async (event) => {
@@ -410,7 +414,14 @@ function EmployeeDetail() {
                     </div>
                   </div>
                   <div className="form-group mb-1">
-                    <button className="btn btn-primary" type="button" onClick={() =>handlePassword(item.id)}>비밀번호 변경</button>
+                    <button className="btn btn-primary" type="button" onClick={() => handlePassword(item.id)}>비밀번호 변경</button>
+                    {showModal && (
+                        <ChangePassword
+                            id={employeeId} // id를 props로 전달
+                            open={showModal}
+                            onOpenChange={setShowModal}
+                        />
+                    )}
                   </div>
                 </div>
               </>

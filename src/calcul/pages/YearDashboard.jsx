@@ -20,13 +20,13 @@ function YearDashboard() {
   };
 
   // 유저 정보와 연도별 데이터가 로딩되거나 에러가 발생한 경우 처리
-  if (loading) {
-    return <div className="loading">Loading...</div>;
-  }
-
-  if (error) {
-    return <div className="error">{error}</div>;
-  }
+  // if (loading) {
+  //   return <div className="loading">Loading...</div>;
+  // }
+  //
+  // if (error) {
+  //   return <div className="error">{error}</div>;
+  // }
 
   return (
     <div className="container">
@@ -49,7 +49,10 @@ function YearDashboard() {
         </button>
       </div>
       <p className="total-amount">
-        {selectedYear} 년의 적립 총액: {formatAmount(totalAccumulatedAmount)}
+        {selectedYear} 년의 적립 총액 :
+        {loading ? "Loading... ":
+            formatAmount(totalAccumulatedAmount)
+        }
       </p>
     </div>
   );

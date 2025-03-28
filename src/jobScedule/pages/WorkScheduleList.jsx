@@ -187,7 +187,7 @@ const WorkScheduleList = () =>  {
     }
 
     // if (loading) return <p>Loading...</p>;
-    if (error) return <p>{error}</p>;
+    // if (error) return <p>{error}</p>;
     return (
             <div className="container">
                 <h2 className="text-dark mb-1">WORK SCHEDULE</h2>
@@ -223,7 +223,6 @@ const WorkScheduleList = () =>  {
                                     </>
                                 }
                             </div>
-
                             {displayText === "수정 요청" ?
                                 <button type="button" className="btn btn-secondary" onClick={() => handleClickSummit(1)}>
                                     근무표 재제출
@@ -239,7 +238,6 @@ const WorkScheduleList = () =>  {
                             }
                         </>
                     }
-
                 </div>
                 <div
                     className="table-responsive"
