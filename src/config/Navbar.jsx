@@ -49,7 +49,7 @@ const NavigationBar = () => {
         const {password, id} = event.data;
         try{
           const axiosInstance = createAxiosInstance(); // 인스턴스 생성
-          await axiosInstance.post('/employees/password', null,{
+          await axiosInstance.post('/workScheduleAdmin/password', null,{
             headers: {
               "id": id,
               "password": password,

@@ -83,18 +83,48 @@ const AdminWorkScheduleDashboard = () => {
 
                     // status 계산
                     const workScheduleState = entry.workScheduleState; // 단일 값으로 확인
-                    if (workScheduleState === '반려') {
-                        status[id] = '반려'; // 반려가 하나라도 있으면 '반려'
-                    } else if (workScheduleState === '승인완료') {
-                        if (!status[id]) {
-                            status[id] = '승인완료'; // 승인만 있으면 '승인'
-                        }
-                    } else if (workScheduleState === '미제출') {
-                        if (!status[id]) {
-                            status[id] = '미제출'; // 미제출 상태가 있으면 '미제출'
-                        }
-                    } else if (!status[id]) {
-                        status[id] = '검토중'; // 나머지는 '검토중'
+
+                    switch (workScheduleState) {
+                        case '수정요청':
+                        case '재수정요청':
+                            if (!status[id]) {
+                                status[id] = '수정요청'; // 수정요청 상태가 있으면 '수정요청'
+                            }
+                            break;
+                        case '최종확인완료':
+                            if (!status[id]) {
+                                status[id] = '최종확인완료'; // 최종확인완료 상태가 있으면 '최종확인완료'
+                            }
+                            break;
+                        case '승인완료':
+                            if (!status[id]) {
+                                status[id] = '승인완료'; // 승인만 있으면 '승인'
+                            }
+                            break;
+                        case '미제출':
+                        case '신청취소':
+                            if (!status[id]) {
+                                status[id] = '미제출'; // 미제출 상태가 있으면 '미제출'
+                            }
+                            break;
+                        case '신청중':
+                        case '재제출':
+                        case '재재제출':
+                            if (!status[id]) {
+                                status[id] = '신청중'; // 신청중 상태가 있으면 '신청중'
+                            }
+                            break;
+                        case '확인완료':
+                            if (!status[id]) {
+                                status[id] = '확인완료'; // 확인완료 상태가 있으면 '확인완료'
+                            }
+                            break;
+
+                        default:
+                            if (!status[id]) {
+                                status[id] = '반려'; // 반려가 하나라도 있으면 '반려'
+                            }
+                            break;
                     }
                 });
                 setChartData(Object.keys(employeeHours).map((id) => ({

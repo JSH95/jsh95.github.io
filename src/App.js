@@ -44,6 +44,7 @@ const Layout = ({ children }) => (
   </>
 );
 
+//로그인 상태 권한 설정 권한 Nav
 const ProtectedRoute = ({ children }) => {
     const { isLoggedIn , role} = useAuth();
     if(role === "ROLE_ADMIN"){
@@ -55,6 +56,10 @@ const ProtectedRoute = ({ children }) => {
             children
             : <Navigate to="/" />;
     } else if (role === "ROLE_TEAM"){
+        return isLoggedIn ?
+            children
+            : <Navigate to="/" />;
+    }else if (role === "ROLE_TEAM_LEADER"){
         return isLoggedIn ?
             children
             : <Navigate to="/" />;

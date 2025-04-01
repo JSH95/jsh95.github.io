@@ -182,7 +182,17 @@ const AdminWorkScheduleList = () =>  {
                 alert(id + "의 수정요청이 완료되었습니다.");
                 localStorage.removeItem("checkedItems");
                 setCheckedItems({});
-                setDisplayText("수정 요청")
+                switch (keyData) {
+                    case 1:
+                        setDisplayText("승인완료")
+                        break;
+                    case 2:
+                        setDisplayText("최종확인완료")
+                        break;
+                    case 3:
+                        setDisplayText("확인완료")
+                        break;
+                }
             } catch (error) {
                 // console.error(error);
                 alert("저장 중 오류가 발생했습니다.");
@@ -197,6 +207,18 @@ const AdminWorkScheduleList = () =>  {
                     keyData
                 });
                 alert(id + "의 승인이 완료되었습니다.");
+                switch (keyData) {
+                    case 1:
+                        setDisplayText("승인 완료")
+                        break;
+                    case 2:
+                        setDisplayText("최종확인완료")
+                        break;
+                    case 3:
+                        setDisplayText("확인완료")
+                        break;
+
+                }
                 setDisplayText("승인 완료")
             } catch (error) {
                 // console.error(error);
@@ -234,14 +256,14 @@ const AdminWorkScheduleList = () =>  {
                         {month}월 영수증 첨부
                     </button>
                     <button onClick={() => handleSave(0)} className="btn btn-secondary me-4" type="button">수정 요청</button>
-                    {role === "ROLE_ADMIN" ?
+                    {displayText !== "승인 완료" ? role === "ROLE_ADMIN" ?
                         <button onClick={() => handleSave(1)} className="btn btn-secondary me-4" type="button">승 인</button>
                         :
                         role === "ROLE_TEAM_LEADER" ?
                             <button onClick={() => handleSave(2)} className="btn btn-secondary me-4" type="button">승인 요청</button>
                             :
                             <button onClick={() => handleSave(3)} className="btn btn-secondary me-4" type="button">승인 요청</button>
-                    }
+                    : null}
                     <h5 className="">상태 : {displayText} </h5>
                 </div>}
                 <div

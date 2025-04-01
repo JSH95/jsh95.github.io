@@ -74,7 +74,7 @@ const ScheduleCalendar = ({ schedules }) => {
     return (
         <div>
             <div  style={{ overflowX: 'auto', marginBottom: '20px' }}>
-                <div style={{ minWidth: '600px' }}>
+                <div style={{ minWidth: '900px' }}>
                     <FullCalendar
                         plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
                         initialView="dayGridMonth"

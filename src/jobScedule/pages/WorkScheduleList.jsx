@@ -231,10 +231,11 @@ const WorkScheduleList = () =>  {
                                     <button type="button" className="btn btn-danger" onClick={() => handleClickSummit(2)}>
                                         제출 취소
                                     </button>
-                                    :
-                                    <button type="button" className="btn btn-success" onClick={() => handleClickSummit(0)}>
-                                        근무표 제출
-                                    </button>
+                                    :  displayText === "승인 완료" ?
+                                   null
+                                 : <button type="button" className="btn btn-success" onClick={() => handleClickSummit(0)}>
+                                            근무표 제출
+                                        </button>
                             }
                         </>
                     }
@@ -260,7 +261,7 @@ const WorkScheduleList = () =>  {
                             <tr key={index} >
                                 <td className={day.styleClass}>
                                     {day.date}日 &nbsp;
-                                    {displayText === "제출 중" || displayText === "재제출 중"? null :
+                                    {displayText === "제출 중" || displayText === "재제출 중" || displayText === "승인 완료" ? null :
                                         <i className="bi bi-pencil-fill"
                                            onClick={() => handleClickEdit(day.key, displayText)}
                                         >

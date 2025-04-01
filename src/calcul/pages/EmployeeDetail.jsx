@@ -165,7 +165,7 @@ function EmployeeDetail() {
         const {password, id} = event.data;
         try{
           const axiosInstance = createAxiosInstance(); // 인스턴스 생성
-          await axiosInstance.post('/employees/password', null,{
+          await axiosInstance.post('/workScheduleAdmin/password', null,{
                 headers: {
                   "id": id,
                   "password": password,
@@ -174,7 +174,6 @@ function EmployeeDetail() {
             alert('비밀번호가 변경되었습니다.');
             window.location.reload(); // 부모 창 새로고침
         }catch (err) {
-          // console.error('비밀번호 변경 중 오류 발생:', err);
           alert('비밀번호 변경 중 오류가 발생했습니다.');
         }
       }

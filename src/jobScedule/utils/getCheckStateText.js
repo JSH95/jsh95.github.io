@@ -7,8 +7,12 @@ export const getCheckStateText = (checkStates) => {
         return "제출 중";
     } else if (checkStates.includes("신청중")) {
         return "제출 중";
+    } else if (checkStates.includes("확인완료")) {
+        return "확인 완료";
     } else if (checkStates.includes("승인완료")) {
         return "승인 완료";
+    }  else if (checkStates.includes("최종확인완료")) {
+        return "최종확인 완료";
     } else {
         return "미제출";
     }
