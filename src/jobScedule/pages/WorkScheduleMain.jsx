@@ -26,14 +26,13 @@ const WorkScheduleMain = () => {
         workPosition: "",
         workLocation: "",
         basicWorkTime: "",
+        flexTime: false,
         memo: "",
     });
     const [selectedFile, setSelectedFile] = useState(null);
     const [progress, setProgress] = useState(0); // 업로드 진행 상태
     const [uploading, setUploading] = useState(false);
     const [fileStatus, setFileStatus ] = useState(false);
-    const fileInputRef = useRef(null);
-
 
     // 기본 데이터 설정 (초기 실행)
     useEffect(() => {
@@ -57,25 +56,27 @@ const WorkScheduleMain = () => {
         }
         setSavedData((prev) => ({
             ...prev,
-            checkInTime: data.checkInTime,
-            checkOutTime: data.checkOutTime,
-            breakTimeIn: data.breakTimeIn,
-            breakTimeOut: data.breakTimeOut,
-            workLocation: data.workLocation,
-            workPosition: data.workPosition,
-            basicWorkTime: data.basicWorkTime,
+            checkInTime: data.checkInTime || "",
+            checkOutTime: data.checkOutTime || "",
+            breakTimeIn: data.breakTimeIn || "",
+            breakTimeOut: data.breakTimeOut || "",
+            workLocation: data.workLocation || "",
+            workPosition: data.workPosition || "",
+            basicWorkTime: data.basicWorkTime || "",
+            flexTime: data.flexTime || "",
             memo: "",
         }));
     }, [workData, data, today]);
 
     const handleStart = async (e) => {
         e.preventDefault();
-            if (savedData.checkInTime > data.checkInTime ||
+            if (!savedData.flexTime && savedData.checkInTime > data.checkInTime ||
                 savedData.checkOutTime < data.checkOutTime) {
                 if(savedData.memo.length === 0) {
                     window.alert("사유를 입력해주세요.");
                     return;
-                } if (savedData.memo.length < 5) {
+                }
+                if (savedData.memo.length > 0 && savedData.memo.length < 5) {
                     window.alert("사유가 너무 짧습니다. 5자 이상 입력해주세요.");
                     return;
                 }
@@ -86,7 +87,7 @@ const WorkScheduleMain = () => {
                     { ...prev, memo: ""}));
                 return;
             }
-            if(savedData.checkInTime > data.checkInTime && selectedFile === null && fileStatus === false) {
+            if(!savedData.flexTime && savedData.checkInTime > data.checkInTime && selectedFile === null && fileStatus === false) {
                 const confirmDelete = window.confirm("지연서 파일을 업로드 하지 않았습니다. \n 그래도 진행하시겠습니까?");
                 if (!confirmDelete) return;
             }
@@ -173,10 +174,10 @@ const WorkScheduleMain = () => {
                                 name="checkInTime"
                                 value={savedData.checkInTime || ""}
                                 onChange={handleChange}
+                                step="60"
                                 required
                             />
                         </div>
-
                         <div className="d-flex align-items-center gap-2 mb-3 text-nowrap">
                             <strong className="col-5">퇴근 시간 :</strong>
                             <input
@@ -188,7 +189,30 @@ const WorkScheduleMain = () => {
                                 required
                             />
                         </div>
-                        {(savedData.checkInTime > data.checkInTime || savedData.checkOutTime < data.checkOutTime) && (
+                        <div className="form-group row">
+                            <div className="row">
+                                <div className="col">
+                                        <strong className="col">플랙스 시간제</strong>
+                                </div>
+                                <div className="col">
+                                    <input
+                                        type="checkbox"
+                                        name="flexTime"
+                                        style={{marginTop: "0px"}}
+                                        className="form-check-input"
+                                        checked={savedData.flexTime}
+                                        onChange={(e) => {
+                                            setSavedData({
+                                                ...savedData,
+                                                flexTime: e.target.checked,
+                                            });
+                                        }
+                                    }
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                        {(!savedData.flexTime && savedData.checkInTime > data.checkInTime || savedData.checkOutTime < data.checkOutTime) && (
                             <>
                             <div className="d-flex align-items-center gap-2 mb-3">
                                 <strong className="col-3">사유 :</strong>
@@ -199,13 +223,14 @@ const WorkScheduleMain = () => {
                                     onChange={handleChange}
                                     placeholder="사유를 입력해 주세요."
                                     maxLength={40}
+                                    required = {!savedData.flexTime}
                                 />
                                 <small>{savedData.memo.length}/40</small>
                             </div>
 
                             </>
                         )}
-                        {savedData.checkInTime > data.checkInTime ? (
+                        {!savedData.flexTime &&savedData.checkInTime > data.checkInTime ? (
                             <div className="row-cols-1">
                                 {uploading && (
                                     <div style={{ marginBottom: "10px" }}>

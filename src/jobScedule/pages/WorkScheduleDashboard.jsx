@@ -30,6 +30,7 @@ function WorkScheduleDashboard (){
                         checkOutTime: "",
                         breakTimeIn: "",
                         breakTimeOut: "",
+                        flexTime: false,
                     };
                     setEditedItem(defaultData);
                     setIsEditing(false);
@@ -123,28 +124,6 @@ function WorkScheduleDashboard (){
                                             />
                                         </div>
                                     </div>
-                                    {/*<div>*/}
-                                    {/*    <label className="label">변경할 비밀번호</label>*/}
-                                    {/*    <div>*/}
-                                    {/*        <input*/}
-                                    {/*            className="input"*/}
-                                    {/*            type="password"*/}
-                                    {/*            name="passwordChange"*/}
-                                    {/*            value={editedItem.passwordChange}*/}
-                                    {/*            onChange={handleChange}*/}
-                                    {/*        />*/}
-                                    {/*    </div>*/}
-                                    {/*    <label className="label">비밀번호 확인</label>*/}
-                                    {/*    <div>*/}
-                                    {/*        <input*/}
-                                    {/*            className="input"*/}
-                                    {/*            type="passwordChange2"*/}
-                                    {/*            name="passwordChange2"*/}
-                                    {/*            value={editedItem.passwordChange}*/}
-                                    {/*            onChange={handleChange}*/}
-                                    {/*        />*/}
-                                    {/*    </div>*/}
-                                    {/*</div>*/}
                                     <div className="form-group">
                                         <label className="label">근무지</label>
                                         <div>
@@ -175,6 +154,27 @@ function WorkScheduleDashboard (){
                                             </select>
                                         </div>
                                     </div>
+                                        <div className="row">
+                                            <div className="col">
+                                                <label className="label">플랙스 시간제</label>
+                                            </div>
+                                            <div className="col">
+                                                <input
+                                                    type="checkbox"
+                                                    name="flexTime"
+                                                    className="form-check-input"
+                                                    style={{marginBottom: "5px" , marginTop: "0px"}}
+                                                    checked={editedItem.flexTime || false}
+                                                    onChange={(e) => {
+                                                        setEditedItem({
+                                                            ...editedItem,
+                                                            flexTime: e.target.checked,
+                                                        });
+                                                    }
+                                                    }
+                                                />
+                                            </div>
+                                        </div>
                                     <div className="form-group">
                                         <label className="label">기준 출근 시간</label>
                                         <div>

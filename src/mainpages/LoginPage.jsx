@@ -13,7 +13,7 @@ function LoginPage() {
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
-  const { login } = useAuth(); // AuthContext에서 setIsLoggedIn 가져오기
+  const { login , isLoggedIn, role } = useAuth(); // AuthContext에서 setIsLoggedIn 가져오기
   const [remember, setRemember] = useState(false);
 
 
@@ -22,6 +22,14 @@ function LoginPage() {
     if (savedUsername) {
       setUsername(savedUsername);
       setRemember(true);
+    }
+    if(isLoggedIn){
+      setIsLoading(true);
+      if (role === 'ROLE_ADMIN') {
+        navigate('/dashboard');
+      } else {
+        navigate('/workSchedule/main');
+      }
     }
   }, []);
 

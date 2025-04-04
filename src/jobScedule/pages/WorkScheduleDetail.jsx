@@ -52,6 +52,7 @@ function WorkScheduleDashboard (){
                 breakTimeOut: data.breakTimeOut,
                 workLocation: data.workLocation,
                 workPosition: data.workPosition,
+                flexTime: data.flexTime,
             };
             setItem(null);
             setEditedItem(newDefaultItem);
@@ -275,6 +276,29 @@ function WorkScheduleDashboard (){
                                     />
                                 </div>
                             </div>
+                            <div className="form-group row">
+                                <div className="row">
+                                    <div className="col">
+                                        <strong className="col">플랙스 시간제</strong>
+                                    </div>
+                                    <div className="col">
+                                        <input
+                                            type="checkbox"
+                                            name="flexTime"
+                                            style={{marginTop: "0px"}}
+                                            className="form-check-input"
+                                            checked={editedItem.flexTime}
+                                            onChange={(e) => {
+                                                setEditedItem({
+                                                    ...editedItem,
+                                                    flexTime: e.target.checked,
+                                                });
+                                            }
+                                            }
+                                        />
+                                    </div>
+                                </div>
+                            </div>
                             <div className="form-group">
                                 <label className="label">퇴근 날짜 / 시간</label>
                                 <div className="d-flex">
@@ -337,7 +361,7 @@ function WorkScheduleDashboard (){
                                 </select>
                             </div>
                             {editedItem.workType !== "출근" && editedItem.workType !== "휴일출근"
-                                || editedItem.checkInTime > data.checkInTime
+                                || (!editedItem.flexTime && editedItem.checkInTime > data.checkInTime)
                                 || editedItem.checkInDate !== editedItem.checkOutDate? (
                                 <div className="form-group">
                                     <label>사유</label>
@@ -396,7 +420,7 @@ function WorkScheduleDashboard (){
                                     onChange={handleInputChange}
                                 />
                             </div>
-                            {editedItem.checkInTime > data.checkInTime ? ( // 체크인 시간이 다르면 표시
+                            {(!editedItem.flexTime && editedItem.checkInTime > data.checkInTime) ? ( // 체크인 시간이 다르면 표시
                                 <>
                                     <label className="label">지연표를 업로드 해주세요</label>
                                     <div className="row-cols-1">

@@ -20,12 +20,14 @@ export const getEmployeeTypeText = (employeeType, status, exitDate) => {
 
   if (status == 0 && exitDate ==null) {
     switch (employeeType) {
-      case "CONTRACT":
-        return "계약직";
-      case "REGULAR":
-        return "정직원";
-      default:
-        return "알 수 없음";
+        case "CONTRACT":
+         return "계약직";
+        case "REGULAR":
+          return "정직원";
+        case "OTHERS":
+          return "기타";
+        default:
+          return "알 수 없음";
     }
   } else if (exitDateObject && exitDateObject > now) {
     // 퇴사 예정자

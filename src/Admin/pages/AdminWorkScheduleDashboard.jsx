@@ -5,7 +5,7 @@ import createAxiosInstance from "../../config/api";
 import {useNavigate} from "react-router-dom";
 import {useAuth} from "../../config/AuthContext";
 import holidayListData from "../../utils/holidayListData";
-
+import { calculateStatsForAllEmployees } from "../../utils/calculateStatsForAllEmployees";
 
 const AdminWorkScheduleDashboard = () => {
     const { username } = useAuth();
@@ -19,6 +19,7 @@ const AdminWorkScheduleDashboard = () => {
         const [hours, minutes] = timeStr.split(':').map(Number);
         return hours * 60 + minutes;
     };
+    const [allStats, setAllStats] = useState([]);
 
     function GetBusinessDays(year, month, holidays) {
         let businessDays = 0;
@@ -36,7 +37,6 @@ const AdminWorkScheduleDashboard = () => {
 
     useEffect(() => {
         const fetchData = async () => {
-
             try {
                 const japanHolidaysObject  = await holidayListData();
                 const japanHolidays = Object.keys(japanHolidaysObject);
@@ -44,10 +44,12 @@ const AdminWorkScheduleDashboard = () => {
                 const response = await axiosInstance.get(`/workSchedule/${year}/${month}`);
                 const filteredData = response.data.filter(
                     (entry) =>
-                        (entry.workType === '출근' || entry.workType === '휴일출근') &&
+                        // (entry.workType === '출근' || entry.workType === '휴일출근') &&
                         ((role === 'ROLE_ADMIN' ||role === 'ROLE_TEAM_LEADER')|| entry.employee.team.teamLeaderId === username) // 어드민이면 팀장 ID 조건 제거
                 );
-
+                setAllStats(calculateStatsForAllEmployees(filteredData, year, month));
+                console.log("data", calculateStatsForAllEmployees(filteredData));
+                console.log("data2", filteredData);
                 const employeeHours = {};
                 const basicWorkTime = {};
                 const usernames = {}; // 기존 username과 변수명 충돌 방지
@@ -72,7 +74,7 @@ const AdminWorkScheduleDashboard = () => {
                             (BasicBreakOutMinutes - BasicBreakInMinutes)
                         ) / 60
                     ).toFixed(1);
-                    const monthlyBasicWorkTime = (basicWorkTimeInHours * businessDaysInMonth).toFixed(1);
+                    const monthlyBasicWorkTime = ((basicWorkTimeInHours * businessDaysInMonth)).toFixed(0);
 
                     const workDuration = (checkOut - checkIn - (breakEnd - breakStart)) > 0
                         ? Math.floor((checkOut - checkIn - (breakEnd - breakStart)) / (1000 * 60 * 60))
@@ -182,7 +184,7 @@ const AdminWorkScheduleDashboard = () => {
                     <tr>
                         <th className="table-header" style={{ minWidth: '150px', whiteSpace: 'nowrap' }}>승인 단계</th>
                         <th className="table-header" style={{ minWidth: '150px', whiteSpace: 'nowrap' }}>이름</th>
-                        <th className="table-header" style={{ minWidth: '150px', whiteSpace: 'nowrap' }}>기본 근무시간</th>
+                        <th className="table-header" style={{ minWidth: '150px', whiteSpace: 'nowrap' }}>기본 근무시간(+40 시간)</th>
                         <th className="table-header" style={{ minWidth: '150px', whiteSpace: 'nowrap' }}>총 근무시간</th>
                         <th className="table-header" style={{ minWidth: '150px', whiteSpace: 'nowrap' }}>초과 근무시간</th>
                         <th className="table-header table-header-fixed"  style={{ minWidth: '200px', whiteSpace: 'nowrap' }}>
@@ -198,7 +200,9 @@ const AdminWorkScheduleDashboard = () => {
                     </tr>
                     </thead>
                     <tbody>
-                    {chartData.map((entry) => (
+                    {chartData
+                        .sort((a, b) => a.username.localeCompare(b.username))
+                        .map((entry) => (
                         <tr key={entry.username}>
                             <td className="table-data"> {entry.status}</td>
                             <td className="table-data" >
@@ -206,7 +210,7 @@ const AdminWorkScheduleDashboard = () => {
                                     {entry.username}
                                 </i>
                             </td>
-                            <td className="table-data"> {entry.basicWorkTime}</td>
+                            <td className="table-data"> {Number(entry.basicWorkTime) + 40}</td>
                             <td className="table-data"> {entry.hours}</td>
                             <td className="table-data"> {entry.hours - entry.basicWorkTime > 0 ? entry.hours - entry.basicWorkTime : "없음"}</td>
                             <td className="chart-cell">
@@ -229,8 +233,10 @@ const AdminWorkScheduleDashboard = () => {
                                         />
                                         <Bar dataKey="hours">
                                             <Cell fill={entry.hours >=
-                                            140 || entry.hours <=
-                                            entry.basicWorkTime ? "#c20000" : "#61e368"}
+                                            (Number(entry.basicWorkTime) + 40) ? "#0065ff"
+                                                : entry.hours >= Number(entry.basicWorkTime) ? "#61e368"
+                                                    : "#c20000"
+                                            }
                                             />
                                         </Bar>
                                     </BarChart>
@@ -241,6 +247,53 @@ const AdminWorkScheduleDashboard = () => {
                     </tbody>
                 </table>
             </div>
+
+            <div>
+                <h2>이번 달 직원별 근무 요약</h2>
+                <table border="1" cellPadding="8">
+                    <thead>
+                    <tr>
+                        <th>사원명</th>
+                        <th>出社日数</th>
+                        <th>実作業時間</th>
+                        <th>遅刻</th>
+                        <th>夜勤(時間)</th>
+                        <th>欠勤</th>
+                        <th>代休</th>
+                        <th>有給</th>
+                        <th>振休</th>
+                        <th>特別休</th>
+                        <th>慶弔休</th>
+                        <th>休出</th>
+                        <th>本社出勤</th>
+                        {/*<th>通勤費</th>*/}
+                        {/*<th>立替経費</th>*/}
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {allStats.map((s) => (
+                        <tr key={s.employee.id}>
+                            <td>{s.employee.name}</td>
+                            <td>{s.totalWorkDays}</td>
+                            <td>{s.totalWorkHours}</td>
+                            <td>{s.lateCount}</td>
+                            <td>{s.nightShiftHours}</td>
+                            <td>{s.absences}</td>
+                            <td>{s.substituteHolidays}</td>
+                            <td>{s.paidLeave}</td>
+                            <td>{s.dayOff}</td>
+                            <td>{s.specialLeave}</td>
+                            <td>{s.condolenceLeave}</td>
+                            <td>{s.holidayWork}</td>
+                            <td>{s.headOfficeAttendance}</td>
+                            {/*<td>{s.totalCommuteCost}</td>*/}
+                            {/*<td>{s.totalReimbursement}</td>*/}
+                        </tr>
+                    ))}
+                    </tbody>
+                </table>
+            </div>
+
         </div>
     );
 };

@@ -157,8 +157,9 @@ const EmployeeRegi = () => {
               <option value="" disabled>
                 직원 유형을 선택해 주세요
               </option>
-              <option value="CONTRACT">계약직</option>
               <option value="REGULAR">정규직</option>
+              <option value="CONTRACT">계약직</option>
+              <option value="OTHERS">기타</option>
             </select>
           </div>
           {formData.employeeType === "REGULAR" && (
@@ -186,6 +187,7 @@ const EmployeeRegi = () => {
               <option value="" disabled>
                 직급을 선택해 주세요
               </option>
+              <option value={5}>기타</option>
               <option value={0}>사원</option>
               <option value={1}>주임</option>
               <option value={2}>계장</option>

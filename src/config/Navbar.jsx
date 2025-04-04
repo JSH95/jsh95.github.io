@@ -71,7 +71,7 @@ const NavigationBar = () => {
 
     return (
         <nav className="navbar navbar-expand-lg bg-white fixed-top">
-          <div className="container mt-1 mb-1 py-0 px-5 ">
+          <div className="container mt-1 mb-1">
             <span className="navbar-brand"  onClick={handleLogoClick} style={{ cursor: "pointer" }}>
               <h1 className="text-dark fw-bold">
                 <img src={logoImage} alt="" style={{ height: "50px" }} />
@@ -189,6 +189,7 @@ const NavigationBar = () => {
                                          text-dark
                                          fw-bold
                                          "
+                                to="workSchedule/main"
                                 onClick={handleLinkClick}>근무기록</Link>
                         </li>
                         <li className="nav-item" >
@@ -207,20 +208,15 @@ const NavigationBar = () => {
                                 to="workSchedule/dashBoard"
                                 onClick={handleLinkClick}>근무표 기본 정보</Link>
                         </li>
-                        <li className="nav-item" >
-                          <Link className="nav-link
-                                         text-dark
-                                         fw-bold
-                                         "
-                                to="/admin/list"
-                                onClick={handleLinkClick}>근무표 관리</Link>
-                        </li>
                       </>
                   )}
                 </ul>
                 <div className="d-flex justify-content-end mt-2">
                   {isLoggedIn ?
                       <>
+                        <a href="https://sites.google.com/view/weavuswiki/%E7%A4%BE%E5%86%85%E6%97%A5%E7%A8%8B" target="_blank" rel="noopener noreferrer" className="btn btn-info">
+                          社内WIKI
+                        </a>
                         <button
                             onClick={() => handlePassword(username)}
                             className="btn btn-outline-light text-dark fw-bold"

@@ -1,7 +1,7 @@
 
 import React, {useCallback, useEffect, useState} from 'react';
 import {useNavigate} from "react-router-dom";
-import { Button } from "react-bootstrap";
+import {Button, Card, Table} from "react-bootstrap";
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import "../../config/index.css";
 import holidayListData from "../../utils/holidayListData";
@@ -10,8 +10,17 @@ import useWorkDefaultData from "../utils/WorkDataDefault";
 import {getCheckStateText} from "../utils/getCheckStateText";
 import createAxiosInstance from "../../config/api";
 import ScheduleMemoPopup from "../utils/ScheduleMemoPopup";
-const WorkScheduleList = () =>  {
+import * as PropTypes from "prop-types";
+import calculateWorkHours from "../../utils/calculateWorkHours";
+import {useAuth} from "../../config/AuthContext";
 
+function CardContent(props) {
+    return null;
+}
+
+CardContent.propTypes = {children: PropTypes.node};
+const WorkScheduleList = () =>  {
+        const { role, username } = useAuth();
         const today = new Date();
         const [year, setYear] = useState(today.getFullYear());
         const [month, setMonth] = useState(today.getMonth() + 1);
@@ -25,6 +34,13 @@ const WorkScheduleList = () =>  {
     const [modalOpen, setModalOpen] = useState(false);
 
     //     "2025-01-01": { attendanceType: "휴일", workType: "", checkInTime: "", checkOutTime: "", memo: "공휴일" },
+    useEffect(() => {
+        const calculatedData = async () => {
+            const calculatedData = await calculateWorkHours(year, month, role, username);
+            console.log("calculatedData", calculatedData);
+        }
+        calculatedData();
+    } , [year, month]);
 
     useEffect(() => {
         const fetchSchedule = async () => {
@@ -72,6 +88,8 @@ const WorkScheduleList = () =>  {
                         fileId : workType.fileId || "",
                         checkState: workType.workStatus || "",
                         checkMemo: workType.checkMemo || "",
+                        employeeId: workType.employeeId || "",
+                        employeeName: workType.employeeName || "",
                     };
                 });
                 setSchedule(newSchedule);
@@ -303,6 +321,95 @@ const WorkScheduleList = () =>  {
                         ))}
                         </tbody>
                     </table>
+                </div>
+                <div className="d-flex justify-content-center align-items-center mb-4">
+                    <div className="mt-4 p-4">
+                        <h2 className="text-xl font-semibold mb-4">근무 시간 요약</h2>
+                        <div className="row">
+                            <div className="col-md-4">
+                                <div className="card shadow-sm p-3">
+                                    <h5 className="card-title">기본 근무 정보</h5>
+                                    <ul className="list-group list-group-flush">
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>총 근무 시간</span>
+                                            <span>16:05</span>
+                                        </li>
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>실업시간</span>
+                                            <span>16:05</span>
+                                        </li>
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>소정 시간</span>
+                                            <span>162:45</span>
+                                        </li>
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>소정 내 근무 시간</span>
+                                            <span>15:26</span>
+                                        </li>
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>잔업 시간</span>
+                                            <span>0:39</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div className="col-md-4">
+                                <div className="card shadow-sm p-3">
+                                    <h5 className="card-title">법정 시간</h5>
+                                    <ul className="list-group list-group-flush">
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>법정내 시간외 노동시간</span>
+                                            <span>0:34</span>
+                                        </li>
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>법정시간 외 근무시간</span>
+                                            <span>0:05</span>
+                                        </li>
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>법정외 휴일 노동시간</span>
+                                            <span>0:00</span>
+                                        </li>
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>법정 휴일 근무 시간</span>
+                                            <span>0:00</span>
+                                        </li>
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>자정 근무 시간</span>
+                                            <span>0:00</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div className="col-md-4">
+                                <div className="card shadow-sm p-3">
+                                    <h5 className="card-title">휴일 및 휴가</h5>
+                                    <ul className="list-group list-group-flush">
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>공휴일 수</span>
+                                            <span>9.0일</span>
+                                        </li>
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>유급휴가 일수</span>
+                                            <span>0.0일</span>
+                                        </li>
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>오늘까지 유급휴가잔수</span>
+                                            <span>0.0일</span>
+                                        </li>
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>이체 휴일 일수</span>
+                                            <span>0.0일</span>
+                                        </li>
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>오늘까지 이체 휴일 잔수</span>
+                                            <span>0.0일</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         );

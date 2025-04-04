@@ -217,11 +217,11 @@ const EmployeeSettings = () => {
             {/*</div>*/}
 
             {/* 앱 테스트 알림 발송 버튼 */}
-            <div className="text-center mt-4">
-              <button className="btn btn-warning" onClick={handleMessage}>
-                App 테스트 알림 발송
-              </button>
-            </div>
+            {/*<div className="text-center mt-4">*/}
+            {/*  <button className="btn btn-warning" onClick={handleMessage}>*/}
+            {/*    App 테스트 알림 발송*/}
+            {/*  </button>*/}
+            {/*</div>*/}
           </div>
         </div>
       </div>

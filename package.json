@@ -4,7 +4,7 @@
   "description": "",
   "keywords": [],
   "main": "src/index.tsx",
-  "homepage": "https://jsh95.github.io",
+  "homepage": "./",
   "dependencies": {
     "@capacitor/android": "^7.0.1",
     "@capacitor/cli": "^7.0.1",
@@ -35,9 +35,11 @@
     "react-native": "^0.78.0",
     "react-router-dom": "7.0.2",
     "react-scripts": "^5.0.1",
+    "react-time-picker": "^7.0.0",
     "recharts": "^2.15.1",
     "styled-components": "6.1.13",
-    "tailwindcss": "^3.4.17"
+    "tailwindcss": "^3.4.17",
+    "zustand": "^5.0.3"
   },
   "devDependencies": {
     "@types/react": "19.0.0",
@@ -64,6 +66,5 @@
     "not dead",
     "not ie <= 11",
     "not op_mini all"
-  ],
-  "homepage" : "./"
+  ]
 }
