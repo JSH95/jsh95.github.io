@@ -4,7 +4,7 @@ import useWorkDefaultData from "../utils/WorkDataDefault";
 import useWorkData from "../utils/WorkData";
 import { useNavigate } from "react-router-dom";
 import "../../cssFiles/ScheduleMain.css";
-
+import {adjustTime} from "../utils/timeUtils";
 const WorkScheduleMain = () => {
     const today = new Date().toISOString().split("T")[0];
     const year = new Date(today).getFullYear();
@@ -93,8 +93,13 @@ const WorkScheduleMain = () => {
             }
 
             try {
+                const adjusted = adjustTime(savedData.checkOutTime);
+                const toSave = {
+                    ...savedData,
+                    checkOutTime: adjusted.time,
+                };
                 const axiosInstance = createAxiosInstance();
-                await axiosInstance.post("/workSchedule/save", savedData);
+                await axiosInstance.post("/workSchedule/save", toSave);
                 window.alert("출퇴근시간이 기록되었습니다.");
                 localStorage.setItem("fileStatus", JSON.stringify(false));
                 localStorage.removeItem("selectedFile");
@@ -166,41 +171,126 @@ const WorkScheduleMain = () => {
                         <h2>근무 출퇴근 기록</h2>
                     </div>
                     <div className="card-body">
-                        <div className="d-flex align-items-center gap-2 mb-3 my-2 text-nowrap">
-                            <strong className="col-5">출근 시간 :</strong>
-                            <input
-                                type="time"
-                                className="input"
-                                name="checkInTime"
-                                value={savedData.checkInTime || ""}
-                                onChange={handleChange}
-                                step="60"
-                                required
-                            />
+                        <div className="form-group">
+                            <div className="d-flex align-items-center justify-content-center gap-2 flex-nowrap">
+                                <strong >출근 시간</strong>
+                                <input
+                                    name="checkInDate"
+                                    type="date"
+                                    className="form-control"
+                                    style={{ maxWidth: "160px" }}
+                                    value={savedData.checkInDate || ""}
+                                    onChange={handleChange}
+                                    hidden={true}
+                                />
+                                <input
+                                    type="number"
+                                    min="00"
+                                    max="99"
+                                    className="form-control"
+                                    placeholder="시"
+                                    style={{ width: "80px" }}
+                                    value={savedData.checkInHour ?? (savedData.checkInTime?.split(":")[0] || "")}
+                                    onChange={(e) => {
+                                        const hour = e.target.value;
+                                        const minute = savedData.checkInMinute ?? savedData.checkInTime?.split(":")[1] ?? "00";
+                                        setSavedData((prev) => ({
+                                            ...prev,
+                                            checkInHour: hour,
+                                            checkInTime: `${hour.padStart(2, "0")}:${minute.padStart(2, "0")}`,
+                                        }));
+                                    }}
+                                />
+                                <span className="fs-5">:</span>
+                                <input
+                                    type="number"
+                                    min="00"
+                                    max="59"
+                                    className="form-control"
+                                    placeholder="분"
+                                    style={{ width: "80px" }}
+                                    value={savedData.checkInMinute ?? (savedData.checkInTime?.split(":")[1] || "")}
+                                    onChange={(e) => {
+                                        const minute = e.target.value;
+                                        const hour = savedData.checkInHour ?? savedData.checkInTime?.split(":")[0] ?? "00";
+                                        setSavedData((prev) => ({
+                                            ...prev,
+                                            checkInMinute: minute,
+                                            checkInTime: `${hour.padStart(2, "0")}:${minute.padStart(2, "0")}`,
+                                        }));
+                                    }}
+                                />
+                            </div>
                         </div>
-                        <div className="d-flex align-items-center gap-2 mb-3 text-nowrap">
-                            <strong className="col-5">퇴근 시간 :</strong>
-                            <input
-                                type="time"
-                                className="input"
-                                name="checkOutTime"
-                                value={savedData.checkOutTime || ""}
-                                onChange={handleChange}
-                                required
-                            />
+                        <div className="form-group">
+                            <div className="d-flex align-items-center justify-content-center gap-2 flex-nowrap">
+                                <strong >퇴근 시간</strong>
+                                <input
+                                    name="checkOutDate"
+                                    type="date"
+                                    className="form-control"
+                                    style={{ maxWidth: "160px" }}
+                                    value={savedData.checkOutDate || ""}
+                                    onChange={handleChange}
+                                    hidden={true}
+                                />
+                                <input
+                                    type="number"
+                                    min="0"
+                                    max="99"
+                                    className="form-control"
+                                    placeholder="시"
+                                    style={{ width: "80px" }}
+                                    value={savedData.checkOutHour ?? (savedData.checkOutTime?.split(":")[0] || "")}
+                                    onChange={(e) => {
+                                        const hour = e.target.value;
+                                        const minute = savedData.checkOutMinute ?? savedData.checkOutTime?.split(":")[1] ?? "00";
+                                        const checkOutDate = parseInt(hour) >= 24
+                                            ? new Date(new Date(savedData.checkInDate).getTime() + 86400000).toISOString().split("T")[0]
+                                            : savedData.checkInDate;
+
+                                        setSavedData((prev) => ({
+                                            ...prev,
+                                            checkOutHour: hour,
+                                            checkOutDate: checkOutDate,
+                                            checkOutTime: `${hour.padStart(2, "0")}:${minute.padStart(2, "0")}`,
+                                        }));
+                                    }}
+                                />
+                                <span className="fs-5">:</span>
+                                <input
+                                    type="number"
+                                    min="0"
+                                    max="59"
+                                    className="form-control"
+                                    placeholder="분"
+                                    style={{ width: "80px" }}
+                                    value={savedData.checkOutMinute ?? (savedData.checkOutTime?.split(":")[1] || "")}
+                                    onChange={(e) => {
+                                        const minute = e.target.value;
+                                        const hour = savedData.checkOutHour ?? savedData.checkOutTime?.split(":")[0] ?? "00";
+                                        const checkOutDate = parseInt(hour) >= 24
+                                            ? new Date(new Date(savedData.checkInDate).getTime() + 86400000).toISOString().split("T")[0]
+                                            : savedData.checkInDate;
+                                        setSavedData((prev) => ({
+                                            ...prev,
+                                            checkOutMinute: minute,
+                                            checkOutDate: checkOutDate,
+                                            checkOutTime: `${hour.padStart(2, "0")}:${minute.padStart(2, "0")}`,
+                                        }));
+                                    }}
+                                />
+                            </div>
                         </div>
                         <div className="form-group row">
-                            <div className="row">
-                                <div className="col">
-                                        <strong className="col">플랙스 시간제</strong>
-                                </div>
-                                <div className="col">
+                                <div className="d-flex align-items-center justify-content-center gap-2 flex-nowrap">
+                                    <strong >플랙스 시간제</strong>
                                     <input
                                         type="checkbox"
                                         name="flexTime"
                                         style={{marginTop: "0px"}}
                                         className="form-check-input"
-                                        checked={savedData.flexTime}
+                                        checked={savedData?.flexTime}
                                         onChange={(e) => {
                                             setSavedData({
                                                 ...savedData,
@@ -210,7 +300,6 @@ const WorkScheduleMain = () => {
                                     }
                                     />
                                 </div>
-                            </div>
                         </div>
                         {(!savedData.flexTime && savedData.checkInTime > data.checkInTime || savedData.checkOutTime < data.checkOutTime) && (
                             <>

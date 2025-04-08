@@ -3,6 +3,7 @@ import {useLocation, useNavigate, useParams} from "react-router-dom";
 import useWorkData from "../utils/WorkData";
 import createAxiosInstance from "../../config/api";
 import workDataDefault from "../utils/WorkDataDefault";
+import {adjustTime} from "../utils/timeUtils";
 
 function WorkScheduleDashboard (){
     const location = useLocation();
@@ -104,10 +105,16 @@ function WorkScheduleDashboard (){
                     || editedItem.checkInDate !== editedItem.checkOutDate)){
                     editedItem.memo = "";
                 }
+                const adjusted = adjustTime(editedItem.checkOutTime);
+                const toSave = {
+                    ...editedItem,
+                    checkOutTime: adjusted.time,
+                };
+
                 const axiosInstance = createAxiosInstance(); // 인스턴스 생성
                 await axiosInstance.post(
                     "/workSchedule/save",
-                    editedItem
+                    toSave
                 );
                 setItem(editedItem);
                 setEditedItem(editedItem);
@@ -263,7 +270,7 @@ function WorkScheduleDashboard (){
                                     <input
                                         type="number"
                                         min="00"
-                                        max="99"
+                                        max="23"
                                         className="form-control"
                                         placeholder="시"
                                         style={{ width: "80px" }}
@@ -347,7 +354,7 @@ function WorkScheduleDashboard (){
                                             const minute = editedItem.checkOutMinute ?? editedItem.checkOutTime?.split(":")[1] ?? "00";
                                             const checkOutDate = parseInt(hour) >= 24
                                                 ? new Date(new Date(editedItem.checkInDate).getTime() + 86400000).toISOString().split("T")[0]
-                                                : editedItem.checkInDate;
+                                                : editedItem.checkOutDate;
 
                                             setEditedItem((prev) => ({
                                                 ...prev,
@@ -369,20 +376,15 @@ function WorkScheduleDashboard (){
                                         onChange={(e) => {
                                             const minute = e.target.value;
                                             const hour = editedItem.checkOutHour ?? editedItem.checkOutTime?.split(":")[0] ?? "00";
-                                            const checkOutDate = parseInt(hour) >= 24
-                                                ? new Date(new Date(editedItem.checkInDate).getTime() + 86400000).toISOString().split("T")[0]
-                                                : editedItem.checkInDate;
                                             setEditedItem((prev) => ({
                                                 ...prev,
                                                 checkOutMinute: minute,
-                                                checkOutDate: checkOutDate,
                                                 checkOutTime: `${hour.padStart(2, "0")}:${minute.padStart(2, "0")}`,
                                             }));
                                         }}
                                     />
                                 </div>
                             </div>
-
                             <div className="form-group">
                                 <label className="label">휴게시간</label>
                                 <div className="d-flex">
@@ -427,11 +429,7 @@ function WorkScheduleDashboard (){
                             </div>
                             {item?.memo || editedItem.workType !== "출근" && editedItem.workType !== "휴일출근"
                                 || (!editedItem.flexTime && editedItem.checkInTime > data.checkInTime)
-                            || (
-                                editedItem.workType === "출근" &&
-                                editedItem.checkInDate !== editedItem.checkOutDate &&
-                                parseInt(editedItem.checkOutHour || editedItem.checkOutTime?.split(":")[0] || 0) < 24
-                            ) ? (
+                                ? (
                                 <div className="form-group">
                                     <label>사유</label>
                                     <textarea
