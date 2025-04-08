@@ -32,12 +32,14 @@ const WorkScheduleList = () =>  {
     const workDefaultData = useWorkDefaultData();
     const [displayText, setDisplayText] = useState("");
     const [modalOpen, setModalOpen] = useState(false);
+    const [workTime, setWorkTime] = useState({});
 
     //     "2025-01-01": { attendanceType: "휴일", workType: "", checkInTime: "", checkOutTime: "", memo: "공휴일" },
     useEffect(() => {
         const calculatedData = async () => {
             const calculatedData = await calculateWorkHours(year, month, role, username);
             console.log("calculatedData", calculatedData);
+            setWorkTime(calculatedData[0]);
         }
         calculatedData();
     } , [year, month]);
@@ -129,7 +131,14 @@ const WorkScheduleList = () =>  {
     }
 
     const handleClickEdit = (date) => {
-        navigate(`/workSchedule/detail/${date}`);
+        if(workDataList?.workData[date] === undefined) {
+            navigate(`/workSchedule/detail/${date}`, {
+                state: { isEditing: true }
+            });
+        } else {
+            navigate(`/workSchedule/detail/${date}`);
+        }
+
     }
 
     const checkStatesHandle = useCallback((schedule) => {
@@ -250,7 +259,7 @@ const WorkScheduleList = () =>  {
                                         제출 취소
                                     </button>
                                     :  displayText === "승인 완료" ?
-                                   null
+                                        <i class="bi bi-calendar-check"> 승인완료</i>
                                  : <button type="button" className="btn btn-success" onClick={() => handleClickSummit(0)}>
                                             근무표 제출
                                         </button>
@@ -290,7 +299,7 @@ const WorkScheduleList = () =>  {
                                 <td className={day.styleClass}>{day.workType} </td>
                                 <td className={day.styleClass}>{day.workPosition}</td>
                                 <td className={day.styleClass}>
-                                    {day.workType !== "출근" && day.workType !== "휴일출근" ? "-" : day.checkInTime}
+                                    {day.workType !== "유급휴가" && day.workType !== "출근" && day.workType !== "휴일출근" ? "-" : day.checkInTime}
                                 </td>
                                 <td className={day.styleClass}
                                     style={(day.checkOutDate !== day.key)  ?
@@ -298,7 +307,7 @@ const WorkScheduleList = () =>  {
                                         : {}}
                                 >
 
-                                    {day.workType !== "출근" && day.workType !== "휴일출근" ? "-" :
+                                    {day.workType !== "유급휴가" && day.workType !== "출근" && day.workType !== "휴일출근" ? "-" :
                                         (day.checkOutTime ? ((day.checkOutDate !== day.key)  ?
                                         "次の日 " : "" )
                                         : "" )
@@ -324,7 +333,7 @@ const WorkScheduleList = () =>  {
                 </div>
                 <div className="d-flex justify-content-center align-items-center mb-4">
                     <div className="mt-4 p-4">
-                        <h2 className="text-xl font-semibold mb-4">근무 시간 요약</h2>
+                        <h2 className="text-xl font-semibold mb-4">근무 시간 요약(테스트 중)</h2>
                         <div className="row">
                             <div className="col-md-4">
                                 <div className="card shadow-sm p-3">
@@ -332,7 +341,7 @@ const WorkScheduleList = () =>  {
                                     <ul className="list-group list-group-flush">
                                         <li className="list-group-item d-flex justify-content-between">
                                             <span>총 근무 시간</span>
-                                            <span>16:05</span>
+                                            <span>{workTime?.hours + " h" || "Loading..."}</span>
                                         </li>
                                         <li className="list-group-item d-flex justify-content-between">
                                             <span>실업시간</span>

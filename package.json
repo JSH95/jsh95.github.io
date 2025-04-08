@@ -29,6 +29,7 @@
     "dialog": "^0.3.1",
     "firebase": "^11.4.0",
     "gapi-script": "^1.2.0",
+    "jwt-decode": "^4.0.0",
     "react": "^19.0.0",
     "react-bootstrap": "^2.10.8",
     "react-dom": "^19.0.0",

@@ -51,12 +51,13 @@ function LoginPage() {
       const {
         success,
         message,
-        token, // 토큰은 이제 사용되지 않음
+        token,
         role,
         username: responseUsername,
+        serverTime,
       } = response.data;
       if (success) {
-        login(token, role, responseUsername); // 로그인 시 토큰을 저장하지만, 여기서는 토큰을 상태에 저장하지 않음
+        login(token, role, responseUsername, serverTime); // 로그인 시 토큰을 저장하지만, 여기서는 토큰을 상태에 저장하지 않음
         if (role === 'ROLE_ADMIN') {
           navigate('/dashboard');
         } else {

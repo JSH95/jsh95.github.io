@@ -1,11 +1,14 @@
 import React, {useCallback, useEffect, useState} from "react";
-import { useNavigate, useParams} from "react-router-dom";
+import {useLocation, useNavigate, useParams} from "react-router-dom";
 import useWorkData from "../utils/WorkData";
 import createAxiosInstance from "../../config/api";
 import workDataDefault from "../utils/WorkDataDefault";
-import {getCheckStateText} from "../utils/getCheckStateText";
+import {adjustTime} from "../utils/timeUtils";
 
 function WorkScheduleDashboard (){
+    const location = useLocation();
+    const fromState = location.state || {};
+
     const { date } = useParams();
     const year = new Date(date).getFullYear();
     const month = new Date(date).getMonth()+ 1;
@@ -13,7 +16,7 @@ function WorkScheduleDashboard (){
     const [item, setItem] = useState({});
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("")
-    const [isEditing, setIsEditing] = useState(false);
+    const [isEditing, setIsEditing] = useState(!!fromState.isEditing);
     const [editedItem, setEditedItem] = useState({});
     const [uploading, setUploading] = useState(false);
     const [selectedFile, setSelectedFile] = useState(null);
@@ -32,44 +35,36 @@ function WorkScheduleDashboard (){
         workPosition: "",
         workLocation: "",
         memo: "",
+        flexTime: false,
         });
 
-    useEffect(() => {
-        dataLoging();
-        }, [data, workData?.workData[date]]);
 
-    const dataLoging = async () => {
+
+    const dataLoading = async () => {
+        setLoading(true);
         if (workData.workData[date]) {
             setItem(workData.workData[date]);
             setEditedItem(workData.workData[date]);
-
         } else {
             const newDefaultItem = {
                 ...defaultItem,
-                checkInTime: data.checkInTime,
-                checkOutTime: data.checkOutTime,
-                breakTimeIn: data.breakTimeIn,
-                breakTimeOut: data.breakTimeOut,
-                workLocation: data.workLocation,
-                workPosition: data.workPosition,
-                flexTime: data.flexTime,
+                checkInTime: data.checkInTime || "",
+                checkOutTime: data.checkOutTime|| "",
+                breakTimeIn: data.breakTimeIn|| "",
+                breakTimeOut: data.breakTimeOut|| "",
+                workLocation: data.workLocation|| "",
+                workPosition: data.workPosition|| "",
+                flexTime: data.flexTime|| false,
             };
             setItem(null);
             setEditedItem(newDefaultItem);
         }
     }
-
     useEffect(() => {
-        dataEditing();
-    }, [workData?.workData]);  // workData가 변경될 때마다 실행
-
-    const dataEditing = async () => {
-        if (!workData.workData[date] || workData.workData[date].isEmpty) {
-            setIsEditing(true);
-        } else {
-            setIsEditing(false);  // 데이터가 있으면 편집 상태를 false로 설정
-        }
-    }
+        dataLoading().then(r => {
+            setLoading(false);
+        });
+    }, [data, workData?.workData[date]]);
 
     function handleClickBack() {
         navigate("/workSchedule/list");
@@ -78,7 +73,7 @@ function WorkScheduleDashboard (){
         setIsEditing(true);
     };
     function handleCancelClick() {
-        if(!item || item.isEmpty){
+        if (!item || Object.keys(item).length === 0) {
             navigate("/workSchedule/list");
         } else {
             setIsEditing(false);
@@ -102,7 +97,7 @@ function WorkScheduleDashboard (){
             setLoading(true);
             setError("");
             try {
-                if(editedItem.workType !== "출근" && editedItem.workType !== "휴일출근"){
+                if(editedItem.workType !== "유급휴가" && editedItem.workType !== "출근" && editedItem.workType !== "휴일출근"){
                     editedItem.workPosition = "휴가";
                 }
                 if(!(editedItem.workType !== "출근" && editedItem.workType !== "휴일출근"
@@ -110,10 +105,16 @@ function WorkScheduleDashboard (){
                     || editedItem.checkInDate !== editedItem.checkOutDate)){
                     editedItem.memo = "";
                 }
+                const adjusted = adjustTime(editedItem.checkOutTime);
+                const toSave = {
+                    ...editedItem,
+                    checkOutTime: adjusted.time,
+                };
+
                 const axiosInstance = createAxiosInstance(); // 인스턴스 생성
                 await axiosInstance.post(
                     "/workSchedule/save",
-                    editedItem
+                    toSave
                 );
                 setItem(editedItem);
                 setEditedItem(editedItem);
@@ -237,7 +238,7 @@ function WorkScheduleDashboard (){
     if (error) return <div>{error}</div>;
     return (
         <div className="container d-flex justify-content-center align-items-center flex-column">
-            <div className="card">
+            <div className="card" style={{ width: '100%', maxWidth: '600px', minHeight: '500px' }}>
                 <form onSubmit={handleSubmit}>
                 <div className="card-header">
                     <h3>근무표 상세 페이지</h3>
@@ -257,25 +258,55 @@ function WorkScheduleDashboard (){
                             </div>
                             <div className="form-group">
                                 <label className="label">출근 날짜 / 시간</label>
-                                <div className="d-flex">
+                                <div className="d-flex align-items-center justify-content-start gap-2 flex-nowrap">
                                     <input
                                         name="checkInDate"
                                         type="date"
-                                        className="input"
-                                        value={editedItem.checkInDate  || ""}
+                                        className="form-control"
+                                        style={{ maxWidth: "160px" }}
+                                        value={editedItem.checkInDate || ""}
                                         onChange={handleInputChange}
-
                                     />
                                     <input
-                                        name="checkInTime"
-                                        type="time"
-                                        className="input"
-                                        value={editedItem.checkInTime  || ""}
-                                        onChange={handleInputChange}
-
+                                        type="number"
+                                        min="00"
+                                        max="23"
+                                        className="form-control"
+                                        placeholder="시"
+                                        style={{ width: "80px" }}
+                                        value={editedItem.checkInHour ?? (editedItem.checkInTime?.split(":")[0] || "")}
+                                        onChange={(e) => {
+                                            const hour = e.target.value;
+                                            const minute = editedItem.checkInMinute ?? editedItem.checkInTime?.split(":")[1] ?? "00";
+                                            setEditedItem((prev) => ({
+                                                ...prev,
+                                                checkInHour: hour,
+                                                checkInTime: `${hour.padStart(2, "0")}:${minute.padStart(2, "0")}`,
+                                            }));
+                                        }}
+                                    />
+                                    <span className="fs-5">:</span>
+                                    <input
+                                        type="number"
+                                        min="00"
+                                        max="59"
+                                        className="form-control"
+                                        placeholder="분"
+                                        style={{ width: "80px" }}
+                                        value={editedItem.checkInMinute ?? (editedItem.checkInTime?.split(":")[1] || "")}
+                                        onChange={(e) => {
+                                            const minute = e.target.value;
+                                            const hour = editedItem.checkInHour ?? editedItem.checkInTime?.split(":")[0] ?? "00";
+                                            setEditedItem((prev) => ({
+                                                ...prev,
+                                                checkInMinute: minute,
+                                                checkInTime: `${hour.padStart(2, "0")}:${minute.padStart(2, "0")}`,
+                                            }));
+                                        }}
                                     />
                                 </div>
                             </div>
+
                             <div className="form-group row">
                                 <div className="row">
                                     <div className="col">
@@ -301,20 +332,56 @@ function WorkScheduleDashboard (){
                             </div>
                             <div className="form-group">
                                 <label className="label">퇴근 날짜 / 시간</label>
-                                <div className="d-flex">
+                                <div className="d-flex align-items-center justify-content-start gap-2 flex-nowrap">
                                     <input
                                         name="checkOutDate"
                                         type="date"
-                                        className="input"
-                                        value={editedItem.checkOutDate  || ""}
+                                        className="form-control"
+                                        style={{ maxWidth: "160px" }}
+                                        value={editedItem.checkOutDate || ""}
                                         onChange={handleInputChange}
                                     />
                                     <input
-                                        name="checkOutTime"
-                                        type="time"
-                                        className="input"
-                                        value={editedItem.checkOutTime  || ""}
-                                        onChange={handleInputChange}
+                                        type="number"
+                                        min="0"
+                                        max="99"
+                                        className="form-control"
+                                        placeholder="시"
+                                        style={{ width: "80px" }}
+                                        value={editedItem.checkOutHour ?? (editedItem.checkOutTime?.split(":")[0] || "")}
+                                        onChange={(e) => {
+                                            const hour = e.target.value;
+                                            const minute = editedItem.checkOutMinute ?? editedItem.checkOutTime?.split(":")[1] ?? "00";
+                                            const checkOutDate = parseInt(hour) >= 24
+                                                ? new Date(new Date(editedItem.checkInDate).getTime() + 86400000).toISOString().split("T")[0]
+                                                : editedItem.checkOutDate;
+
+                                            setEditedItem((prev) => ({
+                                                ...prev,
+                                                checkOutHour: hour,
+                                                checkOutDate: checkOutDate,
+                                                checkOutTime: `${hour.padStart(2, "0")}:${minute.padStart(2, "0")}`,
+                                            }));
+                                        }}
+                                    />
+                                    <span className="fs-5">:</span>
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        max="59"
+                                        className="form-control"
+                                        placeholder="분"
+                                        style={{ width: "80px" }}
+                                        value={editedItem.checkOutMinute ?? (editedItem.checkOutTime?.split(":")[1] || "")}
+                                        onChange={(e) => {
+                                            const minute = e.target.value;
+                                            const hour = editedItem.checkOutHour ?? editedItem.checkOutTime?.split(":")[0] ?? "00";
+                                            setEditedItem((prev) => ({
+                                                ...prev,
+                                                checkOutMinute: minute,
+                                                checkOutTime: `${hour.padStart(2, "0")}:${minute.padStart(2, "0")}`,
+                                            }));
+                                        }}
                                     />
                                 </div>
                             </div>
@@ -360,19 +427,19 @@ function WorkScheduleDashboard (){
                                     <option value="휴일출근">휴일출근</option>
                                 </select>
                             </div>
-                            {editedItem.workType !== "출근" && editedItem.workType !== "휴일출근"
+                            {item?.memo || editedItem.workType !== "출근" && editedItem.workType !== "휴일출근"
                                 || (!editedItem.flexTime && editedItem.checkInTime > data.checkInTime)
-                                || editedItem.checkInDate !== editedItem.checkOutDate? (
+                                ? (
                                 <div className="form-group">
                                     <label>사유</label>
-                                    <input
+                                    <textarea
                                         name="memo"
-                                        type="text"
+                                        // type="text"
                                         className="input"
                                         placeholder="사유를 입력해 주세요."
                                         value={editedItem.memo  || ""}
                                         onChange={handleInputChange}
-                                        required
+                                        required={editedItem.flexTime}
                                     />
                                 </div>
                             ) : (
@@ -388,7 +455,7 @@ function WorkScheduleDashboard (){
                                         />
                                     </>
                             )}
-                                    {editedItem.workType !== "출근" && editedItem.workType !== "휴일출근"? (
+                                    {editedItem.workType !== "유급휴가" && editedItem.workType !== "출근" && editedItem.workType !== "휴일출근"? (
                                         <></>
                                             ) : (
                                         <div className="form-group">
@@ -406,6 +473,7 @@ function WorkScheduleDashboard (){
                                                     <option value="현장">현장</option>
                                                     <option value="본사">본사</option>
                                                     <option value="재택근무">재택근무</option>
+                                                    <option value="휴가">휴가</option>
                                                 </>
                                             </select>
                                         </div>
@@ -477,100 +545,76 @@ function WorkScheduleDashboard (){
                             <>
                                 <div className="form-group">
                                     <label className="label">출퇴근 시간</label>
-                                    <div className="d-flex">
-                                        <input
-                                            type="text"
-                                            className="input"
-                                            value={item?.checkInTime || defaultItem.checkInTime}
-                                            readOnly
-                                        />
-                                        <span> ~ </span>
-                                        <input
-                                            type="text"
-                                            className="input"
-                                            value={item.checkOutDate !== item.checkInDate  ?
-                                                        "次の日 " + item.checkOutTime : item.checkOutTime || ""
-                                            }
-                                            readOnly
-                                        />
+                                    <div className="d-flex justify-content-center align-items-center">
+                                        <span className="form-control-plaintext me-2">
+                                          {item?.checkInTime || defaultItem.checkInTime}
+                                        </span>
+                                        <span className="text-gray-500 me-2 fs-5"> ~ </span>
+                                        <span className="form-control-plaintext">
+                                          {item?.checkOutDate !== item?.checkInDate ? "次の日 " + item?.checkOutTime : item?.checkOutTime || ""}
+                                        </span>
                                     </div>
                                 </div>
+
                                 <div className="form-group">
                                     <label className="label">휴게시간</label>
-                                    <div className="d-flex">
-                                        <input
-                                            type="text"
-                                            className="input"
-                                            value={item?.breakTimeIn || defaultItem.breakTimeIn}
-                                            readOnly
-                                        />
+                                    <div className="d-flex justify-content-center align-items-center">
+                                        <span className="form-control-plaintext me-2">
+                                          {item?.breakTimeIn || defaultItem.breakTimeIn}
+                                        </span>
                                         <span className="text-gray-500 me-2 fs-5"> ~ </span>
-                                        <input
-                                            type="text"
-                                            className="input"
-                                            value={item?.breakTimeOut|| defaultItem.breakTimeOut}
-                                            readOnly
-                                        />
+                                        <span className="form-control-plaintext">
+                                          {item?.breakTimeOut || defaultItem.breakTimeOut}
+                                        </span>
                                     </div>
                                 </div>
                                 <div className="form-group">
                                     <label className="label">근무 유형</label>
-                                    <input
-                                        type="text"
-                                        className="input"
-                                        value={item?.workType|| defaultItem.workType}
-                                        readOnly
-                                    />
+                                    <span className="form-control-plaintext">
+                                        {item?.workType || defaultItem.workType}
+                                      </span>
                                 </div>
                                 <div className="form-group">
                                     <label className="label">근태 유형</label>
-                                    <input
-                                        type="text"
-                                        className="input"
-                                        value={item?.workPosition|| defaultItem.workPosition}
-                                        readOnly
-                                    />
+                                    <span className="form-control-plaintext">
+                                        {item?.workPosition || defaultItem.workPosition}
+                                    </span>
                                 </div>
                                 <div className="form-group">
                                     <label className="label">근무지</label>
-                                    <input
-                                        type="text"
-                                        className="input"
-                                        value={item?.workLocation|| defaultItem.workLocation}
-                                        readOnly
-                                    />
+                                    <span className="form-control-plaintext">
+                                        {item?.workLocation || defaultItem.workLocation}
+                                    </span>
                                 </div>
-                                {item?.memo ? (<div className="form-group">
-                                    <label>사유</label>
-                                    <input
-                                        type="text"
-                                        className="input"
-                                        value={item?.memo || defaultItem.checkInTime}
-                                        readOnly
-                                    />
-                                </div>
-                                ) : (null)}
-                                {item?.fileId ? (
+                                {item?.memo && (
+                                    <div className="form-group">
+                                        <label>사유</label>
+                                        <span className="form-control-plaintext">
+                                            {item?.memo || defaultItem.checkInTime}
+                                        </span>
+                                    </div>
+                                )}
+                                { item?.fileId ? (
                                     <div className="form-group">
                                         <label>지연표 업로드 내역</label>
                                         <span>
-                                            <a href={item.fileUrl} target="_blank" rel="noreferrer">
-                                                {item.fileName.split("_").pop()}
+                                            <a href={item?.fileUrl} target="_blank" rel="noreferrer">
+                                                {item?.fileName.split("_").pop()}
                                             </a>
                                             &nbsp;
-                                            <i className="bi bi-trash-fill"
-                                               onClick={() => handleClickDelete(
-                                                   item.fileId, item.fileName
-                                               )}></i>
+                                            <i
+                                                className="bi bi-trash-fill"
+                                                onClick={() => handleClickDelete(item?.fileId, item?.fileName)}
+                                            ></i>
                                         </span>
                                     </div>
-                                    ) :
-                                     (<>
-                                         {item.checkInTime !== data.checkInTime ? ( // 체크인 시간이 다르면 표시
-                                             <label>지연표를 업로드 해주세요</label>
-                                         ) : null}
-                                    </>)
-                                }
+                                ) : (
+                                    <>
+                                        {!item?.flexTime && item?.checkInTime !== data.checkInTime && (
+                                            <label>지연표를 업로드 해주세요</label>
+                                        )}
+                                    </>
+                                )}
                             </>
                     )}
                 </div>

@@ -249,7 +249,7 @@ const AdminWorkScheduleDashboard = () => {
             </div>
 
             <div>
-                <h2>이번 달 직원별 근무 요약</h2>
+                <h2>이번 달 직원별 근무 요약(테스트 중)</h2>
                 <table border="1" cellPadding="8">
                     <thead>
                     <tr>
@@ -266,8 +266,6 @@ const AdminWorkScheduleDashboard = () => {
                         <th>慶弔休</th>
                         <th>休出</th>
                         <th>本社出勤</th>
-                        {/*<th>通勤費</th>*/}
-                        {/*<th>立替経費</th>*/}
                     </tr>
                     </thead>
                     <tbody>
@@ -286,14 +284,11 @@ const AdminWorkScheduleDashboard = () => {
                             <td>{s.condolenceLeave}</td>
                             <td>{s.holidayWork}</td>
                             <td>{s.headOfficeAttendance}</td>
-                            {/*<td>{s.totalCommuteCost}</td>*/}
-                            {/*<td>{s.totalReimbursement}</td>*/}
                         </tr>
                     ))}
                     </tbody>
                 </table>
             </div>
-
         </div>
     );
 };
