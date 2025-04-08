@@ -63,7 +63,7 @@ const WorkScheduleMain = () => {
             workLocation: data.workLocation || "",
             workPosition: data.workPosition || "",
             basicWorkTime: data.basicWorkTime || "",
-            flexTime: data.flexTime || "",
+            flexTime: data.flexTime || false,
             memo: "",
         }));
     }, [workData, data, today]);

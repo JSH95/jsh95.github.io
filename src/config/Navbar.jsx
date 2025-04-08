@@ -10,9 +10,29 @@ import ChangePassword from "../calcul/utils/passwordChange";
 const NavigationBar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate(); // useNavigate 훅 사용
-  const { isLoggedIn, logout, role, username} = useAuth(); // useAuth 훅을 사용하여 로그인 상태와 logout 함수 가져오기
+  const { isLoggedIn, logout, role, username, expirationTime } = useAuth(); // useAuth 훅을 사용하여 로그인 상태와 logout 함수 가져오기
   const [showModal, setShowModal] = useState(false);
   const [employeeId, setEmployeeId] = useState(null);
+  const [timeLeft, setTimeLeft] = useState(0);
+
+  useEffect(() => {
+    const updateTimeLeft = () => {
+      if (expirationTime) {
+        const remaining = parseInt(expirationTime, 10) - new Date().getTime();
+        setTimeLeft(remaining > 0 ? remaining : 0);
+      }
+    };
+    updateTimeLeft();
+
+    // 1초마다 남은 시간 업데이트
+    const intervalId = setInterval(updateTimeLeft, 1000);
+
+    // 컴포넌트 언마운트 시 인터벌 클리어
+    return () => clearInterval(intervalId);
+  }, [expirationTime]);
+
+  const minutes = Math.floor(timeLeft / 60000);
+  const seconds = Math.floor((timeLeft % 60000) / 1000);
 
   // 메뉴 열고 닫기
   const toggleMenu = () => {
@@ -85,7 +105,7 @@ const NavigationBar = () => {
                   {isLoggedIn && role === "ROLE_ADMIN" && (
                       <>
                         <Dropdown>
-                          <Dropdown.Toggle variant="link" className="nav-link text-dark fw-bold">
+                          <Dropdown.Toggle variant="link" className="nav-link text-dark fw-bold text-nowrap">
                             근무표
                           </Dropdown.Toggle>
                           <Dropdown.Menu>
@@ -98,7 +118,7 @@ const NavigationBar = () => {
                           <Link className="nav-link
                                          text-dark
                                          fw-bold
-                                         "
+                                         text-nowrap"
                                 to="/personnel/dashboard"
                                 onClick={handleLinkClick}>인사관리</Link>
                         </li>
@@ -106,7 +126,7 @@ const NavigationBar = () => {
                           <Link className="nav-link
                                          text-dark
                                          fw-bold
-                                         "
+                                         text-nowrap"
                                 to="/dashboard"
                                 onClick={handleLinkClick}>퇴직금 현황</Link>
                         </li>
@@ -114,7 +134,7 @@ const NavigationBar = () => {
                           <Link className="nav-link
                                          text-dark
                                          fw-bold
-                                         "
+                                         text-nowrap"
                                 to="/year/dashboard"
                                 onClick={handleLinkClick}>퇴직금 검색</Link>
                         </li>
@@ -122,7 +142,7 @@ const NavigationBar = () => {
                           <Link className="nav-link
                                          text-dark
                                          fw-bold
-                                         "
+                                         text-nowrap"
                                 to="/employee"
                                 onClick={handleLinkClick}>사원 등록</Link>
                         </li>
@@ -130,7 +150,7 @@ const NavigationBar = () => {
                           <Link className="nav-link
                                          text-dark
                                          fw-bold
-                                         "
+                                         text-nowrap"
                                 to="/admin"
                                 onClick={handleLinkClick}>관리자페이지</Link>
                         </li>
@@ -152,7 +172,7 @@ const NavigationBar = () => {
                           <Link className="nav-link
                                          text-dark
                                          fw-bold
-                                         "
+                                         text-nowrap"
                                 to="/workSchedule/main"
                                 onClick={handleLinkClick}>근무기록</Link>
                         </li>
@@ -160,7 +180,7 @@ const NavigationBar = () => {
                           <Link className="nav-link
                                          text-dark
                                          fw-bold
-                                         "
+                                         text-nowrap"
                                 to="workSchedule/list"
                                 onClick={handleLinkClick}>근무표 일람</Link>
                         </li>
@@ -168,7 +188,7 @@ const NavigationBar = () => {
                           <Link className="nav-link
                                          text-dark
                                          fw-bold
-                                         "
+                                         text-nowrap"
                                 to="workSchedule/dashBoard"
                                 onClick={handleLinkClick}>근무표 기본 정보</Link>
                         </li>
@@ -176,7 +196,7 @@ const NavigationBar = () => {
                           <Link className="nav-link
                                          text-dark
                                          fw-bold
-                                         "
+                                         text-nowrap"
                                 to="/admin/list"
                                 onClick={handleLinkClick}>근무표 관리</Link>
                         </li>
@@ -188,7 +208,7 @@ const NavigationBar = () => {
                           <Link className="nav-link
                                          text-dark
                                          fw-bold
-                                         "
+                                         text-nowrap"
                                 to="workSchedule/main"
                                 onClick={handleLinkClick}>근무기록</Link>
                         </li>
@@ -196,7 +216,7 @@ const NavigationBar = () => {
                           <Link className="nav-link
                                          text-dark
                                          fw-bold
-                                         "
+                                         text-nowrap"
                                 to="workSchedule/list"
                                 onClick={handleLinkClick}>근무표 일람</Link>
                         </li>
@@ -204,7 +224,7 @@ const NavigationBar = () => {
                           <Link className="nav-link
                                          text-dark
                                          fw-bold
-                                         "
+                                         text-nowrap"
                                 to="workSchedule/dashBoard"
                                 onClick={handleLinkClick}>근무표 기본 정보</Link>
                         </li>
@@ -214,13 +234,25 @@ const NavigationBar = () => {
                 <div className="d-flex justify-content-end mt-2">
                   {isLoggedIn ?
                       <>
-                        <a href="https://sites.google.com/view/weavuswiki/%E7%A4%BE%E5%86%85%E6%97%A5%E7%A8%8B" target="_blank" rel="noopener noreferrer" className="btn btn-info">
+                        <a href="https://sites.google.com/view/weavuswiki/%E7%A4%BE%E5%86%85%E6%97%A5%E7%A8%8B" target="_blank"
+                           rel="noopener noreferrer"
+                           className="btn btn-outline-light text-dark fw-bold text-nowrap d-flex align-items-center justify-content-center"
+                           type="button"
+                           style={{
+                             padding: '0.4rem 1rem', // 기본 padding
+                             fontSize: '1rem',       // 기본 텍스트 크기
+                           }}
+                        >
                           社内WIKI
                         </a>
                         <button
                             onClick={() => handlePassword(username)}
-                            className="btn btn-outline-light text-dark fw-bold"
+                            className="btn btn-outline-light text-dark fw-bold text-nowrap d-flex align-items-center justify-content-center"
                             type="button"
+                            style={{
+                              padding: '0.4rem 1rem', // 기본 padding
+                              fontSize: '1rem',       // 기본 텍스트 크기
+                            }}
                         >비밀번호 변경</button>
                         {showModal && (
                             <ChangePassword
@@ -229,11 +261,20 @@ const NavigationBar = () => {
                                 onOpenChange={setShowModal}
                             />
                         )}
+
                       </>
                       : null
                   }
+
                   <button className={`btn right ${isLoggedIn ? "btn-outline-light text-dark fw-bold" : "btn-primary text-white fw-bold"}` } onClick={handleLoginLogout}>
-                    {isLoggedIn ? "로그아웃" : "로그인"}
+                    {isLoggedIn ?
+                        <>
+                          <span>
+                            <i class="bi bi-alarm"></i> {minutes}:{seconds}
+                          </span> <br/>
+                          로그아웃
+                        </>
+                      : "로그인"}
                   </button>
                 </div>
               </div>
