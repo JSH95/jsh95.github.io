@@ -316,6 +316,15 @@ th, td {
   white-space: nowrap; /* 요소 줄바꿈 방지 */
 }
 
-
+/* 기본 상태: 데스크톱에서는 인라인 요소로 유지 */
+.foot-mobile-break {
+  display: inline;
+}
+/* 모바일 화면: 일정 폭 이하에서는 블록 요소처럼 동작하여 줄바꿈 발생 */
+@media (max-width: 600px) {
+  .foot-mobile-break {
+    display: block;
+  }
+}
 
 

@@ -1,8 +1,10 @@
 import React, {useEffect, useRef, useState} from 'react';
 import createAxiosInstance from "../../config/api";
 import {useNavigate, useParams} from "react-router-dom";
+import {useLoading} from "../../utils/LoadingContext";
 
 const ReceiptList = () => {
+    const { setIsProcessing } = useLoading();
     const { month } = useParams();
     const navigate = useNavigate();
     const [receipts, setReceipts] = useState([]);  // 영수증 리스트
@@ -13,8 +15,8 @@ const ReceiptList = () => {
         receiptItem: "",  // 지급항목
         receiptContent: "",  // 지불내용
         receiptAmount: "",  // 지급금액
-
     });  // 새 영수증 내용
+    
     const [isAdding, setIsAdding] = useState(false);  // 새로운 영수증 입력 창의 표시 여부
     const [progress, setProgress] = useState(0); // 업로드 진행 상태
     const [uploading, setUploading] = useState(false);
@@ -24,8 +26,8 @@ const ReceiptList = () => {
     useEffect(() => {
         fetchReceipts();
     }, [month]);
-
     const fetchReceipts = async () => {
+        setIsProcessing(true); // 로딩 상태 설정
         try {
             const axiosInstance = createAxiosInstance();
             const response = await axiosInstance.get(`/workSchedule/receipts/${month}`);  // API 엔드포인트 호출
@@ -33,6 +35,8 @@ const ReceiptList = () => {
         } catch (error) {
             // console.error('영수증 데이터를 불러오는 데 실패했습니다:', error);
             alert("영수증 데이터를 불러오는 데 실패했습니다.")
+        } finally {
+            setIsProcessing(false); // 로딩 상태 해제
         }
     };
 
@@ -40,50 +44,42 @@ const ReceiptList = () => {
         let { name, value } = e.target;
 
         if (name === "receiptAmount") {
-            // 숫자만 남기기 (천 단위 , 제거)
-            let numericValue = value.replace(/[¥,]/g, "").replace(/\D/g, "");
+            const numeric = value.replace(/[^\d]/g, ""); // 숫자만 추출
+            const number = numeric ? parseInt(numeric, 10) : "";
 
-            // 숫자가 있으면 천 단위 포맷 적용
-            if (numericValue) {
-                // 천 단위 콤마 추가 (화면 표시용)
-                const formattedValue = parseInt(numericValue, 10);
-                setNewReceipt((prev) => ({
-                    ...prev,
-                    [name]: formattedValue // 화면에 보일 때는 포맷된 값
-                }));
-            } else {
-                setNewReceipt((prev) => ({
-                    ...prev,
-                    [name]: "" // 값이 비어있으면 그대로 저장
-                }));
-            }
-        } else {
-            // 다른 필드는 그대로 적용
             setNewReceipt((prev) => ({
                 ...prev,
-                [name]: value
+                [name]: number,
+            }));
+        } else {
+            setNewReceipt((prev) => ({
+                ...prev,
+                [name]: value,
             }));
         }
-    }
+    };
 
     const handleAddReceipt = async (e) => {
         e.preventDefault();
-        if(selectedFile === null) {
+
+        if(selectedFile === null && newReceipt.receiptType !== "기존") {
             window.alert("파일을 선택해주세요.");
             return;
         }
         setUploading(true);
         setProgress(0); // 초기화
-        // setNewReceipt((prev) => ({
-        //     ...prev, // 이전 상태를 복사
-        //     receiptAmount: prev.receiptAmount.replace(/,/g, "") // receiptAmount만 콤마 제거
-        // }));
+        setIsProcessing(true); // 로딩 상태 설정
         try {
                 let lastUpdateTime = 0;
-                const delay = 1000; // 업데이트 간격 (ms)
-
+                const delay = 100; // 업데이트 간격 (ms)
                 const formData = new FormData();
-                formData.append("file", selectedFile);
+                if(newReceipt.receiptType !== "기존"){
+                    formData.append("file", selectedFile);
+                } else {
+                    // 더미 빈 파일 생성
+                    const dummyFile = new Blob([], { type: 'application/octet-stream' });
+                    formData.append("file", dummyFile, "empty.txt");
+                }
                 formData.append("date", newReceipt.receiptDate);
                 formData.append("type", 1);
                 formData.append(
@@ -99,15 +95,21 @@ const ReceiptList = () => {
                         const percentCompleted = Math.round(
                             (progressEvent.loaded * 100) / progressEvent.total
                         );
-                        const currentTime = Date.now();
-                        if (currentTime - lastUpdateTime > delay) {
-                            setProgress(percentCompleted);
-                            lastUpdateTime = currentTime; // 마지막 업데이트 시간을 기록
+                        const now = Date.now();
+                        if (now - lastUpdateTime > delay) {
+                            setProgress(percentCompleted > 95 ? 95 : percentCompleted);
+                            lastUpdateTime = now;
                         }
                     },
                 });  // API 엔드포인트 호출
-                setProgress(100);
                 window.alert("영수증 정보가 저장되었습니다.");
+                setTimeout(() => {
+                    setProgress(100); // 약간의 텀을 두고 100% 표시
+                    setTimeout(() => {
+                        setProgress(0); // 필요시 리셋
+                    }, 800);
+                }, 200); // 0.2초 정도 후에 100%로 업데이트
+
                 setNewReceipt({
                     receiptDate: "",
                     receiptType: "",
@@ -125,7 +127,8 @@ const ReceiptList = () => {
                 window.alert('영수증 정보를 저장하는 데 실패했습니다:', e);
             }finally {
                 setUploading(false);
-            }
+            setIsProcessing(false); // 로딩 상태 해제
+        }
     };
 
     function handleClickList() {
@@ -137,14 +140,17 @@ const ReceiptList = () => {
         if (!confirmSave) {
             return;
         } else {
+            setIsProcessing(true);
             try{
                 const axiosInstance = createAxiosInstance();
-                const response = await axiosInstance.delete(`/workSchedule/receipts/${id}`);
+                await axiosInstance.delete(`/workSchedule/receipts/${id}`);
                 window.alert('영수증이 삭제되었습니다.');
                 fetchReceipts();
             }catch (e){
                 // console.error('영수증 삭제 실패:', e);
-                alert("영수증 삭제 실패");
+                window.alert("영수증 삭제 실패");
+            } finally {
+                setIsProcessing(false); // 로딩 상태 해제
             }
         }
     }
@@ -152,6 +158,13 @@ const ReceiptList = () => {
     const handleFileChange = (e) => {
         const file = e.target.files[0];
         if (file) {
+            const allowedTypes = ['image/jpeg', 'image/png'];
+            if (!allowedTypes.includes(file.type)) {
+                alert("JPG 또는 PNG 형식만 업로드할 수 있습니다.");
+                e.target.value = null; // input 초기화
+                setSelectedFile(null); // 선택된 파일 초기화
+                return;
+            }
             setSelectedFile(file); // 파일 선택 처리
         }
     };
@@ -189,19 +202,19 @@ const ReceiptList = () => {
                                     .map((receipt, index) => (
                                     <tr key={index}>
                                         <td>
-                                            <i class="bi bi-trash-fill"
-                                               onClick={() => handleClickEdit(
-                                                   receipt.id, receipt.receiptName
-                                               )}
+                                            <a onClick={() => handleClickEdit(receipt.id, receipt.receiptName)}
+                                                  style={{ cursor: "pointer", transition: "color 0.2s ease-in-out" }}
+                                                  className="me-2"
                                             >
-                                            </i> &nbsp;
+                                                <i className="bi bi-trash-fill"></i>
+                                            </a>
                                             {receipt.receiptDate}
                                         </td>
                                         <td className="table-data">{receipt.receiptType}</td>
                                         <td className="table-data">{receipt.receiptName}</td>
                                         <td className="table-data">{receipt.receiptItem}</td>
                                         <td className="table-data">{receipt.receiptContent}</td>
-                                        <td className="table-data">¥{receipt.receiptAmount.toLocaleString("en-US")}</td>
+                                        <td className="table-data">¥{receipt.receiptAmount.toLocaleString()}</td>
                                         <td className="table-data">{receipt.receiptStatus === 0 ? "미처리":"처리완료"}</td>
                                         <td className="table-data">
                                             {receipt.fileId != null ? (
@@ -262,7 +275,7 @@ const ReceiptList = () => {
                                             boxSizing: "border-box", // 패딩과 보더를 포함한 너비 설정
                                         }}
                                     >
-                                        <option value="" disabled>신규, 갱신</option>
+                                        <option value="" disabled>신규, 기존</option>
                                         <option value="기존">기존</option>
                                         <option value="신규">신규</option>
                                     </select></td>
@@ -316,7 +329,7 @@ const ReceiptList = () => {
                                                 <input
                                                     type="text"
                                                     value={newReceipt?.receiptAmount
-                                                        ? "¥" + newReceipt.receiptAmount.toLocaleString("en-US")
+                                                        ? "¥" + newReceipt.receiptAmount.toLocaleString()
                                                         : ""}
                                                     className="input"
                                                     name="receiptAmount"
@@ -363,7 +376,7 @@ const ReceiptList = () => {
                                 </div>
                             )}
                             <div className="d-flex align-items-center gap-2 mb-2 my-2 justify-content-start">
-                                <strong>영수증 업로드 .jpg, .png타입 업로드 가능</strong>
+                                <strong>.jpg, .png 타입 만 업로드  가능 / 신규 항목만 파일 업로드 가능</strong>
                             </div>
                             <div className="d-flex gap-2 mb-3">
                                 <div className="input-group">

@@ -26,9 +26,9 @@ function LoginPage() {
     if(isLoggedIn){
       setIsLoading(true);
       if (role === 'ROLE_ADMIN') {
-        navigate('/dashboard');
+        navigate('/main');
       } else {
-        navigate('/workSchedule/main');
+        navigate('/main');
       }
     }
   }, []);
@@ -37,6 +37,7 @@ function LoginPage() {
     e.preventDefault();
     setIsLoading(true);
     setError('');
+    localStorage.setItem('username', username);
     if (remember) {
       localStorage.setItem('savedUsername', username);
     } else {
@@ -59,9 +60,9 @@ function LoginPage() {
       if (success) {
         login(token, role, responseUsername, serverTime); // 로그인 시 토큰을 저장하지만, 여기서는 토큰을 상태에 저장하지 않음
         if (role === 'ROLE_ADMIN') {
-          navigate('/dashboard');
+          navigate('/main');
         } else {
-          navigate('/workSchedule/main');
+          navigate('/main');
         }
       } else {
         setError(message || '알 수 없는 오류가 발생했습니다.');
@@ -100,7 +101,7 @@ function LoginPage() {
             }}
           />
 
-          <div className='login-title'>Login</div>
+          {/*<div className='login-title'>Login</div>*/}
 
           <div className='input-container'>
             <div className='input-label'>User ID</div>

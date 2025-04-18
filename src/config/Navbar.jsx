@@ -47,10 +47,10 @@ const NavigationBar = () => {
 
   const handleLogoClick = () => {
     if(isLoggedIn && role === "ROLE_ADMIN"){
-        navigate("/dashboard");
+        navigate("/main");
       setIsMenuOpen(false);
     }else {
-        navigate("/workSchedule/list");
+        navigate("/main");
       setIsMenuOpen(false);
     }
   }
@@ -90,7 +90,7 @@ const NavigationBar = () => {
   }, []);
 
     return (
-        <nav className="navbar navbar-expand-lg bg-white fixed-top">
+        <nav className="navbar navbar-expand-lg">
           <div className="container mt-1 mb-1">
             <span className="navbar-brand"  onClick={handleLogoClick} style={{ cursor: "pointer" }}>
               <h1 className="text-dark fw-bold">
@@ -158,16 +158,6 @@ const NavigationBar = () => {
                   )}
                   {isLoggedIn && (role === "ROLE_TEAM" || role === "ROLE_TEAM_LEADER") && (
                       <>
-                        {/*<Dropdown>*/}
-                        {/*  <Dropdown.Toggle variant="link" className="nav-link text-dark fw-bold">*/}
-                        {/*    근무표*/}
-                        {/*  </Dropdown.Toggle>*/}
-                        {/*  <Dropdown.Menu>*/}
-                        {/*    <Dropdown.Item as={Link} to="/workSchedule/main">근무기록</Dropdown.Item>*/}
-                        {/*    <Dropdown.Item as={Link} to="workSchedule/list">근무표 일람</Dropdown.Item>*/}
-                        {/*    <Dropdown.Item as={Link} to="workSchedule/dashBoard">근무표 기본 정보</Dropdown.Item>*/}
-                        {/*  </Dropdown.Menu>*/}
-                        {/*</Dropdown>*/}
                         <li className="nav-item" >
                           <Link className="nav-link
                                          text-dark
@@ -231,26 +221,15 @@ const NavigationBar = () => {
                       </>
                   )}
                 </ul>
-                <div className="d-flex justify-content-end mt-2">
+                <div className="d-flex justify-content-end">
                   {isLoggedIn ?
                       <>
-                        <a href="https://sites.google.com/view/weavuswiki/%E7%A4%BE%E5%86%85%E6%97%A5%E7%A8%8B" target="_blank"
-                           rel="noopener noreferrer"
-                           className="btn btn-outline-light text-dark fw-bold text-nowrap d-flex align-items-center justify-content-center"
-                           type="button"
-                           style={{
-                             padding: '0.4rem 1rem', // 기본 padding
-                             fontSize: '1rem',       // 기본 텍스트 크기
-                           }}
-                        >
-                          社内WIKI
-                        </a>
                         <button
                             onClick={() => handlePassword(username)}
                             className="btn btn-outline-light text-dark fw-bold text-nowrap d-flex align-items-center justify-content-center"
                             type="button"
                             style={{
-                              padding: '0.4rem 1rem', // 기본 padding
+                              padding: '', // 기본 padding
                               fontSize: '1rem',       // 기본 텍스트 크기
                             }}
                         >비밀번호 변경</button>
@@ -265,12 +244,11 @@ const NavigationBar = () => {
                       </>
                       : null
                   }
-
                   <button className={`btn right ${isLoggedIn ? "btn-outline-light text-dark fw-bold" : "btn-primary text-white fw-bold"}` } onClick={handleLoginLogout}>
                     {isLoggedIn ?
                         <>
                           <span>
-                            <i class="bi bi-alarm"></i> {minutes}:{seconds}
+                            <i className="bi bi-alarm"></i> {minutes}:{seconds}
                           </span> <br/>
                           로그아웃
                         </>

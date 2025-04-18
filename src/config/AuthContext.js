@@ -21,6 +21,7 @@ export const AuthProvider = ({ children }) => {
   const [username, setUsername] = useState(null);
   const [role, setRole] = useState(null);
   const [expirationTime, setExpirationTime] = useState(null);
+  const [showWarningModal, setShowWarningModal] = useState(false);
 
 
   useEffect(() => {
@@ -44,9 +45,11 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  const login = (newToken, newRole, newUsername, serverTime, password) => {
+  const login = (newToken, newRole, newUsername, serverTime) => {
     // const expirationTime = new Date().getTime() + 3600 * 1000; // 1시간 후
-    const expirationTime = parseInt(serverTime, 10) + 3600 * 1000; // 서버에서 받은 시간에 1시간을 더함
+    const expirationTime = parseInt(serverTime, 10)
+        // + 122 * 1000; // 서버에서 받은 시간에 10초를 더함(테스트)
+        + 2 * 3600 * 1000; // 서버에서 받은 시간에 1시간을 더함
     localStorage.setItem("token", newToken); // 토큰 저장
     localStorage.setItem("role", newRole); // 역할 저장
     localStorage.setItem("username", newUsername); // 사용자 이름 저장
@@ -90,8 +93,8 @@ export const AuthProvider = ({ children }) => {
       // 예시 응답 구조: { token, serverTime, expiresIn }
       const { token: newToken, serverTime } = response.data;
 
-      // expiresIn이 없다면 기본적으로 1시간을 사용
-      const newExpirationTime = parseInt(serverTime, 10) + 3600 * 1000;
+      // expiresIn이 없다면 기본적으로 2시간을 사용
+      const newExpirationTime = parseInt(serverTime, 10) + 2 * 3600 * 1000;
       localStorage.setItem("token", newToken);
       localStorage.setItem("expirationTime", newExpirationTime);
       setToken(newToken);
@@ -102,47 +105,66 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  useEffect(() => {
+    let autoCloseId;
+    if (showWarningModal) {
+      autoCloseId = setTimeout(() => {
+        setShowWarningModal(false);
+        logout(); // 시간이 지났는데도 연장 안 했으면 로그아웃
+      }, 30000); // 30초 대기
+    }
+    return () => clearTimeout(autoCloseId);
+  }, [showWarningModal]);
 
   useEffect(() => {
-    let timerId;
+    let logoutTimer;
     let warningTimer;
-      if (expirationTime) {
-        const timeLeft = parseInt(expirationTime, 10) - new Date().getTime();
 
-        // if (timeLeft > 120000) {
-        if (timeLeft > 120000) {
-          warningTimer = setTimeout(() => {
-            const confirmSave = window.confirm("로그인 시간을 연장 하시겠습니까?");
-            if (confirmSave) {
-              extendSession();
-            }
-          }, timeLeft - 120000);
-        } else {
-          // 시간이 이미 2분 이하이면 바로 모달 띄우기
-          const confirmSave = window.confirm("로그인 시간을 연장 하시겠습니까?");
-          if (confirmSave) {
-            extendSession();
-          }
-        }
+    if (expirationTime) {
+      const timeLeft = parseInt(expirationTime, 10) - Date.now();
 
-        if (timeLeft <= 0) {
-          logout();
-        } else {
-          timerId = setTimeout(logout, timeLeft);
-        }
+      if (timeLeft <= 0) {
+        logout();
+        return;
       }
-      return () => {
-        clearTimeout(timerId);
-        clearTimeout(warningTimer);
-      };
+
+      if (timeLeft > 120000) {
+        warningTimer = setTimeout(() => {
+          setShowWarningModal(true); // 2분 전 경고 모달 표시
+        }, timeLeft - 120000);
+      } else {
+        setShowWarningModal(true); // 이미 2분 이하일 경우 바로 표시
+      }
+
+      logoutTimer = setTimeout(() => {
+        logout();
+      }, timeLeft);
+    }
+
+    return () => {
+      clearTimeout(logoutTimer);
+      clearTimeout(warningTimer);
+    };
   }, [expirationTime]);
+
 
   if (loading) {
     return <div>Loading...</div>; // 초기화 중 로딩 상태 표시
   }
 
   return (
-      <AuthContext.Provider value={{ isLoggedIn, token, role, username, login, logout , expirationTime, extendSession }}>
+      <AuthContext.Provider value={{
+        isLoggedIn,
+        token,
+        role,
+        username,
+        login,
+        logout ,
+        expirationTime,
+        extendSession,
+        showWarningModal,
+        setShowWarningModal
+      }}>
         {children}
       </AuthContext.Provider>
   );
