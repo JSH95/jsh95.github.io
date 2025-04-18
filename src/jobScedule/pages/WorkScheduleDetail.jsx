@@ -4,8 +4,10 @@ import useWorkData from "../utils/WorkData";
 import createAxiosInstance from "../../config/api";
 import workDataDefault from "../utils/WorkDataDefault";
 import {adjustTime} from "../utils/timeUtils";
+import {useLoading} from "../../utils/LoadingContext";
 
 function WorkScheduleDashboard (){
+    const { setIsProcessing } = useLoading();
     const location = useLocation();
     const fromState = location.state || {};
 
@@ -13,6 +15,11 @@ function WorkScheduleDashboard (){
     const year = new Date(date).getFullYear();
     const month = new Date(date).getMonth()+ 1;
     const navigate = useNavigate();
+    const { workData, fetchWorkData, loading: dataLoading, error: dataError } = useWorkData(
+        year,
+        month
+    );
+
     const [item, setItem] = useState({});
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("")
@@ -21,50 +28,49 @@ function WorkScheduleDashboard (){
     const [uploading, setUploading] = useState(false);
     const [selectedFile, setSelectedFile] = useState(null);
     const [progress, setProgress] = useState(0); // 업로드 진행 상태
-    const workData = useWorkData(year, month); // ✅ 최상위에서 호출
     const data = workDataDefault();
-    const [defaultItem] = useState({
+    const [noBreakTime, setNoBreakTime] = useState(false)
+    const [fullBreaktime, setFullBreaktime] = useState(
+        item?.workType === "유급휴가" && item?.workPosition === "휴가"
+    );
+    const defaultItem = {
         id: "",
         checkInDate: date,
         checkInTime: "",
         checkOutDate: date,
         checkOutTime: "",
-        breakTimeIn: "",
-        breakTimeOut: "",
+        // breakTimeIn: "",
+        // breakTimeOut: "",
+        breakTime: 0,
         workType: "",
         workPosition: "",
         workLocation: "",
         memo: "",
         flexTime: false,
-        });
+        };
 
-
-
-    const dataLoading = async () => {
-        setLoading(true);
-        if (workData.workData[date]) {
-            setItem(workData.workData[date]);
-            setEditedItem(workData.workData[date]);
+    useEffect(() => {
+        if (workData?.[date]) {
+            setItem(workData[date]);
+            setEditedItem(workData[date]);
+            setNoBreakTime(Number(workData[date].breakTime) === 0);
         } else {
-            const newDefaultItem = {
+            setItem(null);
+            setEditedItem({
                 ...defaultItem,
                 checkInTime: data.checkInTime || "",
-                checkOutTime: data.checkOutTime|| "",
-                breakTimeIn: data.breakTimeIn|| "",
-                breakTimeOut: data.breakTimeOut|| "",
-                workLocation: data.workLocation|| "",
-                workPosition: data.workPosition|| "",
-                flexTime: data.flexTime|| false,
-            };
-            setItem(null);
-            setEditedItem(newDefaultItem);
+                checkOutTime: data.checkOutTime || "",
+                breakTime: data.breakTime || "",
+                workLocation: data.workLocation || "",
+                workPosition: data.workPosition || "",
+                flexTime: data.flexTime || false,
+            });
         }
-    }
+    }, [workData, data]);
+
     useEffect(() => {
-        dataLoading().then(r => {
-            setLoading(false);
-        });
-    }, [data, workData?.workData[date]]);
+        fetchWorkData();
+    }, [year, month, fetchWorkData]);
 
     function handleClickBack() {
         navigate("/workSchedule/list");
@@ -82,20 +88,31 @@ function WorkScheduleDashboard (){
     }
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        setEditedItem((prevItem) => ({
-            ...prevItem,
-            [name]: value,
-        }));
+
+        setEditedItem((prevItem) => {
+            const updated = { ...prevItem, [name]: value };
+
+            // workType이 변경된 경우만 체크인/체크아웃 시간 자동 설정
+            if (name === "workType") {
+                if (value !== "출근" && value !== "휴일출근" && value !== "유급휴가") {
+                    updated.checkInTime = "00:00";
+                    updated.checkOutTime = "00:00";
+                } else {
+                    updated.checkInTime = data?.checkInTime || item?.checkInTime || "09:00";
+                    updated.checkOutTime = data?.checkOutTime || item?.checkOutTime || "18:00";
+                }
+            }
+
+            return updated;
+        });
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault(); // 폼 제출 방지
-        const confirmSave = window.confirm("해당 근무표 정보를 저장하시겠습니까?");
-        if (!confirmSave) {
-            return;
-        } else {
-            setLoading(true);
-            setError("");
+        if (!window.confirm("해당 근무표 정보를 저장하시겠습니까?")) return;
+
+        setLoading(true);
+        setError("");
             try {
                 if(editedItem.workType !== "유급휴가" && editedItem.workType !== "출근" && editedItem.workType !== "휴일출근"){
                     editedItem.workPosition = "휴가";
@@ -109,32 +126,31 @@ function WorkScheduleDashboard (){
                 const toSave = {
                     ...editedItem,
                     checkOutTime: adjusted.time,
+                    breakTime: noBreakTime ? 0 : editedItem.breakTime,
                 };
 
                 const axiosInstance = createAxiosInstance(); // 인스턴스 생성
-                await axiosInstance.post(
-                    "/workSchedule/save",
-                    toSave
-                );
-                setItem(editedItem);
-                setEditedItem(editedItem);
+                await axiosInstance.post("/workSchedule/save", toSave);
+
+                setItem(toSave);
+                setEditedItem(toSave);
                 setIsEditing(false);
                 window.alert("근무표 정보를 저장하였습니다");
-                navigate("/workSchedule/list")
+                await fetchWorkData();
             } catch (err) {
-                setError(err.response?.status === 404 ? "입력된 값을 다시 한번 확인해 주세요" : "근무표 정보를 수정하는 데 실패했습니다.");
+                setError(err.response?.status === 404
+                    ? "입력된 값을 다시 한번 확인해 주세요"
+                    : "근무표 정보를 수정하는 데 실패했습니다.");
             }finally {
                 setLoading(false);
             }
-        }
     };
 
     const handleDeleteClick = async (e) =>{
         e.preventDefault();
-        const confirmDelete = window.confirm("해당 근무표 정보를 삭제하시겠습니까?");
-        if (!confirmDelete) {
-            return;
-        } else {
+        if (!window.confirm("해당 근무표 정보를 삭제하시겠습니까?")) return;
+
+        setIsProcessing(true);
             setLoading(true);
             setError("");
                 try{
@@ -146,19 +162,15 @@ function WorkScheduleDashboard (){
                     setError("근무표 정보를 삭제하는 데 실패했습니다. 다시 시도해 주세요." + err.message);
                 } finally {
                 setLoading(false);
+                setIsProcessing(false);
             }
-        }
     };
 
     const handleFileChange = (e) => {
         const file = e.target.files[0];
-
         if (!file) return;
-
-        const allowedExtensions = ["jpg", "jpeg", "png"];
         const fileExtension = file.name.split(".").pop().toLowerCase();
-
-        if (!allowedExtensions.includes(fileExtension)) {
+        if (!["jpg", "jpeg", "png"].includes(fileExtension)) {
             alert("JPG 또는 PNG 파일만 업로드할 수 있습니다.");
             e.target.value = ""; // 선택된 파일 초기화
             return;
@@ -167,30 +179,31 @@ function WorkScheduleDashboard (){
     };
 
     const handleClickDelete = async (id, name) => {
-        const confirmDelete = window.confirm(`지연표_${name.split("_").pop()}을(를) 삭제하시겠습니까?`);
-        if (!confirmDelete) return;
+        if (!window.confirm(`지연표_${name.split("_").pop()}을(를) 삭제하시겠습니까?`)) return;
+        setIsProcessing(true);
         try {
             const axiosInstance = createAxiosInstance();
             await axiosInstance.delete(`/workSchedule/file/delete/${id}`);
             window.alert("지연표를 삭제하였습니다.");
-            dataLoging();
+            const updated = { ...item, fileId: null, fileName: null, fileUrl: null };
+            setItem(updated);
+            setEditedItem(updated);
+            await fetchWorkData();
         } catch (error) {
             // console.error("지연표 삭제 실패:", error);
             alert("지연표 삭제 중 오류가 발생했습니다. \n 다시 시도해 주세요.");
+        } finally {
+            setIsProcessing(false);
         }
     }
 
         const handleUpload = async () => {
-            if(selectedFile === null) {
-                window.alert("파일을 선택해주세요.");
-                return;
-            }
-            if(item?.fileId) {
-                const confirmDelete = window.confirm("이미 업로드한 파일이 있습니다. 재업로드 하시겠습니까?");
-                if (!confirmDelete) return;
-            }
+            if (!selectedFile) return window.alert("파일을 선택해주세요.");
+            if (item?.fileId && !window.confirm("이미 업로드한 파일이 있습니다. 재업로드 하시겠습니까?")) return;
+
             setUploading(true);
             setProgress(0); // 초기화
+            setIsProcessing(true);
             try {
                 let lastUpdateTime = 0;
                 const delay = 100; // 업데이트 간격 (ms)
@@ -208,15 +221,16 @@ function WorkScheduleDashboard (){
                         const percentCompleted = Math.round(
                             (progressEvent.loaded * 100) / progressEvent.total
                         );
-                        const currentTime = Date.now();
-                        if (currentTime - lastUpdateTime > delay) {
-                            setProgress(percentCompleted);
-                            lastUpdateTime = currentTime; // 마지막 업데이트 시간을 기록
+                        const now = Date.now();
+                        if (now - lastUpdateTime > delay) {
+                            setProgress(percentCompleted > 95 ? 95 : percentCompleted);
+                            lastUpdateTime = now;
                             }
                         },
                 });
                 setProgress(100);
                 window.alert("파일 업로드 성공!");
+
                 localStorage.setItem("fileStatus", JSON.stringify(true));
                 localStorage.setItem("selectedFile", JSON.stringify(selectedFile));
             } catch (error) {
@@ -230,18 +244,37 @@ function WorkScheduleDashboard (){
             }finally {
                 setProgress(0);
                 setUploading(false);
+                setIsProcessing(false);
             }
         };
 
+    const handleFullBreaktimeChange = (e) => {
+        const isChecked = e.target.checked;
+        setFullBreaktime(isChecked);
 
-    if (loading) return <div>로딩 중...</div>;
-    if (error) return <div>{error}</div>;
+        setEditedItem((prev) => ({
+            ...prev,
+            checkInTime: isChecked ? "00:00" : data.checkInTime,
+            checkOutTime: isChecked ? "00:00" : data.checkOutTime,
+            workPosition: isChecked ? "휴가" : data.workPosition,
+        }));
+    };
+
+    useEffect(() => {
+        if (item?.workType === "유급휴가" && item?.workPosition === "휴가"
+            && item.checkInTime === "00:00" && item.checkOutTime === "00:00"
+            && item.checkInDate === item.checkOutDate) {
+            setFullBreaktime(true);
+        }
+    }, [item]);
+
     return (
         <div className="container d-flex justify-content-center align-items-center flex-column">
             <div className="card" style={{ width: '100%', maxWidth: '600px', minHeight: '500px' }}>
                 <form onSubmit={handleSubmit}>
                 <div className="card-header">
                     <h3>근무표 상세 페이지</h3>
+                    {dataError ? {dataError}  : null}
                 </div>
                 <div className="card-body">
                     {isEditing ? (
@@ -307,29 +340,7 @@ function WorkScheduleDashboard (){
                                 </div>
                             </div>
 
-                            <div className="form-group row">
-                                <div className="row">
-                                    <div className="col">
-                                        <strong className="col">플랙스 시간제</strong>
-                                    </div>
-                                    <div className="col">
-                                        <input
-                                            type="checkbox"
-                                            name="flexTime"
-                                            style={{marginTop: "0px"}}
-                                            className="form-check-input"
-                                            checked={editedItem.flexTime}
-                                            onChange={(e) => {
-                                                setEditedItem({
-                                                    ...editedItem,
-                                                    flexTime: e.target.checked,
-                                                });
-                                            }
-                                            }
-                                        />
-                                    </div>
-                                </div>
-                            </div>
+
                             <div className="form-group">
                                 <label className="label">퇴근 날짜 / 시간</label>
                                 <div className="d-flex align-items-center justify-content-start gap-2 flex-nowrap">
@@ -385,26 +396,67 @@ function WorkScheduleDashboard (){
                                     />
                                 </div>
                             </div>
-                            <div className="form-group">
-                                <label className="label">휴게시간</label>
-                                <div className="d-flex">
-                                    <input
-                                        name="breakTimeIn"
-                                        type="time"
-                                        className="input"
-                                        value={editedItem.breakTimeIn  || ""}
-                                        onChange={handleInputChange}
-                                    />
-                                    <span> ~ </span>
-                                    <input
-                                        name="breakTimeOut"
-                                        type="time"
-                                        className="input"
-                                        value={editedItem.breakTimeOut  || ""}
-                                        onChange={handleInputChange}
-                                    />
+                            <div className="form-group row">
+                                <div className="row">
+                                    <div className="col">
+                                        <strong className="col">플랙스 시간제</strong>
+                                    </div>
+                                    <div className="col">
+                                        <input
+                                            type="checkbox"
+                                            name="flexTime"
+                                            style={{marginTop: "0px"}}
+                                            className="form-check-input"
+                                            checked={editedItem.flexTime}
+                                            onChange={(e) => {
+                                                setEditedItem({
+                                                    ...editedItem,
+                                                    flexTime: e.target.checked,
+                                                });
+                                            }
+                                            }
+                                        />
+                                    </div>
                                 </div>
                             </div>
+                            <div className="form-group row">
+                                <div className="row">
+                                    {/*handleFullBreaktimeChange*/}
+                                    <div className="col">
+                                        <strong className="col">휴게시간 없음</strong>
+                                    </div>
+                                    <div className="col">
+                                        <input
+                                            type="checkbox"
+                                            name="noBreakTime"
+                                            style={{marginTop: "0px"}}
+                                            className="form-check-input"
+                                            checked={noBreakTime}
+                                            onChange={(e) => {
+                                                setNoBreakTime(e.target.checked);
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                            {noBreakTime? null
+                                :
+                                <div className="form-group">
+                                    <label className="label">휴게시간(분)</label>
+                                    <div className="d-flex">
+                                        <input
+                                            name="breakTime"
+                                            type="number"
+                                            className="input"
+                                            min="0"
+                                            max="240"
+                                            value={editedItem.breakTime}
+                                            onChange={handleInputChange}
+                                        />
+                                    </div>
+                                </div>
+                            }
+
                             <div className="form-group">
                                 <label className="label">근무 유형</label>
                                 <select
@@ -427,6 +479,25 @@ function WorkScheduleDashboard (){
                                     <option value="휴일출근">휴일출근</option>
                                 </select>
                             </div>
+                            {editedItem?.workType ==="유급휴가" ?
+                                <div className="form-group row">
+                                    <div className="row">
+                                        <div className="col">
+                                            <strong className="col">전휴</strong>
+                                        </div>
+                                        <div className="col">
+                                            <input
+                                                type="checkbox"
+                                                name="fullBreaktimeCheck"
+                                                style={{marginTop: "0px"}}
+                                                className="form-check-input"
+                                                checked={fullBreaktime}
+                                                onChange={handleFullBreaktimeChange}
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                                : null}
                             {item?.memo || editedItem.workType !== "출근" && editedItem.workType !== "휴일출근"
                                 || (!editedItem.flexTime && editedItem.checkInTime > data.checkInTime)
                                 ? (
@@ -488,7 +559,7 @@ function WorkScheduleDashboard (){
                                     onChange={handleInputChange}
                                 />
                             </div>
-                            {(!editedItem.flexTime && editedItem.checkInTime > data.checkInTime) ? ( // 체크인 시간이 다르면 표시
+                            {((editedItem.workType === "출근" && editedItem.workType !== "유급휴가") && !editedItem.flexTime && editedItem.checkInTime > data.checkInTime) ? ( // 체크인 시간이 다르면 표시
                                 <>
                                     <label className="label">지연표를 업로드 해주세요</label>
                                     <div className="row-cols-1">
@@ -545,28 +616,37 @@ function WorkScheduleDashboard (){
                             <>
                                 <div className="form-group">
                                     <label className="label">출퇴근 시간</label>
-                                    <div className="d-flex justify-content-center align-items-center">
-                                        <span className="form-control-plaintext me-2">
-                                          {item?.checkInTime || defaultItem.checkInTime}
-                                        </span>
-                                        <span className="text-gray-500 me-2 fs-5"> ~ </span>
-                                        <span className="form-control-plaintext">
-                                          {item?.checkOutDate !== item?.checkInDate ? "次の日 " + item?.checkOutTime : item?.checkOutTime || ""}
-                                        </span>
-                                    </div>
+                                    {!(item?.checkInTime === "00:00" && item?.checkOutTime === "00:00" && item?.checkInDate === item?.checkOutDate) ?
+                                        <div className="d-flex justify-content-center align-items-center">
+                                            <span className="form-control-plaintext me-2">
+                                              {item?.checkInTime || defaultItem.checkInTime}
+                                            </span>
+                                            <span className="text-gray-500 me-2 fs-5"> ~ </span>
+                                            <span className="form-control-plaintext">
+                                              {item?.checkOutDate !== item?.checkInDate ? "次の日 " + item?.checkOutTime : item?.checkOutTime || ""}
+                                            </span>
+                                        </div>
+                                        :
+                                        "-"
+                                        }
                                 </div>
 
                                 <div className="form-group">
-                                    <label className="label">휴게시간</label>
+                                    <label className="label">휴게시간(분)</label>
+                                    {!(item?.checkInTime === "00:00" && item?.checkOutTime === "00:00" && item?.checkInDate === item?.checkOutDate) ?
                                     <div className="d-flex justify-content-center align-items-center">
                                         <span className="form-control-plaintext me-2">
-                                          {item?.breakTimeIn || defaultItem.breakTimeIn}
-                                        </span>
-                                        <span className="text-gray-500 me-2 fs-5"> ~ </span>
-                                        <span className="form-control-plaintext">
-                                          {item?.breakTimeOut || defaultItem.breakTimeOut}
+                                          {
+                                              noBreakTime
+                                                  ? "휴게 시간 없음"
+                                                  : item?.breakTime !== undefined && item?.breakTime !== null
+                                                      ? item.breakTime + "분"
+                                                      : ""
+                                          }
                                         </span>
                                     </div>
+                                        : "-"
+                                    }
                                 </div>
                                 <div className="form-group">
                                     <label className="label">근무 유형</label>
@@ -598,19 +678,23 @@ function WorkScheduleDashboard (){
                                     <div className="form-group">
                                         <label>지연표 업로드 내역</label>
                                         <span>
-                                            <a href={item?.fileUrl} target="_blank" rel="noreferrer">
+                                            <a href={item?.fileUrl}
+                                               rel="noreferrer"
+                                               className="me-3"
+                                               target="_blank"
+                                            >
                                                 {item?.fileName.split("_").pop()}
                                             </a>
-                                            &nbsp;
                                             <i
                                                 className="bi bi-trash-fill"
                                                 onClick={() => handleClickDelete(item?.fileId, item?.fileName)}
+                                                style={{ cursor: "pointer", transition: "color 0.2s ease-in-out" }}
                                             ></i>
                                         </span>
                                     </div>
                                 ) : (
                                     <>
-                                        {!item?.flexTime && item?.checkInTime !== data.checkInTime && (
+                                        {editedItem.workType !== "출근" && editedItem.workType !== "유급휴가" && !item?.flexTime && item?.checkInTime !== data.checkInTime && (
                                             <label>지연표를 업로드 해주세요</label>
                                         )}
                                     </>
@@ -647,7 +731,7 @@ function WorkScheduleDashboard (){
                             </button>
                         ) : (<></>)}
 
-                        {isEditing || workData.workData[date]?.workStatus === "신청중" ? (<></>) : (
+                        {isEditing || workData[date]?.workStatus === "신청중" ? (<></>) : (
                             <button
                                 type="button"
                                 className="btn btn-primary me-4"

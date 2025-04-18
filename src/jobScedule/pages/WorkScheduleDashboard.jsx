@@ -3,7 +3,6 @@ import {useLocation, useNavigate} from "react-router-dom";
 import useWorkDefaultData from "../utils/WorkDataDefault";
 import {useAuth} from "../../config/AuthContext";
 import createAxiosInstance from "../../config/api";
-import {color} from "chart.js/helpers"; // 로그인 유저 정보를 가져오는 함수
 
 function WorkScheduleDashboard (){
     const { username } = useAuth();
@@ -28,8 +27,9 @@ function WorkScheduleDashboard (){
                         workPosition: "",
                         checkInTime: "",
                         checkOutTime: "",
-                        breakTimeIn: "",
-                        breakTimeOut: "",
+                        // breakTimeIn: "",
+                        // breakTimeOut: "",
+                        breakTime : "",
                         flexTime: false,
                     };
                     setEditedItem(defaultData);
@@ -84,6 +84,14 @@ function WorkScheduleDashboard (){
             }
         }
         };
+
+    const handleTimeChange = (name, value) => {
+        setEditedItem((prevItem) => ({
+            ...prevItem,
+            checkInTime: value,
+        }));
+    };
+
     if (loading) return <div>로딩 중...</div>;
     if (error) return <div>{error}</div>;
 
@@ -97,7 +105,6 @@ function WorkScheduleDashboard (){
                             <div className="card-body">
                                 <div>
                                     <div className="form-group">
-                                        {/*<label className="label">ID</label>*/}
                                         <div>
                                             <input
                                                 className="input"
@@ -111,7 +118,6 @@ function WorkScheduleDashboard (){
                                         </div>
                                     </div>
                                     <div className="form-group">
-                                        {/*<label className="label">이름</label>*/}
                                         <div>
                                             <input
                                                 className="input"
@@ -177,48 +183,140 @@ function WorkScheduleDashboard (){
                                         </div>
                                     <div className="form-group">
                                         <label className="label">기준 출근 시간</label>
-                                        <div>
+                                        <div className="row">
+                                            {/*<DatePicker*/}
+                                            {/*    selected={startDate}*/}
+                                            {/*    onChange={(date) => setStartDate(date)}*/}
+                                            {/*    locale="pt-BR"*/}
+                                            {/*    showTimeSelect*/}
+                                            {/*    showTimeSelectOnly*/}
+                                            {/*    timeIntervals={15}*/}
+                                            {/*    timeCaption="시간"*/}
+                                            {/*    dateFormat="HH:mm"*/}
+                                            {/*/>*/}
+                                        </div>
+                                        <div className="d-flex align-items-center justify-content-start gap-2 flex-nowrap">
                                             <input
-                                                type="time"
-                                                className="input"
-                                                name="checkInTime"
-                                                value={editedItem.checkInTime}
-                                                onChange={handleChange}
-                                                required
+                                                type="number"
+                                                min="00"
+                                                max="23"
+                                                className="form-control"
+                                                placeholder="시"
+                                                style={{ width: "80px" }}
+                                                value={editedItem.checkInHour ?? (editedItem.checkInTime?.split(":")[0] || "")}
+                                                onChange={(e) => {
+                                                    const hour = e.target.value;
+                                                    const minute = editedItem.checkInMinute ?? editedItem.checkInTime?.split(":")[1] ?? "00";
+                                                    setEditedItem((prev) => ({
+                                                        ...prev,
+                                                        checkInHour: hour,
+                                                        checkInTime: `${hour.padStart(2, "0")}:${minute.padStart(2, "0")}`,
+                                                    }));
+                                                }}
+                                            />
+                                            <span className="fs-5">:</span>
+                                            <input
+                                                type="number"
+                                                min="00"
+                                                max="59"
+                                                className="form-control"
+                                                placeholder="분"
+                                                style={{ width: "80px" }}
+                                                value={editedItem.checkInMinute ?? (editedItem.checkInTime?.split(":")[1] || "")}
+                                                onChange={(e) => {
+                                                    const minute = e.target.value;
+                                                    const hour = editedItem.checkInHour ?? editedItem.checkInTime?.split(":")[0] ?? "00";
+                                                    setEditedItem((prev) => ({
+                                                        ...prev,
+                                                        checkInMinute: minute,
+                                                        checkInTime: `${hour.padStart(2, "0")}:${minute.padStart(2, "0")}`,
+                                                    }));
+                                                }}
                                             />
                                         </div>
                                     </div>
                                     <div className="form-group">
                                         <label className="label">기준 퇴근 시간</label>
-                                        <input
-                                            type="time"
-                                            className="input"
-                                            name="checkOutTime"
-                                            value={editedItem.checkOutTime}
-                                            onChange={handleChange}
-                                            required
-                                        />
+                                        {/*<input*/}
+                                        {/*    type="time"*/}
+                                        {/*    className="input"*/}
+                                        {/*    name="checkOutTime"*/}
+                                        {/*    value={editedItem.checkOutTime}*/}
+                                        {/*    onChange={handleChange}*/}
+                                        {/*    required*/}
+                                        {/*/>*/}
+                                        <div className="d-flex align-items-center justify-content-start gap-2 flex-nowrap">
+                                            <input
+                                                type="number"
+                                                min="0"
+                                                max="99"
+                                                className="form-control"
+                                                placeholder="시"
+                                                style={{ width: "80px" }}
+                                                value={editedItem.checkOutHour ?? (editedItem.checkOutTime?.split(":")[0] || "")}
+                                                onChange={(e) => {
+                                                    const hour = e.target.value;
+                                                    const minute = editedItem.checkOutMinute ?? editedItem.checkOutTime?.split(":")[1] ?? "00";
+
+                                                    setEditedItem((prev) => ({
+                                                        ...prev,
+                                                        checkOutHour: hour,
+                                                        checkOutTime: `${hour.padStart(2, "0")}:${minute.padStart(2, "0")}`,
+                                                    }));
+                                                }}
+                                            />
+                                            <span className="fs-5">:</span>
+                                            <input
+                                                type="number"
+                                                min="0"
+                                                max="59"
+                                                className="form-control"
+                                                placeholder="분"
+                                                style={{ width: "80px" }}
+                                                value={editedItem.checkOutMinute ?? (editedItem.checkOutTime?.split(":")[1] || "")}
+                                                onChange={(e) => {
+                                                    const minute = e.target.value;
+                                                    const hour = editedItem.checkOutHour ?? editedItem.checkOutTime?.split(":")[0] ?? "00";
+                                                    setEditedItem((prev) => ({
+                                                        ...prev,
+                                                        checkOutMinute: minute,
+                                                        checkOutTime: `${hour.padStart(2, "0")}:${minute.padStart(2, "0")}`,
+                                                    }));
+                                                }}
+                                            />
+                                        </div>
                                     </div>
                                     <div className="form-group">
                                         <label className="label">기준 휴게시간</label>
                                         <div className="d-flex">
+                                            {/*<input*/}
+                                            {/*    name="breakTimeIn"*/}
+                                            {/*    type="time"*/}
+                                            {/*    className="input me-2"*/}
+                                            {/*    value={editedItem.breakTimeIn}*/}
+                                            {/*    onChange={handleChange}*/}
+                                            {/*    required*/}
+                                            {/*/>*/}
                                             <input
-                                                name="breakTimeIn"
-                                                type="time"
+                                                name="breakTime"
+                                                type="number"
                                                 className="input me-2"
-                                                value={editedItem.breakTimeIn}
+                                                value={editedItem.breakTime}
                                                 onChange={handleChange}
+                                                placeholder="분"
+                                                min="0"
+                                                max="240"
                                                 required
                                             />
-                                            <div className="text-gray-500 me-2 fs-5	">~</div>
-                                            <input
-                                                name="breakTimeOut"
-                                                type="time"
-                                                className="input"
-                                                value={editedItem.breakTimeOut}
-                                                onChange={handleChange}
-                                                required
-                                            />
+                                            {/*<div className="text-gray-500 me-2 fs-5	">~</div>*/}
+                                            {/*<input*/}
+                                            {/*    name="breakTimeOut"*/}
+                                            {/*    type="time"*/}
+                                            {/*    className="input"*/}
+                                            {/*    value={editedItem.breakTimeOut}*/}
+                                            {/*    onChange={handleChange}*/}
+                                            {/*    required*/}
+                                            {/*/>*/}
                                         </div>
                                     </div>
                                 </div>

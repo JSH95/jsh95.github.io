@@ -48,75 +48,59 @@ function AdminWorkScheduleDashboard (){
                 <div className="card-body">
                                 <div className="form-group">
                                     <label className="label">출퇴근 시간</label>
-                                    <div className="d-flex">
-                                        <input
-                                            type="time"
-                                            className="input"
-                                            value={item?.checkInTime || ""}
-                                            readOnly
-                                        />
-                                        <span> ~ </span>
-                                        <input
-                                            type="time"
-                                            className="input"
-                                            value={item?.checkOutTime || ""}
-                                            readOnly
-                                        />
-                                    </div>
+                                    {!(item?.checkInTime === "00:00" && item?.checkOutTime === "00:00" && item?.checkInDate === item?.checkOutDate) ?                                        <div className="d-flex justify-content-center align-items-center">
+                                            <span className="form-control-plaintext me-2">
+                                              {item?.checkInTime || ""}
+                                            </span>
+                                            <span className="text-gray-500 me-2 fs-5"> ~ </span>
+                                            <span className="form-control-plaintext">
+                                              {item?.checkOutDate !== item?.checkInDate ? "次の日 " + item?.checkOutTime : item?.checkOutTime || ""}
+                                            </span>
+                                        </div>
+                                        :
+                                        "-"
+                                    }
                                 </div>
                                 <div className="form-group">
-                                    <label className="label">휴게시간</label>
-                                    <div className="d-flex">
-                                        <input
-                                            type="time"
-                                            className="input"
-                                            value={item?.breakTimeIn || ""}
-                                            readOnly
-                                        />
-                                        <span className="text-gray-500 me-2 fs-5"> ~ </span>
-                                        <input
-                                            type="time"
-                                            className="input"
-                                            value={item?.breakTimeOut|| ""}
-                                            readOnly
-                                        />
+                                    <label className="label">휴게시간(분)</label>
+                                    {!(item?.checkInTime === "00:00" && item?.checkOutTime === "00:00" && item?.checkInDate === item?.checkOutDate) ?
+                                        <div className="d-flex justify-content-center align-items-center">
+                                        <span className="form-control-plaintext me-2">
+                                          {
+                                              Number(item?.breakTime) === 0
+                                                  ? "휴게시간 없음"
+                                                  : Number(item?.breakTime) > 0
+                                                      ? item.breakTime + "분"
+                                                      : ""
+                                          }
+                                        </span>
                                     </div>
+                                        : "-"
+                                    }
                                 </div>
                                 <div className="form-group">
                                     <label className="label">근무 유형</label>
-                                    <input
-                                        type="text"
-                                        className="input"
-                                        value={item?.workType|| ""}
-                                        readOnly
-                                    />
+                                    <span className="form-control-plaintext">
+                                        {item?.workType || ""}
+                                      </span>
                                 </div>
                                 <div className="form-group">
                                     <label className="label">근태 유형</label>
-                                    <input
-                                        type="text"
-                                        className="input"
-                                        value={item?.workPosition|| ""}
-                                        readOnly
-                                    />
+                                    <span className="form-control-plaintext">
+                                        {item?.workPosition || ""}
+                                    </span>
                                 </div>
                                 <div className="form-group">
                                     <label className="label">근무지</label>
-                                    <input
-                                        type="text"
-                                        className="input"
-                                        value={item?.workLocation|| ""}
-                                        readOnly
-                                    />
+                                    <span className="form-control-plaintext">
+                                        {item?.workLocation || ""}
+                                    </span>
                                 </div>
                                 {item?.memo ? (<div className="form-group">
                                     <label>사유</label>
-                                    <input
-                                        type="text"
-                                        className="input"
-                                        value={item?.memo|| ""}
-                                        readOnly
-                                    />
+                                        <span className="form-control-plaintext">
+                                            {item?.memo || ""}
+                                        </span>
                                 </div>
                                 ) : (null)}
                                 {item?.fileId ? (

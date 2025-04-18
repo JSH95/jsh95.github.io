@@ -1,79 +1,91 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import createAxiosInstance from "../../config/api";
 import { useAuth } from "../../config/AuthContext";
+import { useLoading } from "../../utils/LoadingContext";
 
 const useWorkData = (year, month, id) => {
     const { username } = useAuth();
-    const [workData, setWorkData] = useState({});
-    const [loading, setLoading] = useState(false); // 로딩 상태 추가
-    const [error, setError] = useState(""); // 오류 상태 추가
-    let cachedHolidays = null; // 캐싱하여 여러 번 호출해도 다시 요청하지 않음
+    const { setIsProcessing } = useLoading();
 
-    const fetchWorkData = async () => {
-        if (cachedHolidays) {
-            setWorkData(cachedHolidays); // 이미 로드된 데이터가 있다면 설정
-            return;
-        }
+    const [workData, setWorkData] = useState({});
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
+
+    const cacheRef = useRef(null);
+
+    // 1) fetch 함수에 year/month/id 등을 deps에 넣어 안정화
+    const fetchWorkData = useCallback(async () => {
         setLoading(true);
-        setError(""); // 기존 오류 초기화
-        let ID;
-        if(!id){
-            ID = username;
-        } else {
-            ID = id;
-        }
+        setError("");
+        // setIsProcessing(true);
+
+        const ID = id || username;
+
         try {
-            const axiosInstance = createAxiosInstance();
-            const response = await axiosInstance.get(
+            // 캐시가 비어 있을 때만 요청
+            if (!cacheRef.current) {
+                const response = await createAxiosInstance().get(
                     `/workSchedule/${ID}/${year}/${month}`
                 );
+
                 const newWorkDataList = {};
-                if(response.data.length === 0){
-                    setWorkData(newWorkDataList);
-                } else {
-                    response.data.forEach((event) => {
-                        const date = new Date(event.checkInDate);
-                        const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-                        const formatTime = (time) => (time ? time.split(":").slice(0, 2).join(":") : "");
-                        newWorkDataList[key] = {
-                            id: event.id || "",
-                            checkInDate: event.checkInDate || "",
-                            checkInTime: formatTime(event.checkInTime),  // HH:mm:ss → HH:mm
-                            checkOutDate: event.checkOutDate || "",
-                            checkOutTime: formatTime(event.checkOutTime), // HH:mm:ss → HH:mm
-                            memo: event.memo || "",
-                            breakTimeIn: formatTime(event.breakTimeIn), // HH:mm:ss → HH:mm
-                            breakTimeOut: formatTime(event.breakTimeOut), // HH:mm:ss → HH:mm
-                            workType: event.workType || "",
-                            workLocation: event.workLocation || "",
-                            workPosition: event.workPosition || "",
-                            workFileStatus:
-                                event.workScheduleFileList.length > 0 ? event.workScheduleFileList.length : "0",
-                            fileName : event.workScheduleFileList[0]?.fileName || "",
-                            fileUrl : event.workScheduleFileList[0]?.url || "",
-                            fileId : event.workScheduleFileList[0]?.id || "",
-                            workStatus: event.workScheduleState || "",
-                            checkMemo: event.checkStateMemo || "",
-                            employeeId: event.employee.id || "",
-                            employeeName : event.employee.name || "",
-                            flexTime: event.flexTime || false,
-                        };
-                    });
-                    cachedHolidays = newWorkDataList; // 캐싱하여 중복 요청 방지
-                    setWorkData(newWorkDataList);
-                }
-            } catch (err) {
-                setError("근무 데이터를 불러오는 중 오류가 발생했습니다.");
-            } finally {
-                setLoading(false);
+                // console.log("response", response.data); // API 응답 데이터 확인용
+                response.data.forEach((event) => {
+                    const date = new Date(event.checkInDate);
+                    const key = `${date.getFullYear()}-${String(
+                        date.getMonth() + 1
+                    ).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+
+                    const formatTime = (time) =>
+                        time ? time.split(":").slice(0, 2).join(":") : "";
+
+                    newWorkDataList[key] = {
+                        id: event.id || "",
+                        checkInDate: event.checkInDate || "",
+                        checkInTime: formatTime(event.checkInTime),
+                        checkOutDate: event.checkOutDate || "",
+                        checkOutTime: formatTime(event.checkOutTime),
+                        memo: event.memo || "",
+                        breakTime: event.breakTime || "",
+                        workType: event.workType || "",
+                        workLocation: event.workLocation || "",
+                        workPosition: event.workPosition || "",
+                        workFileStatus:
+                            event.workScheduleFileList.length > 0
+                                ? event.workScheduleFileList.length
+                                : "0",
+                        fileName: event.workScheduleFileList[0]?.fileName || "",
+                        fileUrl: event.workScheduleFileList[0]?.url || "",
+                        fileId: event.workScheduleFileList[0]?.id || "",
+                        workStatus: event.workScheduleState || "",
+                        checkMemo: event.checkStateMemo || "",
+                        employeeId: event.employee.id || "",
+                        employeeName: event.employee.name || "",
+                        flexTime: event.flexTime || false,
+                    };
+                });
+
+                cacheRef.current = newWorkDataList;
             }
-        };
 
-        useEffect(() => {
-            fetchWorkData();
-        }, [year, month]);
+            // 캐시에서 꺼내서 상태 설정
+            setWorkData(cacheRef.current);
+            // console.log("workData", cacheRef.current); // 캐시에서 꺼낸 데이터 확인용
+        } catch (err) {
+            setError("근무 데이터를 불러오는 중 오류가 발생했습니다.");
+        } finally {
+            setLoading(false);
+            // setIsProcessing(false);
+        }
+    }, [username, id, year, month, setIsProcessing]);
 
-    return { workData, fetchWorkData, loading, error }; // 로딩과 오류 상태 반환
+    // 2) year/month/id가 바뀔 때마다 캐시 초기화 + fetch
+    useEffect(() => {
+        cacheRef.current = null;
+        fetchWorkData();
+    }, [fetchWorkData]);
+
+    return { workData, fetchWorkData, loading, error };
 };
 
 export default useWorkData;

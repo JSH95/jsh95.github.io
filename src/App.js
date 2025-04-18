@@ -36,13 +36,67 @@ import AdminWorkScheduleDashboard from "./Admin/pages/AdminWorkScheduleDashboard
 import AdminWorkScheduleList from "./Admin/pages/AdminWorkScheduleList";
 import AdminWorkScheduleDetail from "./Admin/pages/AdminWorkScheduleDetail";
 import AdminWorkScheduleReceipt from "./Admin/pages/AdminWorkScheduleReceipt";
+import Footer from "./config/Footer";
+import ScrollToTopButton from "./config/ScrollToTopButton";
+import MainPage from "./mainpages/MainPage";
+import SessionWarningModal from "./config/SessionWarningModal";
+import { LoadingProvider, useLoading } from "./utils/LoadingContext"; // 경로에 맞게 조정
 
-const Layout = ({ children }) => (
-  <>
-    <NavigationBar />
-    <div style={{ marginTop: '100px', padding: '0px' }}>{children}</div>
-  </>
-);
+const Layout = ({ children }) => {
+    const { isProcessing } = useLoading();
+    const {
+        showWarningModal,
+        extendSession,
+        logout,
+        setShowWarningModal,
+    } = useAuth();
+
+    return (
+        <>
+            <div className="flex flex-col min-h-screen">
+                <NavigationBar />
+                {/* ✅ 세션 만료 경고 모달 */}
+                <SessionWarningModal
+                    show={showWarningModal}
+                    onExtend={() => {
+                        extendSession();
+                        setShowWarningModal(false);
+                    }}
+                    onLogout={() => {
+                        logout();
+                        setShowWarningModal(false);
+                    }}
+                />
+                {isProcessing && (
+                    <div
+                        className="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center"
+                        style={{ backgroundColor: "rgba(0,0,0,0.5)", zIndex: 1050 }}
+                    >
+                        <div className="spinner-border text-light" role="status">
+                            <span className="visually-hidden">처리 중...</span>
+                        </div>
+                    </div>
+                )}
+                <main className="flex-grow">
+                    <div
+                        style={{
+                            marginTop: "20px",
+                            padding: "0px",
+                            minHeight: "calc(100vh - 100px)",
+                            marginBottom: "50px",
+                        }}
+                    >
+                        {children}
+                    </div>
+                    <ScrollToTopButton />
+                </main>
+
+                <Footer />
+            </div>
+        </>
+    );
+};
+
 
 //로그인 상태 권한 설정 권한 Nav
 const ProtectedRoute = ({ children }) => {
@@ -69,18 +123,21 @@ const ProtectedRoute = ({ children }) => {
 const App = () => {
   const navigate = useNavigate();
   const { isLoggedIn } = useAuth();
-  const location = useLocation();
-
   useEffect(() => {
-    // 새로고침 후 로그인 상태 확인
-    if (isLoggedIn && location.pathname === '/#/') {
-      navigate('/dashboard'); // 로그인 상태에서 "/"에 있을 경우에만 리다이렉트
-    } else if (!isLoggedIn && location.pathname !== '/#/') {
-      navigate('/'); // 로그인되지 않은 사용자가 다른 경로로 접근할 경우 리다이렉트
-    }
-  }, [isLoggedIn, navigate, location.pathname]);
+      const currentHash = window.location.hash;
+
+      // 로그인 상태이고 홈 경로라면 대시보드로 이동
+      if (isLoggedIn && (currentHash === '#' || currentHash === '#/')) {
+          navigate('/main');
+      }
+      // 로그인되지 않은 상태이고, 홈 경로가 아니라면 홈으로 이동 (또는 로그인 페이지)
+      else if (!isLoggedIn && currentHash !== '#' && currentHash !== '#/') {
+          navigate('/');
+      }
+  }, [isLoggedIn, navigate]);
   
     return(
+        <LoadingProvider>
         <Layout>
             <Routes>
                 <Route
@@ -295,8 +352,22 @@ const App = () => {
                         </ProtectedRoute>
                     }
                 />
+                <Route path="*"
+                       element={
+                    <Navigate to="/main" replace />
+                }
+                />
+                <Route
+                    path="/main"
+                    element={
+                        <ProtectedRoute>
+                            <MainPage/>
+                        </ProtectedRoute>
+                    }
+                />
             </Routes>
         </Layout>
+        </LoadingProvider>
     );
 };
 

@@ -11,15 +11,18 @@ import {getCheckStateText} from "../utils/getCheckStateText";
 import createAxiosInstance from "../../config/api";
 import ScheduleMemoPopup from "../utils/ScheduleMemoPopup";
 import * as PropTypes from "prop-types";
-import calculateWorkHours from "../../utils/calculateWorkHours";
 import {useAuth} from "../../config/AuthContext";
+import useWorkHours from "../utils/useWorkHours";
+import {useLoading} from "../../utils/LoadingContext";
 
 function CardContent(props) {
     return null;
 }
 
 CardContent.propTypes = {children: PropTypes.node};
+
 const WorkScheduleList = () =>  {
+    const { setIsProcessing } = useLoading();
         const { role, username } = useAuth();
         const today = new Date();
         const [year, setYear] = useState(today.getFullYear());
@@ -28,21 +31,20 @@ const WorkScheduleList = () =>  {
         const navigate = useNavigate();
         const [loading, setLoading] = useState(false);
         const [error, setError] = useState("");
-    const workDataList = useWorkData(year, month); // ✅ 데이터와 갱신 함수 가져오기
-    const workDefaultData = useWorkDefaultData();
-    const [displayText, setDisplayText] = useState("");
-    const [modalOpen, setModalOpen] = useState(false);
-    const [workTime, setWorkTime] = useState({});
-
+        const workDataList = useWorkData(year, month); // ✅ 데이터와 갱신 함수 가져오기
+        const workDefaultData = useWorkDefaultData();
+        const [displayText, setDisplayText] = useState("");
+        const [modalOpen, setModalOpen] = useState(false);
+        const [workTime, setWorkTime] = useState({});
+        const { data, loadingWorkHours, errorWorkHours } = useWorkHours(year, month, username, role);
     //     "2025-01-01": { attendanceType: "휴일", workType: "", checkInTime: "", checkOutTime: "", memo: "공휴일" },
+
     useEffect(() => {
-        const calculatedData = async () => {
-            const calculatedData = await calculateWorkHours(year, month, role, username);
-            console.log("calculatedData", calculatedData);
-            setWorkTime(calculatedData[0]);
+        if (!loadingWorkHours && data.length > 0) {
+            // console.log("받아온 데이터:", data);
+            setWorkTime(data[0]); // 데이터가 있을 때만 사용
         }
-        calculatedData();
-    } , [year, month]);
+    } , [data, loadingWorkHours, year, month]);
 
     useEffect(() => {
         const fetchSchedule = async () => {
@@ -78,8 +80,9 @@ const WorkScheduleList = () =>  {
                         workType: workType.workType || "",
                         workLocation: workType.workLocation || "",
                         workPosition: workType.workPosition || "",
-                        breakTimeIn: workType.breakTimeIn || "",
-                        breakTimeOut: workType.breakTimeOut || "",
+                        // breakTimeIn: workType.breakTimeIn || "",
+                        // breakTimeOut: workType.breakTimeOut || "",
+                        breakTime: workType.breakTime || "",
                         styleClass: key === todayKey ? "today" : (HolidayType ? "holiday" : isWeekend ? "weekend" : ""),
                         styleClass2: workType.workStatus === "" ? "" :
                             (workType.workStatus ==="수정요청" ? "change" :
@@ -95,6 +98,7 @@ const WorkScheduleList = () =>  {
                     };
                 });
                 setSchedule(newSchedule);
+                // console.log("근무 데이터:", newSchedule);
                 setLoading(false);
             }catch (error){
                 setError("근무 데이터를 불러오는데 실패했습니다." + error);
@@ -125,10 +129,10 @@ const WorkScheduleList = () =>  {
         });
     };
 
-    const handleClickMyPage = () => {
-        const scheduleData  = {stateInfo : "true"};
-        navigate("/workSchedule/dashBoard", {state: scheduleData });
-    }
+    // const handleClickMyPage = () => {
+    //     const scheduleData  = {stateInfo : "true"};
+    //     navigate("/workSchedule/dashBoard", {state: scheduleData });
+    // }
 
     const handleClickEdit = (date) => {
         if(workDataList?.workData[date] === undefined) {
@@ -143,8 +147,9 @@ const WorkScheduleList = () =>  {
 
     const checkStatesHandle = useCallback((schedule) => {
         const checkStates = Object.values(schedule).map(item => item.checkState);
-        const checkMemo = Object.values(schedule).map(item => item.checkMemo);
         const text = getCheckStateText(checkStates);
+        // console.log("checkStates", checkStates);
+        // console.log("text", text);
         setDisplayText(text);
     }, []);
 
@@ -172,6 +177,7 @@ const WorkScheduleList = () =>  {
                 if (window.confirm("근무표 제출을 취소하시겠습니까?") === false) return;
                 break;
         }
+        setIsProcessing(true);
         setLoading(true);
         try{
             const formData = new FormData();
@@ -210,36 +216,31 @@ const WorkScheduleList = () =>  {
             }
         }finally {
             setLoading(false);
+            setIsProcessing(false);
         }
     }
 
-    // if (loading) return <p>Loading...</p>;
-    // if (error) return <p>{error}</p>;
     return (
             <div className="container">
                 <h2 className="text-dark mb-1">WORK SCHEDULE</h2>
                 <div className="d-flex justify-content-center align-items-center">
                     <button onClick={() => changeMonth(-1)} className="btn">
-                        <i class="bi bi-arrow-left-circle-fill fs-3"></i>
+                        <i className="bi bi-arrow-left-circle-fill fs-3"></i>
                     </button>
                     <h2 className="px-3">{year} / {String(month).padStart(2, "0")}</h2>
                     <button onClick={() => changeMonth(1)} className="btn">
-                        <i class="bi bi-arrow-right-circle-fill fs-3"></i>
+                        <i className="bi bi-arrow-right-circle-fill fs-3"></i>
                     </button>
                 </div>
                 <div className="d-flex justify-content-center align-items-center mb-4">
-                    {/*<button type="button" className="btn btn-primary me-3" onClick={handleClickMyPage}>*/}
-                    {/*    기본 정보*/}
-                    {/*</button>*/}
-                    <button type="button" className="btn btn-secondary me-4" onClick={handleClickReceipt}>
+                    { loading? "loading..." :<>
+                    <button type="button" className="btn btn-light me-4" onClick={handleClickReceipt}>
                         {month}월 영수증
                     </button>
-                    { loading? "loading..." :
-                        <>
                             <div>
                                 {displayText !== "수정 요청" ? <></>:
                                     <>
-                                        <Button type="button" className="btn btn-info fw-bold me-3" onClick={handleClickModal}>
+                                        <Button type="button" className="btn btn-success fw-bold me-3" onClick={handleClickModal}>
                                             수정 요청 사항
                                         </Button>
                                         <ScheduleMemoPopup
@@ -251,7 +252,7 @@ const WorkScheduleList = () =>  {
                                 }
                             </div>
                             {displayText === "수정 요청" ?
-                                <button type="button" className="btn btn-success" onClick={() => handleClickSummit(1)}>
+                                <button type="button" className="btn btn-secondary" onClick={() => handleClickSummit(1)}>
                                     근무표 재제출
                                 </button>
                                 : displayText === "제출 중" || displayText === "재제출 중"?
@@ -259,8 +260,11 @@ const WorkScheduleList = () =>  {
                                         제출 취소
                                     </button>
                                     :  displayText === "승인 완료" ?
-                                        <i class="bi bi-calendar-check"> 승인완료</i>
-                                 : <button type="button" className="btn btn-success" onClick={() => handleClickSummit(0)}>
+                                        <>
+                                            <i className="bi bi-calendar-check"></i>
+                                            승인완료
+                                        </>
+                                        : <button type="button" className="btn btn-secondary" onClick={() => handleClickSummit(0)}>
                                             근무표 제출
                                         </button>
                             }
@@ -269,9 +273,9 @@ const WorkScheduleList = () =>  {
                 </div>
                 <div
                     className="table-responsive"
-                    style={{ maxHeight: "700px", overflowY: "auto", border: "1px solid #ddd" }}
+                    style={{ maxHeight: "400px", overflowY: "auto", border: "1px solid #ddd" }}
                 >
-                    <table className="table table-striped">
+                    <table className="table">
                         <thead className="table-light sticky-top" style={{ top: "0", zIndex: 1 }}>
                         <tr>
                             <th className="text-center">日付</th>
@@ -284,64 +288,86 @@ const WorkScheduleList = () =>  {
                         </tr>
                         </thead>
                         <tbody>
-                        {loading ? "loading...":schedule.map((day, index) => (
+                        {loading ?
+                            <tr>
+                                <td colSpan="5" className="text-center">Loading...</td>
+                            </tr>
+                            :schedule.map((day, index) => (
                             <tr key={index} >
-                                <td className={day.styleClass}>
-                                    {day.date}日 &nbsp;
-                                    {displayText === "제출 중" || displayText === "재제출 중" || displayText === "승인 완료" ? null :
-                                        <i className="bi bi-pencil-fill"
-                                           onClick={() => handleClickEdit(day.key, displayText)}
-                                        >
-                                        </i>
-                                    }
-                                </td>
+                                    <td className={day.styleClass}>
+                                        <div className="d-flex align-items-center justify-content-center px-1">
+                                            <span
+                                                className="me-2 text-end"
+                                                style={{
+                                                    display: "inline-block",
+                                                    minWidth: "32px", // 날짜 영역 고정폭 (한자리, 두자리 동일 너비)
+                                                }}
+                                            >
+                                                {day.date}日
+                                            </span>
+                                        {displayText === "제출 중" || displayText === "재제출 중" || displayText === "승인 완료" ? null :
+                                            <a
+                                                onClick={() => handleClickEdit(day.key, displayText)}
+                                                style={{ cursor: "pointer", transition: "color 0.2s ease-in-out" }}
+                                                className="text-primary"
+                                            >
+                                                <i className="bi bi-pencil-fill"></i>
+                                            </a>
+                                        }
+                                        </div>
+                                    </td>
                                 <td className={day.styleClass}>{day.weekday}</td>
                                 <td className={day.styleClass}>{day.workType} </td>
                                 <td className={day.styleClass}>{day.workPosition}</td>
                                 <td className={day.styleClass}>
-                                    {day.workType !== "유급휴가" && day.workType !== "출근" && day.workType !== "휴일출근" ? "-" : day.checkInTime}
+                                    {day.workPosition !== "휴가" ?
+                                        day.workType !== "유급휴가" && day.workType !== "출근" && day.workType !== "휴일출근" ? "-" : day.checkInTime
+                                    : "-"
+                                    }
                                 </td>
                                 <td className={day.styleClass}
                                     style={(day.checkOutDate !== day.key)  ?
                                         { color: 'red', fontWeight: 'bold' }
                                         : {}}
                                 >
-
-                                    {day.workType !== "유급휴가" && day.workType !== "출근" && day.workType !== "휴일출근" ? "-" :
+                                    {day.workPosition !== "휴가" ?
+                                    day.workType !== "유급휴가" && day.workType !== "출근" && day.workType !== "휴일출근" ? "-" :
                                         (day.checkOutTime ? ((day.checkOutDate !== day.key)  ?
                                         "次の日 " : "" )
                                         : "" )
-                                        + day.checkOutTime}
-
+                                        + day.checkOutTime
+                                    : "-"}
                                 </td>
                                 <td className={`${day.styleClass} text-truncate`}
                                     style={{ maxWidth: "300px" , minWidth: "200px"}}
                                 >
                                     {day.file === "true" ? (
-                                        <>
-                                            <i className="bi bi-file-earmark-check-fill"
-                                                onClick={() => handleClickEdit(day.key)}></i>
-                                        </>
+                                        <a href={day.fileUrl}
+                                           style={{ cursor: "pointer", transition: "color 0.2s ease-in-out" }}
+                                           className="text-primary"
+                                           target="_blank"
+                                        >
+                                            <i className="bi bi-file-earmark-check-fill"></i>
+                                        </a>
                                     ) : (null)}&nbsp;
                                     {day.memo}
                                 </td>
-
                             </tr>
                         ))}
                         </tbody>
                     </table>
                 </div>
-                <div className="d-flex justify-content-center align-items-center mb-4">
+                <div className=" justify-content-center align-items-center mb-4">
                     <div className="mt-4 p-4">
-                        <h2 className="text-xl font-semibold mb-4">근무 시간 요약(테스트 중)</h2>
+                        <h2 className="text-xl mb-4">근무 시간 요약(테스트 중)</h2>
                         <div className="row">
-                            <div className="col-md-4">
-                                <div className="card shadow-sm p-3">
-                                    <h5 className="card-title">기본 근무 정보</h5>
+                            <div className="col-12 col-lg-4">
+                                <div className="card shadow-sm p-3 mb-3">
+                                    <h5 className="card-header fw-bold">기본 근무 정보</h5>
                                     <ul className="list-group list-group-flush">
                                         <li className="list-group-item d-flex justify-content-between">
                                             <span>총 근무 시간</span>
-                                            <span>{workTime?.hours + " h" || "Loading..."}</span>
+                                            <span>{workTime?.totalWorkHours ? workTime?.totalWorkHours + " h"  : "-"}</span>
                                         </li>
                                         <li className="list-group-item d-flex justify-content-between">
                                             <span>실업시간</span>
@@ -362,9 +388,9 @@ const WorkScheduleList = () =>  {
                                     </ul>
                                 </div>
                             </div>
-                            <div className="col-md-4">
+                            <div className="col-12 col-lg-4 mb-3">
                                 <div className="card shadow-sm p-3">
-                                    <h5 className="card-title">법정 시간</h5>
+                                    <h5 className="card-header fw-bold">법정 시간</h5>
                                     <ul className="list-group list-group-flush">
                                         <li className="list-group-item d-flex justify-content-between">
                                             <span>법정내 시간외 노동시간</span>
@@ -389,10 +415,9 @@ const WorkScheduleList = () =>  {
                                     </ul>
                                 </div>
                             </div>
-
-                            <div className="col-md-4">
+                            <div className="col-12 col-lg-4">
                                 <div className="card shadow-sm p-3">
-                                    <h5 className="card-title">휴일 및 휴가</h5>
+                                    <h5 className="card-header fw-bold">휴일 및 휴가</h5>
                                     <ul className="list-group list-group-flush">
                                         <li className="list-group-item d-flex justify-content-between">
                                             <span>공휴일 수</span>

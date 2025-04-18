@@ -1,150 +1,26 @@
 import React, { useEffect, useState } from "react";
 import {BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, Cell} from "recharts";
 import "../../config/index.css";
-import createAxiosInstance from "../../config/api";
 import {useNavigate} from "react-router-dom";
 import {useAuth} from "../../config/AuthContext";
-import holidayListData from "../../utils/holidayListData";
-import { calculateStatsForAllEmployees } from "../../utils/calculateStatsForAllEmployees";
+import useWorkHours from "../../jobScedule/utils/useWorkHours";
+import {useLoading} from "../../utils/LoadingContext";
 
 const AdminWorkScheduleDashboard = () => {
-    const { username } = useAuth();
+    const { setIsProcessing } = useLoading();
     const { role } = useAuth();
     const navigate = useNavigate();
     const [chartData, setChartData] = useState([]);
     const today = new Date();
     const [year, setYear] = useState(today.getFullYear());
     const [month, setMonth] = useState(today.getMonth() + 1);
-    const timeStringToMinutes = (timeStr) => {
-        const [hours, minutes] = timeStr.split(':').map(Number);
-        return hours * 60 + minutes;
-    };
-    const [allStats, setAllStats] = useState([]);
-
-    function GetBusinessDays(year, month, holidays) {
-        let businessDays = 0;
-        const date = new Date(year, month - 1, 1);
-        while (date.getMonth() === month - 1) {
-            const day = date.getDay();
-            const formattedDate = date.toISOString().slice(0, 10); // YYYY-MM-DD 형식
-            if (day !== 0 && day !== 6 && !holidays.includes(formattedDate)) {
-                businessDays++;
-            }
-            date.setDate(date.getDate() + 1);
-        }
-        return businessDays;
-    }
+    const { data, loadingWorkHours, errorWorkHours } = useWorkHours(year, month, null, role);
 
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const japanHolidaysObject  = await holidayListData();
-                const japanHolidays = Object.keys(japanHolidaysObject);
-                const axiosInstance = createAxiosInstance();
-                const response = await axiosInstance.get(`/workSchedule/${year}/${month}`);
-                const filteredData = response.data.filter(
-                    (entry) =>
-                        // (entry.workType === '출근' || entry.workType === '휴일출근') &&
-                        ((role === 'ROLE_ADMIN' ||role === 'ROLE_TEAM_LEADER')|| entry.employee.team.teamLeaderId === username) // 어드민이면 팀장 ID 조건 제거
-                );
-                setAllStats(calculateStatsForAllEmployees(filteredData, year, month));
-                console.log("data", calculateStatsForAllEmployees(filteredData));
-                console.log("data2", filteredData);
-                const employeeHours = {};
-                const basicWorkTime = {};
-                const usernames = {}; // 기존 username과 변수명 충돌 방지
-                const businessDaysInMonth = GetBusinessDays(year, month, japanHolidays);
-                const status = {};
-
-                filteredData.forEach((entry) => {
-
-                    const { id } = entry.employee;
-                    const checkIn = new Date(`${entry.checkInDate}T${entry.checkInTime}`);
-                    const checkOut = new Date(`${entry.checkOutDate}T${entry.checkOutTime}`);
-                    const breakStart = new Date(`${entry.checkInDate}T${entry.breakTimeIn}`);
-                    const breakEnd = new Date(`${entry.checkInDate}T${entry.breakTimeOut}`);
-                    const BasicCheckInMinutes = timeStringToMinutes(entry.employeeWorkDate?.checkInTime || "");
-                    const BasicCheckOutMinutes = timeStringToMinutes(entry.employeeWorkDate?.checkOutTime|| "");
-                    const BasicBreakInMinutes = timeStringToMinutes( entry.employeeWorkDate?.breakTimeIn|| "");
-                    const BasicBreakOutMinutes = timeStringToMinutes(entry.employeeWorkDate?.breakTimeOut|| "");
-                    const basicWorkTimeInHours = (
-                        (
-                            (BasicCheckOutMinutes - BasicCheckInMinutes)
-                            -
-                            (BasicBreakOutMinutes - BasicBreakInMinutes)
-                        ) / 60
-                    ).toFixed(1);
-                    const monthlyBasicWorkTime = ((basicWorkTimeInHours * businessDaysInMonth)).toFixed(0);
-
-                    const workDuration = (checkOut - checkIn - (breakEnd - breakStart)) > 0
-                        ? Math.floor((checkOut - checkIn - (breakEnd - breakStart)) / (1000 * 60 * 60))
-                        : 0;
-                    employeeHours[id] = (employeeHours[id] || 0) + Number(workDuration);
-                    basicWorkTime[id] = monthlyBasicWorkTime;
-                    usernames[id] = entry.employee.name;
-
-                    // status 계산
-                    const workScheduleState = entry.workScheduleState; // 단일 값으로 확인
-
-                    switch (workScheduleState) {
-                        case '수정요청':
-                        case '재수정요청':
-                            if (!status[id]) {
-                                status[id] = '수정요청'; // 수정요청 상태가 있으면 '수정요청'
-                            }
-                            break;
-                        case '최종확인완료':
-                            if (!status[id]) {
-                                status[id] = '최종확인완료'; // 최종확인완료 상태가 있으면 '최종확인완료'
-                            }
-                            break;
-                        case '승인완료':
-                            if (!status[id]) {
-                                status[id] = '승인완료'; // 승인만 있으면 '승인'
-                            }
-                            break;
-                        case '미제출':
-                        case '신청취소':
-                            if (!status[id]) {
-                                status[id] = '미제출'; // 미제출 상태가 있으면 '미제출'
-                            }
-                            break;
-                        case '신청중':
-                        case '재제출':
-                        case '재재제출':
-                            if (!status[id]) {
-                                status[id] = '신청중'; // 신청중 상태가 있으면 '신청중'
-                            }
-                            break;
-                        case '확인완료':
-                            if (!status[id]) {
-                                status[id] = '확인완료'; // 확인완료 상태가 있으면 '확인완료'
-                            }
-                            break;
-
-                        default:
-                            if (!status[id]) {
-                                status[id] = '반려'; // 반려가 하나라도 있으면 '반려'
-                            }
-                            break;
-                    }
-                });
-                setChartData(Object.keys(employeeHours).map((id) => ({
-                    id,
-                    status : status[id],
-                    username: usernames[id],
-                    hours: employeeHours[id],
-                    basicWorkTime: basicWorkTime[id],
-                })
-                ));
-            } catch (error) {
-                alert("데이터를 불러올 수 없습니다. \n 다시 시도해주세요.")
-                // console.error("Error fetching work schedule data:");
-            }
-        };
-
-        fetchData();
-    }, [year, month]); // chartData 제거 (무한 루프 방지)
+        if (!loadingWorkHours && data.length > 0) {
+            setChartData(data); // 데이터가 있을 때만 사용
+        }
+    } , [data, loadingWorkHours]);
 
     const changeMonth = (direction) => {
         setMonth((prev) => {
@@ -178,8 +54,8 @@ const AdminWorkScheduleDashboard = () => {
                 <button className="btn btn-secondary" onClick={() => changeMonth(1)}>다음 달</button>
             </div>
             <div className="table-responsive">
-                <table className="table table-bordered
-                style={{ tableLayout: 'fixed', width: '100%' }}">
+                <table className="table table-hover"
+                style={{ tableLayout: 'fixed', width: '100%' }}>
                     <thead>
                     <tr>
                         <th className="table-header" style={{ minWidth: '150px', whiteSpace: 'nowrap' }}>승인 단계</th>
@@ -200,19 +76,22 @@ const AdminWorkScheduleDashboard = () => {
                     </tr>
                     </thead>
                     <tbody>
-                    {chartData
-                        .sort((a, b) => a.username.localeCompare(b.username))
+                    {!errorWorkHours ? chartData
+                        .sort((a, b) => a.employeeName.localeCompare(b.employeeName))
                         .map((entry) => (
-                        <tr key={entry.username}>
+                        <tr key={entry.employeeName}
+                            className="hover:bg-blue-50 cursor-pointer transition"
+                            onClick={() => moveToDetail(entry.employeeId)}
+                            style={{
+                                cursor: "pointer",
+                                transition: "color 0.2s ease-in-out",
+                            }}
+                        >
                             <td className="table-data"> {entry.status}</td>
-                            <td className="table-data" >
-                                <i onClick={() => moveToDetail(entry.id)}>
-                                    {entry.username}
-                                </i>
-                            </td>
-                            <td className="table-data"> {Number(entry.basicWorkTime) + 40}</td>
-                            <td className="table-data"> {entry.hours}</td>
-                            <td className="table-data"> {entry.hours - entry.basicWorkTime > 0 ? entry.hours - entry.basicWorkTime : "없음"}</td>
+                            <td className="table-data" >{entry.employeeName}</td>
+                            <td className="table-data"> {Number(entry.basicWorkHours) + 40}</td>
+                            <td className="table-data"> {entry.totalWorkHours}</td>
+                            <td className="table-data"> {entry.totalWorkHours - (entry.basicWorkHours + 40) > 0 ? (entry.totalWorkHours - (entry.basicWorkHours + 40)).toFixed(1) : "없음"}</td>
                             <td className="chart-cell">
                                 <ResponsiveContainer width="100%" height={30}>
                                     <BarChart
@@ -231,10 +110,10 @@ const AdminWorkScheduleDashboard = () => {
                                             type="category"
                                             hide={true}
                                         />
-                                        <Bar dataKey="hours">
-                                            <Cell fill={entry.hours >=
-                                            (Number(entry.basicWorkTime) + 40) ? "#0065ff"
-                                                : entry.hours >= Number(entry.basicWorkTime) ? "#61e368"
+                                        <Bar dataKey="totalWorkHours">
+                                            <Cell fill={entry.totalWorkHours >=
+                                            (Number(entry.basicWorkHours) + 40) ? "#0065ff"
+                                                : entry.totalWorkHours >= Number(entry.basicWorkHours) ? "#61e368"
                                                     : "#c20000"
                                             }
                                             />
@@ -243,12 +122,14 @@ const AdminWorkScheduleDashboard = () => {
                                 </ResponsiveContainer>
                             </td>
                         </tr>
-                    ))}
+                    ))
+                        : "오류"
+                    }
                     </tbody>
                 </table>
             </div>
 
-            <div>
+            <div className="mb-2 mt-4">
                 <h2>이번 달 직원별 근무 요약(테스트 중)</h2>
                 <table border="1" cellPadding="8">
                     <thead>
@@ -269,9 +150,9 @@ const AdminWorkScheduleDashboard = () => {
                     </tr>
                     </thead>
                     <tbody>
-                    {allStats.map((s) => (
-                        <tr key={s.employee.id}>
-                            <td>{s.employee.name}</td>
+                    {chartData.map((s) => (
+                        <tr key={s.employeeId}>
+                            <td>{s.employeeName}</td>
                             <td>{s.totalWorkDays}</td>
                             <td>{s.totalWorkHours}</td>
                             <td>{s.lateCount}</td>
