@@ -166,12 +166,13 @@ const AdminWorkScheduleList = () =>  {
                 alert("체크된 항목이 없습니다.");
                 return;
             }
-
             const missingMemo = checkedItemsData.some((item) => !item.checkStateMemo || item.checkStateMemo.trim() === "");
             if (missingMemo) {
                 alert("사유를 입력하지 않은 항목이 있습니다.");
                 return;
             }
+            const confirmDelete = window.confirm("해당 사원에게 수정요청을 보내겠습니까?");
+            if (!confirmDelete) return;
             try {
                 const axiosInstance = createAxiosInstance();
                 await axiosInstance.post(`/workScheduleAdmin/${id}`,{
@@ -182,20 +183,25 @@ const AdminWorkScheduleList = () =>  {
                 alert(id + "의 수정요청이 완료되었습니다.");
                 localStorage.removeItem("checkedItems");
                 setCheckedItems({});
-                switch (keyData) {
-                    case 1:
-                        setDisplayText("승인완료")
-                        break;
-                    case 2:
-                        setDisplayText("최종확인완료")
-                        break;
-                    case 3:
-                        setDisplayText("확인완료")
-                        break;
-                }
+                setDisplayText("수정 요청");
             } catch (error) {
-                // console.error(error);
-                alert("저장 중 오류가 발생했습니다.");
+                alert("요청에 오류가 발생했습니다.");
+            }
+        } else if(keyData === 4) {
+            const confirmDelete = window.confirm("승인을 취소하시겠습니까?");
+            if (!confirmDelete) return;
+            try {
+                const axiosInstance = createAxiosInstance();
+                await axiosInstance.post(`/workScheduleAdmin/approval/${id}`,{
+                    year,
+                    month,
+                    checkedDatesDto: null,
+                    keyData
+                });
+                alert(id + "의 승인이 취소되었습니다.");
+                setDisplayText("승인 취소");
+            } catch (error) {
+                alert("승인 취소 중 오류가 발생했습니다.");
             }
         } else {
             try {
@@ -217,12 +223,20 @@ const AdminWorkScheduleList = () =>  {
                     case 3:
                         setDisplayText("확인완료")
                         break;
-
                 }
-                setDisplayText("승인 완료")
             } catch (error) {
+                switch (keyData) {
+                    case 1:
+                        alert("승인 중 오류가 발생했습니다.");
+                        break;
+                    case 2:
+                        alert("최종확인 제출 중 오류가 발생했습니다.");
+                        break;
+                    case 3:
+                        alert("확인 완료 처리 중 오류가 발생했습니다.");
+                        break;
+                }
                 // console.error(error);
-                alert("저장 중 오류가 발생했습니다.");
             }
         }
     };
@@ -244,11 +258,11 @@ const AdminWorkScheduleList = () =>  {
                 <h2 className="text-dark mb-1">WORK SCHEDULE</h2>
                 <div className="d-flex justify-content-center align-items-center">
                     <button onClick={() => changeMonth(-1)} className="btn">
-                        <i class="bi bi-arrow-left-circle-fill fs-3"></i>
+                        <i className="bi bi-arrow-left-circle-fill fs-3"></i>
                     </button>
                     <h2 className="px-3">{year} / {String(month).padStart(2, "0")}</h2>
                     <button onClick={() => changeMonth(1)} className="btn">
-                        <i class="bi bi-arrow-right-circle-fill fs-3"></i>
+                        <i className="bi bi-arrow-right-circle-fill fs-3"></i>
                     </button>
                 </div>
                 {loading ? "Loading ...":<div className="d-flex justify-content-center align-items-center mb-2">
@@ -257,20 +271,22 @@ const AdminWorkScheduleList = () =>  {
                     </button>
                     <button onClick={() => handleSave(0)} className="btn btn-secondary me-4" type="button">수정 요청</button>
                     {displayText !== "승인 완료" ? role === "ROLE_ADMIN" ?
-                        <button onClick={() => handleSave(1)} className="btn btn-secondary me-4" type="button">승 인</button>
+                        <button onClick={() => handleSave(1)} className="btn btn-primary me-4" type="button">승 인</button>
                         :
                         role === "ROLE_TEAM_LEADER" ?
-                            <button onClick={() => handleSave(2)} className="btn btn-secondary me-4" type="button">승인 요청</button>
+                            <button onClick={() => handleSave(2)} className="btn btn-primary me-4" type="button">승인 요청</button>
                             :
-                            <button onClick={() => handleSave(3)} className="btn btn-secondary me-4" type="button">승인 요청</button>
-                    : null}
+                            <button onClick={() => handleSave(3)} className="btn btn-primary me-4" type="button">승인 요청</button>
+                        :
+                        <button onClick={() => handleSave(4)} className="btn btn-danger me-4" type="button">승인 취소</button>
+                    }
                     <h5 className="">상태 : {displayText} </h5>
                 </div>}
                 <div
                     className="table-responsive"
-                    style={{ maxHeight: "700px", overflowY: "auto", border: "1px solid #ddd" }}
+                    style={{ maxHeight: "450px", overflowY: "auto", border: "1px solid #ddd" }}
                 >
-                    <table className="table table-striped">
+                    <table className="table table-hover">
                         <thead className="table-light sticky-top" style={{ top: "0", zIndex: 1 }}>
                         <tr>
                             <th className="text-center">수정 사항</th>
@@ -285,10 +301,14 @@ const AdminWorkScheduleList = () =>  {
                         </thead>
                         <tbody>
                         {loading ? null : schedule.map((day, index) => (
-                            <tr key={index} onClick={() => handleClickEdit(day.key)}>
-                                {day.workType ? <td className={day.styleClass}
+                            <tr key={index} onClick={() => handleClickEdit(day.key)}
+                                style={{
+                                    cursor: "pointer",
+                                    transition: "color 0.2s ease-in-out",
+                                }}>
+                                    <td className={day.styleClass}
                                      onClick={(e) => e.stopPropagation()} // row 클릭 방지
-                                >
+                                    >
                                     <input
                                         type="checkbox"
                                         checked={!!checkedItems[day.key]}
@@ -305,10 +325,7 @@ const AdminWorkScheduleList = () =>  {
                                             style={{marginLeft: "8px", width: "150px"}}
                                         />
                                     )}
-                                </td> :
-                                    <td className={day.styleClass}>
-
-                                    </td>}
+                                </td>
                                 <td className={day.styleClass}>
                                     {day.date}日
                                 </td>
@@ -316,26 +333,34 @@ const AdminWorkScheduleList = () =>  {
                                 <td className={day.styleClass}>{day.workType} </td>
                                 <td className={day.styleClass}>{day.workPosition}</td>
                                 <td className={day.styleClass}>
-                                    {day.workType !== "출근" && day.workType !== "휴일출근" ? "-" : day.checkInTime}
-                                </td>
+                                    {day.workPosition !== "휴가" ?
+                                        day.workType !== "유급휴가" && day.workType !== "출근" && day.workType !== "휴일출근" ? "-" : day.checkInTime
+                                        : "-"
+                                    }                                </td>
                                 <td className={day.styleClass}
                                     style={(day.checkOutDate !== day.key)  ?
                                         { color: 'red', fontWeight: 'bold' }
                                         : {}}
                                 >
-                                    {day.workType !== "출근" && day.workType !== "휴일출근" ? "-" :
-                                        (day.checkOutTime ? ((day.checkOutDate !== day.key)  ?
-                                                "次の日 " : "" )
-                                            : "" )
-                                        + day.checkOutTime}
+                                    {day.workPosition !== "휴가" ?
+                                        day.workType !== "유급휴가" && day.workType !== "출근" && day.workType !== "휴일출근" ? "-" :
+                                            (day.checkOutTime ? ((day.checkOutDate !== day.key)  ?
+                                                    "次の日 " : "" )
+                                                : "" )
+                                            + day.checkOutTime
+                                        : "-"}
                                 </td>
                                 <td className={`${day.styleClass} text-truncate`}
                                     style={{ maxWidth: "300px" , minWidth: "200px"}}>
                                     {day.file === "true" ? (
-                                        <>
-                                            <i className="bi bi-file-earmark-check-fill"
-                                               onClick={() => handleClickEdit(day.key)}></i>
-                                        </>
+                                        <a href={day.fileUrl}
+                                           style={{ cursor: "pointer", transition: "color 0.2s ease-in-out" }}
+                                           className="text-primary"
+                                           target="_blank"
+                                           onClick={(e) => e.stopPropagation()}
+                                        >
+                                            <i className="bi bi-file-earmark-check-fill"></i>
+                                        </a>
                                     ) : (null)}&nbsp;
                                     {day.memo}
                                 </td>

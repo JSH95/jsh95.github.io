@@ -5,6 +5,7 @@ import useWorkData from "../utils/WorkData";
 import { useNavigate } from "react-router-dom";
 import "../../cssFiles/ScheduleMain.css";
 import {adjustTime} from "../utils/timeUtils";
+
 const WorkScheduleMain = () => {
     const today = new Date().toISOString().split("T")[0];
     const year = new Date(today).getFullYear();
@@ -20,8 +21,9 @@ const WorkScheduleMain = () => {
         checkInTime: "",
         checkOutDate: today,
         checkOutTime: "",
-        breakTimeIn: "",
-        breakTimeOut: "",
+        // breakTimeIn: "",
+        // breakTimeOut: "",
+        noBreakTime: false,
         workType: "출근",
         workPosition: "",
         workLocation: "",
@@ -34,6 +36,7 @@ const WorkScheduleMain = () => {
     const [uploading, setUploading] = useState(false);
     const [fileStatus, setFileStatus ] = useState(false);
 
+
     // 기본 데이터 설정 (초기 실행)
     useEffect(() => {
         if (data.checkInTime === null) {
@@ -41,7 +44,7 @@ const WorkScheduleMain = () => {
             navigate("/workSchedule/dashBoard");
             return;
         }
-        if (workData[today] !== undefined) {
+        if (workData?.[today]) {
             window.alert("이미 금일출근 기록이 있습니다. 출근리스트로 이동합니다.");
             navigate("/workSchedule/list");
             return;
@@ -58,8 +61,9 @@ const WorkScheduleMain = () => {
             ...prev,
             checkInTime: data.checkInTime || "",
             checkOutTime: data.checkOutTime || "",
-            breakTimeIn: data.breakTimeIn || "",
-            breakTimeOut: data.breakTimeOut || "",
+            // breakTimeIn: data.breakTimeIn || "",
+            // breakTimeOut: data.breakTimeOut || "",
+            noBreakTime: data.breakTime <= 0 || false,
             workLocation: data.workLocation || "",
             workPosition: data.workPosition || "",
             basicWorkTime: data.basicWorkTime || "",
@@ -97,6 +101,7 @@ const WorkScheduleMain = () => {
                 const toSave = {
                     ...savedData,
                     checkOutTime: adjusted.time,
+                    breakTime: savedData.noBreakTime ? 0 : data.breakTime,
                 };
                 const axiosInstance = createAxiosInstance();
                 await axiosInstance.post("/workSchedule/save", toSave);
@@ -108,6 +113,8 @@ const WorkScheduleMain = () => {
                 window.alert("오류가 발생했습니다. 다시한번 시도해주세요.");
             }
     };
+
+
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -300,6 +307,25 @@ const WorkScheduleMain = () => {
                                     }
                                     />
                                 </div>
+                        </div>
+                        <div className="form-group row">
+                            <div className="d-flex align-items-center justify-content-center gap-2 flex-nowrap">
+                                <strong >휴게 시간 없음</strong>
+                                <input
+                                    type="checkbox"
+                                    name="noBreakTime"
+                                    style={{marginTop: "0px"}}
+                                    className="form-check-input"
+                                    checked={savedData?.noBreakTime}
+                                    onChange={(e) => {
+                                        setSavedData({
+                                            ...savedData,
+                                            noBreakTime: e.target.checked,
+                                        });
+                                    }
+                                    }
+                                />
+                            </div>
                         </div>
                         {(!savedData.flexTime && savedData.checkInTime > data.checkInTime || savedData.checkOutTime < data.checkOutTime) && (
                             <>
