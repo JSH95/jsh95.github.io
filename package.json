@@ -9,7 +9,7 @@
     "@capacitor/android": "^7.0.1",
     "@capacitor/cli": "^7.0.1",
     "@capacitor/core": "^7.0.1",
-    "@capacitor/ios": "^7.1.0",
+    "@capacitor/ios": "^7.2.0",
     "@capacitor/push-notifications": "^7.0.0",
     "@capacitor/splash-screen": "^7.0.0",
     "@fullcalendar/daygrid": "^6.1.15",
@@ -64,7 +64,8 @@
     "deploy": "gh-pages -d build",
     "android-build": "npm run build && npx cap sync android && cd android && gradlew assembleDebug",
     "start-android-studio": "start \"\" \"C:\\Program Files\\Android\\Android Studio\\bin\\studio64.exe\" \"C:\\Users\\user\\Desktop\\ReactFront\\android\"",
-    "gitUpload": "git pull origin master && git add . && git commit -m \"update\" && git push origin JSH"
+    "gitUpload": "git pull origin master && git add . && git commit -m \"update\" && git push origin JSH",
+    "ios-build": "npm run build && npx cap sync ios"
   },
   "browserslist": [
     ">0.2%",
