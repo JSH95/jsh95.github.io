@@ -291,14 +291,15 @@ function WorkScheduleDashboard (){
                             </div>
                             <div className="form-group">
                                 <label className="label">출근 날짜 / 시간</label>
-                                <div className="d-flex align-items-center justify-content-start gap-2 flex-nowrap">
+                                <div className="d-flex align-items-center justify-content-start gap-2">
                                     <input
                                         name="checkInDate"
                                         type="date"
                                         className="form-control"
-                                        style={{ maxWidth: "160px" }}
+                                        style={{ maxWidth: "150px" , minWidth: 0}}
                                         value={editedItem.checkInDate || ""}
                                         onChange={handleInputChange}
+                                        required
                                     />
                                     <input
                                         type="number"
@@ -306,7 +307,7 @@ function WorkScheduleDashboard (){
                                         max="23"
                                         className="form-control"
                                         placeholder="시"
-                                        style={{ width: "80px" }}
+                                        style={{ width: "80px" , minWidth: 0}}
                                         value={editedItem.checkInHour ?? (editedItem.checkInTime?.split(":")[0] || "")}
                                         onChange={(e) => {
                                             const hour = e.target.value;
@@ -317,6 +318,7 @@ function WorkScheduleDashboard (){
                                                 checkInTime: `${hour.padStart(2, "0")}:${minute.padStart(2, "0")}`,
                                             }));
                                         }}
+                                        required
                                     />
                                     <span className="fs-5">:</span>
                                     <input
@@ -325,7 +327,7 @@ function WorkScheduleDashboard (){
                                         max="59"
                                         className="form-control"
                                         placeholder="분"
-                                        style={{ width: "80px" }}
+                                        style={{ width: "80px" , minWidth: 0}}
                                         value={editedItem.checkInMinute ?? (editedItem.checkInTime?.split(":")[1] || "")}
                                         onChange={(e) => {
                                             const minute = e.target.value;
@@ -336,6 +338,7 @@ function WorkScheduleDashboard (){
                                                 checkInTime: `${hour.padStart(2, "0")}:${minute.padStart(2, "0")}`,
                                             }));
                                         }}
+                                        required
                                     />
                                 </div>
                             </div>
@@ -343,14 +346,15 @@ function WorkScheduleDashboard (){
 
                             <div className="form-group">
                                 <label className="label">퇴근 날짜 / 시간</label>
-                                <div className="d-flex align-items-center justify-content-start gap-2 flex-nowrap">
+                                <div className="d-flex align-items-center justify-content-start gap-2 ">
                                     <input
                                         name="checkOutDate"
                                         type="date"
                                         className="form-control"
-                                        style={{ maxWidth: "160px" }}
+                                        style={{ maxWidth: "150px" , minWidth: 0}}
                                         value={editedItem.checkOutDate || ""}
                                         onChange={handleInputChange}
+                                        required
                                     />
                                     <input
                                         type="number"
@@ -358,7 +362,7 @@ function WorkScheduleDashboard (){
                                         max="99"
                                         className="form-control"
                                         placeholder="시"
-                                        style={{ width: "80px" }}
+                                        style={{ width: "80px" , minWidth: 0}}
                                         value={editedItem.checkOutHour ?? (editedItem.checkOutTime?.split(":")[0] || "")}
                                         onChange={(e) => {
                                             const hour = e.target.value;
@@ -374,6 +378,7 @@ function WorkScheduleDashboard (){
                                                 checkOutTime: `${hour.padStart(2, "0")}:${minute.padStart(2, "0")}`,
                                             }));
                                         }}
+                                        required
                                     />
                                     <span className="fs-5">:</span>
                                     <input
@@ -382,7 +387,7 @@ function WorkScheduleDashboard (){
                                         max="59"
                                         className="form-control"
                                         placeholder="분"
-                                        style={{ width: "80px" }}
+                                        style={{ width: "80px" , minWidth: 0}}
                                         value={editedItem.checkOutMinute ?? (editedItem.checkOutTime?.split(":")[1] || "")}
                                         onChange={(e) => {
                                             const minute = e.target.value;
@@ -393,6 +398,7 @@ function WorkScheduleDashboard (){
                                                 checkOutTime: `${hour.padStart(2, "0")}:${minute.padStart(2, "0")}`,
                                             }));
                                         }}
+                                        required
                                     />
                                 </div>
                             </div>
@@ -510,7 +516,7 @@ function WorkScheduleDashboard (){
                                         placeholder="사유를 입력해 주세요."
                                         value={editedItem.memo  || ""}
                                         onChange={handleInputChange}
-                                        required={editedItem.flexTime}
+                                        required
                                     />
                                 </div>
                             ) : (
@@ -590,7 +596,9 @@ function WorkScheduleDashboard (){
                                                 <label className="label">.jpg, .png타입만 업로드 가능</label>
                                             </strong>
                                         </div>
-                                        <div className="d-flex gap-2 mb-3" style={{ width: '80%' }}>
+                                        <div className="d-flex gap-2 mb-3"
+                                            style={{ width: '100%', maxWidth: '100%' }}
+                                        >
                                             <div className="input-group">
                                                 <input
                                                     type="file"
