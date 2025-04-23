@@ -1,0 +1,10 @@
+{
+	"appId": "com.weavus.app",
+	"appName": "react",
+	"webDir": "build",
+	"android": {},
+	"packageClassList": [
+		"PushNotificationsPlugin",
+		"SplashScreenPlugin"
+	]
+}
