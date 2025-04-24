@@ -141,9 +141,9 @@ const App = () => {
     useEffect(() => {
         // 웹뷰 위에 상태바가 겹치지 않게
         StatusBar.setOverlaysWebView({ overlay: false });
-
+        StatusBar.setBackgroundColor({ color: '#ffffff' });
         // 상태바 스타일 (필요 시 어둡거나 밝게 조정)
-        StatusBar.setStyle({ style: Style.Light }); // or Style.Dark
+        StatusBar.setStyle({ style: Style.Dark }); // or Style.Dark
     }, []);
   
     return(
