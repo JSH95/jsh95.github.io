@@ -143,7 +143,7 @@ const App = () => {
         StatusBar.setOverlaysWebView({ overlay: false });
         StatusBar.setBackgroundColor({ color: '#ffffff' });
         // 상태바 스타일 (필요 시 어둡거나 밝게 조정)
-        StatusBar.setStyle({ style: Style.Dark }); // or Style.Dark
+        StatusBar.setStyle({ style: Style.Light });
     }, []);
   
     return(
