@@ -342,7 +342,6 @@ const WorkScheduleMain = () => {
                                 />
                                 <small>{savedData.memo.length}/40</small>
                             </div>
-
                             </>
                         )}
                         {!savedData.flexTime &&savedData.checkInTime > data.checkInTime ? (

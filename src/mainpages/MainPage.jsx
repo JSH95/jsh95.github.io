@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom';
 import {useAuth} from "../config/AuthContext";
 import './MainPage.css';
+import {Capacitor} from "@capacitor/core";
+import usePushNotificationPermission from "../hooks/usePushNotificationPermission";
 
 const MainPage = () => {
     const { role } = useAuth();
@@ -39,6 +41,10 @@ const MainPage = () => {
             target : "_blank"
         },
     ].filter(Boolean);
+
+    if (Capacitor.isNativePlatform()) {
+        usePushNotificationPermission(); // 푸시 알림 토큰 가져오기
+    }
 
     return (
         <div className="container py-5">

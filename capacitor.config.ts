@@ -5,6 +5,17 @@ const config: CapacitorConfig = {
   appName: 'react',
   webDir: 'build',
   android: {},
+  plugins: {
+    SplashScreen: {
+      launchShowDuration: 0,
+      androidScaleType: 'CENTER_CROP',
+      backgroundColor: '#ffffff',
+      showSpinner: false,
+    },
+    PushNotifications: {
+      presentationOptions: ['alert', 'badge', 'sound'],
+    },
+  },
 };
 
 export default config;

@@ -19,7 +19,7 @@ function WorkScheduleDashboard (){
         year,
         month
     );
-
+    const [leaveType, setLeaveType] = useState(""); // 초기값 없음
     const [item, setItem] = useState({});
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("")
@@ -30,9 +30,6 @@ function WorkScheduleDashboard (){
     const [progress, setProgress] = useState(0); // 업로드 진행 상태
     const data = workDataDefault();
     const [noBreakTime, setNoBreakTime] = useState(false)
-    const [fullBreaktime, setFullBreaktime] = useState(
-        item?.workType === "유급휴가" && item?.workPosition === "휴가"
-    );
     const defaultItem = {
         id: "",
         checkInDate: date,
@@ -248,25 +245,65 @@ function WorkScheduleDashboard (){
             }
         };
 
-    const handleFullBreaktimeChange = (e) => {
-        const isChecked = e.target.checked;
-        setFullBreaktime(isChecked);
+    const handleLeaveTypeChange = (e) => {
+        const selectedType = e.target.value;
+        setLeaveType(selectedType);
 
-        setEditedItem((prev) => ({
-            ...prev,
-            checkInTime: isChecked ? "00:00" : data.checkInTime,
-            checkOutTime: isChecked ? "00:00" : data.checkOutTime,
-            workPosition: isChecked ? "휴가" : data.workPosition,
-        }));
+        switch (selectedType) {
+            case "전휴":
+                setEditedItem((prev) => ({
+                    ...prev,
+                    checkInTime: "00:00",
+                    checkOutTime: "00:00",
+                    workPosition: "휴가",
+                }));
+                break;
+            case "오후반휴":
+                setEditedItem((prev) => ({
+                    ...prev,
+                    checkInTime: data?.checkInTime || "",
+                    checkOutTime: "12:00",
+                    workPosition: data?.workPosition || "",
+                }));
+                break;
+            case "오전반휴":
+                setEditedItem((prev) => ({
+                    ...prev,
+                    checkInTime: "13:00",
+                    checkOutTime: data?.checkOutTime || "",
+                    workPosition: data?.workPosition || "",
+                }));
+                break;
+            default:
+                break;
+        }
     };
 
+
     useEffect(() => {
-        if (item?.workType === "유급휴가" && item?.workPosition === "휴가"
-            && item.checkInTime === "00:00" && item.checkOutTime === "00:00"
-            && item.checkInDate === item.checkOutDate) {
-            setFullBreaktime(true);
+        if (
+            item?.workType === "유급휴가" &&
+            item?.workPosition === "휴가" &&
+            item.checkInTime === "00:00" &&
+            item.checkOutTime === "00:00" &&
+            item.checkInDate === item.checkOutDate
+        ) {
+            setLeaveType("전휴"); // 체크박스 대신 라디오 선택
+        } else if (
+            item?.workType === "유급휴가" &&
+            item.checkOutTime === "12:00"
+        ) {
+            setLeaveType("오후반휴");
+        } else if (
+            item?.workType === "유급휴가" &&
+            item.checkInTime === "13:00"
+        ) {
+            setLeaveType("오전반휴");
+        } else {
+            setLeaveType(""); // 아무 것도 선택 안 된 상태
         }
     }, [item]);
+
 
     return (
         <div className="container d-flex justify-content-center align-items-center flex-column">
@@ -485,26 +522,58 @@ function WorkScheduleDashboard (){
                                     <option value="휴일출근">휴일출근</option>
                                 </select>
                             </div>
-                            {editedItem?.workType ==="유급휴가" ?
+                            {editedItem?.workType === "유급휴가" && (
                                 <div className="form-group row">
                                     <div className="row">
                                         <div className="col">
-                                            <strong className="col">전휴</strong>
+                                            <strong>휴가 유형</strong>
                                         </div>
                                         <div className="col">
-                                            <input
-                                                type="checkbox"
-                                                name="fullBreaktimeCheck"
-                                                style={{marginTop: "0px"}}
-                                                className="form-check-input"
-                                                checked={fullBreaktime}
-                                                onChange={handleFullBreaktimeChange}
-                                            />
+                                            <div className="form-check">
+                                                <input
+                                                    type="radio"
+                                                    id="fullBreak"
+                                                    name="leaveType"
+                                                    value="전휴"
+                                                    className="form-check-input"
+                                                    checked={leaveType === "전휴"}
+                                                    onChange={handleLeaveTypeChange}
+                                                    required
+                                                />
+                                                <label htmlFor="fullBreak" className="form-check-label">전휴</label>
+                                            </div>
+                                            <div className="form-check">
+                                                <input
+                                                    type="radio"
+                                                    id="amBreak"
+                                                    name="leaveType"
+                                                    value="오전반휴"
+                                                    className="form-check-input"
+                                                    checked={leaveType === "오전반휴"}
+                                                    onChange={handleLeaveTypeChange}
+                                                    required
+                                                />
+                                                <label htmlFor="amBreak" className="form-check-label">오전 반휴</label>
+                                            </div>
+                                            <div className="form-check">
+                                                <input
+                                                    type="radio"
+                                                    id="pmBreak"
+                                                    name="leaveType"
+                                                    value="오후반휴"
+                                                    className="form-check-input"
+                                                    checked={leaveType === "오후반휴"}
+                                                    onChange={handleLeaveTypeChange}
+                                                    required
+                                                />
+                                                <label htmlFor="pmBreak" className="form-check-label">오후 반휴</label>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                                : null}
-                            {item?.memo || editedItem.workType !== "출근" && editedItem.workType !== "휴일출근"
+                            )}
+
+                            {editedItem?.memo || editedItem.workType !== "출근" && editedItem.workType !== "휴일출근"
                                 || (!editedItem.flexTime && editedItem.checkInTime > data.checkInTime)
                                 ? (
                                 <div className="form-group">

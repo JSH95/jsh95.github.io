@@ -232,16 +232,19 @@ const WorkScheduleList = () =>  {
                         <i className="bi bi-arrow-right-circle-fill fs-3"></i>
                     </button>
                 </div>
-                <div className="d-flex justify-content-center align-items-center mb-4">
+                <div className="d-flex flex-wrap justify-content-center align-items-center text-center mb-4 gap-3">
                     { loading? "loading..." :<>
-                    <button type="button" className="btn btn-light me-4" onClick={handleClickReceipt}>
-                        {month}월 영수증
-                    </button>
+                        <button type="button" className="btn btn-light me-2" onClick={handleClickReceipt}>
+                            {month}월 영수증
+                        </button>
                             <div>
                                 {displayText !== "수정 요청" ? <></>:
                                     <>
                                         <Button type="button" className="btn btn-success fw-bold me-3" onClick={handleClickModal}>
-                                            수정 요청 사항
+                                             {/*<span className="foot-mobile-break">*/}
+                                                 수정사항
+                                            {/* </span>*/}
+                                            {/*사항*/}
                                         </Button>
                                         <ScheduleMemoPopup
                                             schedule={schedule}
@@ -253,11 +256,11 @@ const WorkScheduleList = () =>  {
                             </div>
                             {displayText === "수정 요청" ?
                                 <button type="button" className="btn btn-secondary" onClick={() => handleClickSummit(1)}>
-                                    근무표 재제출
+                                    근무표재제출
                                 </button>
                                 : displayText === "제출 중" || displayText === "재제출 중"?
                                     <button type="button" className="btn btn-danger" onClick={() => handleClickSummit(2)}>
-                                        제출 취소
+                                        제출취소
                                     </button>
                                     :  displayText === "승인 완료" ?
                                         <>
