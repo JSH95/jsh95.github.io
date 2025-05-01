@@ -26,7 +26,7 @@ const EmployeeDetailPage = () => {
         );
         setItem(response.data);
       } catch (err) {
-        setError("유저 정보를 불러오지 못했습니다.");
+        setError("ユーザー情報を取得できませんでした。");
         // console.error(err);
       } finally {
         setLoading(false);
@@ -83,7 +83,7 @@ const EmployeeDetailPage = () => {
                   <div className="form-group">
                     <label className="label">퇴사일</label>
                     <p className="box">
-                      {item.employee.exitDate ? item.employee.exitDate : "재직중"}
+                      {item.employee.exitDate ? item.employee.exitDate : "在職中"}
                     </p>
                   </div>
                 </div>

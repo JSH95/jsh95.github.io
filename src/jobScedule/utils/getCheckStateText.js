@@ -1,19 +1,19 @@
 export const getCheckStateText = (checkStates) => {
     if (!checkStates || checkStates.length === 0)
-        return "미확인";
-    if (checkStates.includes("수정요청") || checkStates.includes("재수정요청")) {
-        return "수정 요청";
-    } else if (checkStates.includes("재제출") || checkStates.includes("재재제출")) {
-        return "제출 중";
-    } else if (checkStates.includes("신청중")) {
-        return "제출 중";
-    } else if (checkStates.includes("확인완료")) {
-        return "확인 완료";
-    } else if (checkStates.includes("승인완료")) {
-        return "승인 완료";
-    }  else if (checkStates.includes("최종확인완료")) {
-        return "최종확인 완료";
+        return "notSubmitted";
+    if (checkStates.includes("修正依頼") || checkStates.includes("再修正依頼")) {
+        return "request";
+    } else if (checkStates.includes("再提出") || checkStates.includes("再再提出")) {
+        return "reSending";
+    } else if (checkStates.includes("申請中")) {
+        return "sending";
+    } else if (checkStates.includes("確認完了")) {
+        return "check";
+    } else if (checkStates.includes("承認完了")) {
+        return "confirm";
+    }  else if (checkStates.includes("最終確認完了")) {
+        return "finalConfirm";
     } else {
-        return "미제출";
+        return "notSubmitted";
     }
 };

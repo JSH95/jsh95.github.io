@@ -23,6 +23,7 @@ const useWorkDefaultData = () => {
                 );
                 cachedHolidays = workDefaultData;
                 setWorkDefaultData(response.data);
+                // console.log("근무표 기본 설정 데이터", response.data); // API 응답 데이터 확인용
             } catch (err) {
             }
         };

@@ -42,6 +42,7 @@ import MainPage from "./mainpages/MainPage";
 import SessionWarningModal from "./config/SessionWarningModal";
 import { LoadingProvider, useLoading } from "./utils/LoadingContext";
 import { StatusBar, Style } from '@capacitor/status-bar';
+import {Capacitor} from "@capacitor/core";
 
 const Layout = ({ children }) => {
     const { isProcessing } = useLoading();
@@ -99,7 +100,6 @@ const Layout = ({ children }) => {
     );
 };
 
-
 //로그인 상태 권한 설정 권한 Nav
 const ProtectedRoute = ({ children }) => {
     const { isLoggedIn , role} = useAuth();
@@ -139,11 +139,13 @@ const App = () => {
   }, [isLoggedIn, navigate]);
 
     useEffect(() => {
-        // 웹뷰 위에 상태바가 겹치지 않게
-        StatusBar.setOverlaysWebView({ overlay: false });
-        StatusBar.setBackgroundColor({ color: '#ffffff' });
-        // 상태바 스타일 (필요 시 어둡거나 밝게 조정)
-        StatusBar.setStyle({ style: Style.Light });
+        if (Capacitor.isNativePlatform()) {
+            // 웹뷰 위에 상태바가 겹치지 않게
+            StatusBar.setOverlaysWebView({ overlay: false });
+            StatusBar.setBackgroundColor({ color: '#ffffff' });
+            // 상태바 스타일 (필요 시 어둡거나 밝게 조정)
+            StatusBar.setStyle({ style: Style.Light });
+        }
     }, []);
   
     return(

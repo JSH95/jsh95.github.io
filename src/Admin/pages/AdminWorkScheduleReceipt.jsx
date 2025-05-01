@@ -21,7 +21,7 @@ const AdminWorkScheduleReceipt = () => {
             setReceipts(response.data);
         } catch (error) {
             // console.error('영수증 데이터를 불러오는 데 실패했습니다:', error);
-            alert('영수증 데이터를 불러오는 데 실패했습니다.');
+            alert('領収書データの読み込みに失敗しました。');
         }
     };
 
@@ -71,7 +71,7 @@ const AdminWorkScheduleReceipt = () => {
                                         <td className="table-data">{receipt.receiptItem}</td>
                                         <td className="table-data">{receipt.receiptContent}</td>
                                         <td className="table-data">¥{receipt.receiptAmount.toLocaleString("en-US")}</td>
-                                        <td className="table-data">{receipt.receiptStatus === 0 ? "미처리":"처리완료"}</td>
+                                        <td className="table-data">{receipt.receiptStatus === 0 ? "未処理":"処理完了"}</td>
                                         <td className="table-data">
                                             {receipt.fileId != null ? (
                                                 <>

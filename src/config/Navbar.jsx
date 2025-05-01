@@ -75,11 +75,11 @@ const NavigationBar = () => {
               "password": password,
             }
           })
-          alert('비밀번호가 변경되었습니다.');
+          alert('パスワードが変更されました。');
           window.location.reload(); // 부모 창 새로고침
         }catch (err) {
           // console.error('비밀번호 변경 중 오류 발생:', err);
-          alert('비밀번호 변경 중 오류가 발생했습니다.');
+          alert('パスワードの変更中にエラーが発生しました。');
         }
       }
     };
@@ -106,12 +106,12 @@ const NavigationBar = () => {
                       <>
                         <Dropdown>
                           <Dropdown.Toggle variant="link" className="nav-link text-dark fw-bold text-nowrap">
-                            근무표
+                            勤務表
                           </Dropdown.Toggle>
                           <Dropdown.Menu>
-                            <Dropdown.Item as={Link} to="/workSchedule/main"  onClick={handleLinkClick}>근무기록</Dropdown.Item>
-                            <Dropdown.Item as={Link} to="workSchedule/list" onClick={handleLinkClick}>근무표 일람</Dropdown.Item>
-                            <Dropdown.Item as={Link} to="workSchedule/dashBoard" onClick={handleLinkClick}>근무표 기본 정보</Dropdown.Item>
+                            <Dropdown.Item as={Link} to="/workSchedule/main"  onClick={handleLinkClick}>勤務記録</Dropdown.Item>
+                            <Dropdown.Item as={Link} to="workSchedule/list" onClick={handleLinkClick}>勤務表スケジュール</Dropdown.Item>
+                            <Dropdown.Item as={Link} to="workSchedule/dashBoard" onClick={handleLinkClick}>勤務表 基本情報</Dropdown.Item>
                           </Dropdown.Menu>
                         </Dropdown>
                         <li className="nav-item">
@@ -144,7 +144,7 @@ const NavigationBar = () => {
                                          fw-bold
                                          text-nowrap"
                                 to="/employee"
-                                onClick={handleLinkClick}>사원 등록</Link>
+                                onClick={handleLinkClick}>사원 일람</Link>
                         </li>
                         <li className="nav-item" >
                           <Link className="nav-link
@@ -152,7 +152,7 @@ const NavigationBar = () => {
                                          fw-bold
                                          text-nowrap"
                                 to="/admin"
-                                onClick={handleLinkClick}>관리자페이지</Link>
+                                onClick={handleLinkClick}>관리자 페이지</Link>
                         </li>
                       </>
                   )}
@@ -164,7 +164,7 @@ const NavigationBar = () => {
                                          fw-bold
                                          text-nowrap"
                                 to="/workSchedule/main"
-                                onClick={handleLinkClick}>근무기록</Link>
+                                onClick={handleLinkClick}>勤務記録</Link>
                         </li>
                         <li className="nav-item" >
                           <Link className="nav-link
@@ -172,7 +172,7 @@ const NavigationBar = () => {
                                          fw-bold
                                          text-nowrap"
                                 to="workSchedule/list"
-                                onClick={handleLinkClick}>근무표 일람</Link>
+                                onClick={handleLinkClick}>勤務表スケジュール</Link>
                         </li>
                         <li className="nav-item" >
                           <Link className="nav-link
@@ -180,7 +180,7 @@ const NavigationBar = () => {
                                          fw-bold
                                          text-nowrap"
                                 to="workSchedule/dashBoard"
-                                onClick={handleLinkClick}>근무표 기본 정보</Link>
+                                onClick={handleLinkClick}>勤務表の基本情報</Link>
                         </li>
                         <li className="nav-item" >
                           <Link className="nav-link
@@ -188,7 +188,7 @@ const NavigationBar = () => {
                                          fw-bold
                                          text-nowrap"
                                 to="/admin/list"
-                                onClick={handleLinkClick}>근무표 관리</Link>
+                                onClick={handleLinkClick}>勤務表管理</Link>
                         </li>
                       </>
                   )}
@@ -200,7 +200,7 @@ const NavigationBar = () => {
                                          fw-bold
                                          text-nowrap"
                                 to="workSchedule/main"
-                                onClick={handleLinkClick}>근무기록</Link>
+                                onClick={handleLinkClick}>勤務記録</Link>
                         </li>
                         <li className="nav-item" >
                           <Link className="nav-link
@@ -208,7 +208,7 @@ const NavigationBar = () => {
                                          fw-bold
                                          text-nowrap"
                                 to="workSchedule/list"
-                                onClick={handleLinkClick}>근무표 일람</Link>
+                                onClick={handleLinkClick}>勤務表スケジュール</Link>
                         </li>
                         <li className="nav-item" >
                           <Link className="nav-link
@@ -216,7 +216,7 @@ const NavigationBar = () => {
                                          fw-bold
                                          text-nowrap"
                                 to="workSchedule/dashBoard"
-                                onClick={handleLinkClick}>근무표 기본 정보</Link>
+                                onClick={handleLinkClick}>勤務表 基本情報</Link>
                         </li>
                       </>
                   )}
@@ -232,7 +232,7 @@ const NavigationBar = () => {
                               padding: '', // 기본 padding
                               fontSize: '1rem',       // 기본 텍스트 크기
                             }}
-                        >비밀번호 변경</button>
+                        >パスワード変更</button>
                         {showModal && (
                             <ChangePassword
                                 id={employeeId} // id를 props로 전달
@@ -250,9 +250,9 @@ const NavigationBar = () => {
                           <span>
                             <i className="bi bi-alarm"></i> {minutes}:{seconds}
                           </span> <br/>
-                          로그아웃
+                          ログアウト
                         </>
-                      : "로그인"}
+                      : "ログイン"}
                   </button>
                 </div>
               </div>

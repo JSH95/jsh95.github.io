@@ -64,7 +64,7 @@ function Dashboard() {
                 </td>
                 <td className='table-data '>{item.employee.entryDate}</td>
                 <td className='table-data '>
-                  {item.employee.exitDate ? item.employee.exitDate : '재직중'}
+                  {item.employee.exitDate ? item.employee.exitDate : '在職中'}
                 </td>
                 <td className='table-data'>
                   {formatAmount(item.totalAmount ? item.totalAmount : '0')}

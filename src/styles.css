@@ -4,6 +4,8 @@
 @tailwind utilities;
 
 .App {
-  font-family: sans-serif;
+  font-family: "Noto Sans KR", "Malgun Gothic", "Apple SD Gothic Neo",
+  "Noto Sans JP", "Yu Gothic", "Meiryo",
+  "Segoe UI", sans-serif;
   text-align: center;
 }

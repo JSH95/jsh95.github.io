@@ -2,24 +2,21 @@ import { useEffect, useState } from "react";
 import { calculateWorkStats } from "../../utils/calculateWorkHours";
 import {useLoading} from "../../utils/LoadingContext";
 
-const useWorkHours = (year, month, username, role) => {
-    const { setIsProcessing } = useLoading();
+const useWorkHours = (year, month, username, role, run) => {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
     useEffect(() => {
         const fetchData = async () => {
-            // setIsProcessing(true);
             setLoading(true);
             try {
-                const result = await calculateWorkStats(year, month, username, role);
+                const result = await calculateWorkStats(year, month, username, role, run);
                 setData(result);
             } catch (err) {
                 setError(err);
             } finally {
                 setLoading(false);
-                // setIsProcessing(false);
             }
         };
 

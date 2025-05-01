@@ -10,32 +10,38 @@ const MainPage = () => {
     // console.log(date); // 예: 2025年4月15日(火)
     const links = [
         {
-            title: '근무표 일람',
-            description: '본인의 근무표를 조회하거나 수정합니다.',
+            title: '勤務表スケジュール',
+            description: '本人の勤務表を確認または修正、提出します。',
             path: '/workSchedule/list',
             rel: null
         },
         {
-            title: '근무기록',
-            description: date + '\n금일 근무시간을 기록합니다.',
+            title: '勤務記録',
+            description: date + '\n当日の勤務時間を記録します。',
             path: '/workSchedule/main',
             rel : null
         },
+        {
+            title: '勤務表 基本情報',
+            description: '本人の勤務表の基本情報を設定します。',
+            path: '/workSchedule/dashBoard',
+            rel : null
+        },
         role === 'ROLE_ADMIN' && {
-            title: '사원정보',
-            description: '사원들의 개인 정보를 관리합니다.',
+            title: '社員情報',
+            description: '社員の個人情報を管理します。',
             path: "/employee",
             rel: null
         },
         (role === 'ROLE_ADMIN' || role === 'ROLE_TEAM_LEADER' || role === 'ROLE_TEAM') && {
-            title: '근무표 관리',
-            description: '사원들의 근무표를 관리합니다.',
+            title: '勤務表管理',
+            description: '社員たちの勤務表を管理します。',
             path: "/admin/list",
             rel: null
         },
         {
             title: '社内WIKI',
-            description: '사내 스케쥴 및 정보를 확인합니다.',
+            description: '社内スケジュールおよび情報を確認するサイトに移動します。',
             path: 'https://sites.google.com/view/weavuswiki/%E7%A4%BE%E5%86%85%E6%97%A5%E7%A8%8B',
             rel : "noopener noreferrer",
             target : "_blank"
@@ -48,7 +54,7 @@ const MainPage = () => {
 
     return (
         <div className="container py-5">
-            <h1 className="text-center mb-4">WEAVUS 포털</h1>
+            <h1 className="text-center mb-4">WEAVUS ポータル</h1>
             <div className="row">
                 {links.map((link) => (
                     <div key={link.title} className="col-md-6 mb-4">

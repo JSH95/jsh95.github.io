@@ -65,7 +65,7 @@ function LoginPage() {
           navigate('/main');
         }
       } else {
-        setError(message || '알 수 없는 오류가 발생했습니다.');
+        setError(message || 'エラーが発生しました。 リロードをお願いします。');
       }
     } catch (error) {
       if (
@@ -75,7 +75,7 @@ function LoginPage() {
       ) {
         setError(error.response.data.message);
       } else {
-        setError('로그인에 실패했습니다. 다시 시도하세요.');
+        setError('ログインに失敗しました。 もう一度お試しくださいませ。');
       }
     } finally {
       setIsLoading(false); // 로딩 상태 비활성화
@@ -142,12 +142,12 @@ function LoginPage() {
                 checked={remember}
                 onChange={() => setRemember(!remember)}
               />{' '}
-              아이디 저장
+              ID保存
             </label>
           </div>
 
           <button type='submit' className='login-button' disabled={isLoading}>
-            {isLoading ? 'Loading...' : '로그인'}
+            {isLoading ? 'Loading...' : 'ログイン'}
           </button>
           {error && <p className='error-message'>{error}</p>}
         </form>
