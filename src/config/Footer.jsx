@@ -53,8 +53,10 @@ const Footer = () => {
                                 <span className="foot-mobile-break">MAIL. jungsh0802@weavus-group.com</span>
 
                             </p>
-                            <div className="text-sm text-right leading-relaxed">
-                                <p>Copyright © 2023 WEAVUS</p>
+                            <div className="text-sm text-right leading-relaxed" style={{
+                                paddingBottom: "10px",
+                            }}>
+                                <span>Copyright © 2023 WEAVUS</span>
                             </div>
                         </div>
                     </div>

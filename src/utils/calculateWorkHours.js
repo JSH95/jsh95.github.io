@@ -1,6 +1,5 @@
 import holidayListData from "../utils/holidayListData";
 import createAxiosInstance from "../config/api";
-import {useAuth} from "../config/AuthContext";
 
 const timeStringToMinutes = (timeStr) => {
     if (!timeStr) return 0;
@@ -30,7 +29,6 @@ export const calculateWorkStats = async (year, month, username, role, run) => {
             : `/workSchedule/${year}/${month}`;
 
         const response = await axiosInstance.get(endpoint);
-        // console.log("계산", endpoint);
         const dataArray = response.data
             ? (Array.isArray(response.data) ? response.data : [response.data])
             : [];
@@ -53,7 +51,7 @@ export const calculateWorkStats = async (year, month, username, role, run) => {
                 return false;
             })
             : dataArray;
-        // console.log("필터링된 데이터", filteredData);
+
         filteredData.forEach((entry) => {
             const id = entry.employee.id;
             if (!groupedByEmployee[id]) {
@@ -63,77 +61,86 @@ export const calculateWorkStats = async (year, month, username, role, run) => {
                 };
             }
             groupedByEmployee[id].records.push(entry);
-            // console.log("전체", groupedByEmployee[id].records);
         });
 
         const allowedTypes = ["出勤", "休日出勤", "有給休暇"];
         const results = [];
-        Object.values(groupedByEmployee).forEach(({ employee, records }) => {
 
+        Object.values(groupedByEmployee).forEach(({ employee, records }) => {
             let totalWorkHours = 0, lateCount = 0, nightShiftHours = 0;
             let absences = 0, substituteHolidays = 0, paidLeave = 0;
             let dayOff = 0, specialLeave = 0, condolenceLeave = 0;
             let holidayWork = 0, headOfficeAttendance = 0;
-            let statutoryOvertime = 0; // 법정시간 외 근무시간
-            let withinScheduledHours = 0; // 소정 내 근무시간
-            let overScheduledHours = 0; // 소정 초과 근무시간
-            let holidayWorkLegal = 0; // 법정 휴일 근무시간
-            let holidayWorkNonLegal = 0; // 법정 외 휴일 근무
-            let midnightWork = 0; // 자정 근무
-            let totalBreakTime = 0; // 휴게시간 총합
-            // console.log("▶ 전체 workPosition 목록:", records.map(r => r.workType));
+            let statutoryOvertime = 0;
+            let withinScheduledHours = 0;
+            let overScheduledHours = 0;
+            let holidayWorkLegal = 0;
+            let holidayWorkNonLegal = 0;
+            let midnightWork = 0;
+            let totalBreakTime = 0;
+
+            let earlyLeaveCount = 0;
+            let lateMinutes = 0;
+            let earlyLeaveMinutes = 0;
+
+            const standardCheckInMinutes = 9 * 60;
+            const standardCheckOutMinutes = 18 * 60;
+
             records
-                .filter(r =>
-                    allowedTypes.includes(r.workType) &&
-                    r.workPosition !== "休暇"
-                )
+                .filter(r => allowedTypes.includes(r.workType) && r.workPosition !== "休暇")
                 .forEach((r) => {
-                const checkIn = new Date(`${r.checkInDate}T${r.checkInTime}`);
-                const checkOut = new Date(`${r.checkOutDate || r.checkInDate}T${r.checkOutTime}`);
-                const breakTime =  (r.breakTime || 0) * 60 * 1000;
+                    const checkIn = new Date(`${r.checkInDate}T${r.checkInTime}`);
+                    const checkOut = new Date(`${r.checkOutDate || r.checkInDate}T${r.checkOutTime}`);
+                    const breakTime = (r.breakTime || 0) * 60 * 1000;
 
-                const workDuration = (checkOut - checkIn - breakTime) / 3600000;
-                const realWorkTime = Math.max(workDuration, 0);
-                totalWorkHours += realWorkTime;
+                    const workDuration = (checkOut - checkIn - breakTime) / 3600000;
+                    const realWorkTime = Math.max(workDuration, 0);
+                    totalWorkHours += realWorkTime;
 
-                if (
-                    (r.checkInDate === r.checkOutDate) &&
-                    r.checkInTime > r.employeeWorkDate?.checkInTime &&
-                    !r.employeeWorkDate?.flexTime
-                ) lateCount++;
+                    const checkInMinutes = timeStringToMinutes(r.checkInTime);
+                    const checkOutMinutes = timeStringToMinutes(r.checkOutTime);
 
-                if (checkOut.getHours() >= 22) {
-                    const overtimeMinutes = (checkOut.getHours() - 22) * 60 + checkOut.getMinutes();
-                    nightShiftHours += Math.floor(overtimeMinutes / 60);
-                }
+                    if (checkInMinutes > standardCheckInMinutes) {
+                        lateMinutes += checkInMinutes - standardCheckInMinutes;
+                        lateCount++;
+                    }
 
-                switch (r.workType) {
-                    case "欠勤": absences++; break;
-                    case "代休": substituteHolidays++; break;
-                    case "有給休暇": paidLeave++; break;
-                    case "特別休暇": specialLeave++; break;
-                    case "休日代替": dayOff++; break;
-                    case "慶弔休暇": condolenceLeave++; break;
-                    case "休日出勤": holidayWork++; break;
-                    default: break;
-                }
+                    if (checkOutMinutes < standardCheckOutMinutes) {
+                        earlyLeaveCount++;
+                        earlyLeaveMinutes += standardCheckOutMinutes - checkOutMinutes;
+                    }
 
-                if (r.workPosition === "本社") headOfficeAttendance++;
+                    if (checkOut.getHours() >= 22) {
+                        const overtimeMinutes = (checkOut.getHours() - 22) * 60 + checkOut.getMinutes();
+                        nightShiftHours += Math.floor(overtimeMinutes / 60);
+                    }
+
+                    switch (r.workType) {
+                        case "欠勤": absences++; break;
+                        case "代休": substituteHolidays++; break;
+                        case "有給休暇": paidLeave++; break;
+                        case "特別休暇": specialLeave++; break;
+                        case "休日代替": dayOff++; break;
+                        case "慶弔休暇": condolenceLeave++; break;
+                        case "休日出勤": holidayWork++; break;
+                    }
+
+                    if (r.workPosition === "本社") headOfficeAttendance++;
 
                     const isHoliday = japanHolidays.includes(r.checkInDate) || [0, 6].includes(new Date(r.checkInDate).getDay());
                     totalBreakTime += (r.breakTime || 0);
 
                     const checkInHour = checkIn.getHours() + checkIn.getMinutes() / 60;
                     const checkOutHour = checkOut.getHours() + checkOut.getMinutes() / 60;
+                    const scheduledHours = Math.max(Math.min(checkOutHour, 18) - Math.max(checkInHour, 9), 0);
 
                     if (!isHoliday) {
-                        const start = Math.max(checkInHour, 9);
-                        const end = Math.min(checkOutHour, 18);
-                        withinScheduledHours += Math.max(end - start, 0);
+                        withinScheduledHours += scheduledHours;
+                        const over = realWorkTime - scheduledHours;
+                        overScheduledHours += Math.max(0, over);
 
-                        if (checkOutHour > 18) {
-                            overScheduledHours += checkOutHour - 18;
-                        }
+                        const legal = realWorkTime - 8;
+                        statutoryOvertime += Math.max(0, legal);
                     } else {
                         holidayWorkNonLegal += realWorkTime;
                     }
@@ -145,44 +152,35 @@ export const calculateWorkStats = async (year, month, username, role, run) => {
                     if (checkOutHour >= 22) {
                         midnightWork += checkOutHour - 22;
                     }
+                });
 
-                    if (realWorkTime > 8) {
-                        statutoryOvertime += realWorkTime - 8;
-                    }
-            });
-            const monthlyBasicWorkTime = (8 * businessDaysInMonth).toFixed(0);
+            const monthlyBasicWorkTime = businessDaysInMonth * 8;
+            const deficitScheduledHours = Math.max(0, monthlyBasicWorkTime - withinScheduledHours);
 
             const checkStates = records.map(r => r.workScheduleState).filter(Boolean);
             const getWorkScheduleStatus = (checkStates) => {
                 if (!checkStates || checkStates.length === 0) return "未提出";
-                if (checkStates.includes("修正依頼") || checkStates.includes("再修正依頼")) {
-                    return "修正依頼";
-                } else if (checkStates.includes("再提出") || checkStates.includes("再再提出")) {
-                    return "再提出";
-                } else if (checkStates.includes("申請中")) {
-                    return "申請中";
-                } else if (checkStates.includes("確認完了")) {
-                    return "確認完了";
-                } else if (checkStates.includes("承認完了")) {
-                    return "承認完了";
-                } else if (checkStates.includes("最終確認完了")) {
-                    return "最終確認完了";
-                } else {
-                    return "未提出";
-                }
+                if (checkStates.includes("修正依頼") || checkStates.includes("再修正依頼")) return "修正依頼";
+                if (checkStates.includes("再提出") || checkStates.includes("再再提出")) return "再提出";
+                if (checkStates.includes("申請中")) return "申請中";
+                if (checkStates.includes("確認完了")) return "確認完了";
+                if (checkStates.includes("承認完了")) return "承認完了";
+                if (checkStates.includes("最終確認完了")) return "最終確認完了";
+                return "未提出";
             };
 
             results.push({
                 employeeId: employee.id,
                 employeeName: employee.name,
+                scheduledWorkDays: businessDaysInMonth,
                 totalWorkDays: records.length,
                 totalWorkHours: Number(totalWorkHours.toFixed(1)),
-                basicWorkHours:  Number(monthlyBasicWorkTime),
-                status: getWorkScheduleStatus(checkStates), // 변경된 부분
-                actualWorkHours: Number(totalWorkHours.toFixed(1)), // 실업시간
-                withinScheduledHours: Number(withinScheduledHours.toFixed(1)), // 소정내
-                overScheduledHours: Number(overScheduledHours.toFixed(1)), // 잔업
-                statutoryOvertime: Number(statutoryOvertime.toFixed(1)), // 법정초과
+                basicWorkHours: Number(monthlyBasicWorkTime),
+                status: getWorkScheduleStatus(checkStates),
+                actualWorkHours: Number(totalWorkHours.toFixed(1)),
+                withinScheduledHours: Number(withinScheduledHours.toFixed(1)),
+                overScheduledHours: Number(overScheduledHours.toFixed(1)),
+                statutoryOvertime: Number(statutoryOvertime.toFixed(1)),
                 holidayWorkLegal: Number(holidayWorkLegal.toFixed(1)),
                 holidayWorkNonLegal: Number(holidayWorkNonLegal.toFixed(1)),
                 midnightWork: Number(midnightWork.toFixed(1)),
@@ -199,12 +197,14 @@ export const calculateWorkStats = async (year, month, username, role, run) => {
                 condolenceLeave,
                 holidayWork,
                 headOfficeAttendance,
-
+                earlyLeaveCount,
+                lateMinutes: Math.floor(lateMinutes),
+                earlyLeaveMinutes: Math.floor(earlyLeaveMinutes),
+                deficitScheduledHours: Number(deficitScheduledHours.toFixed(1)),
             });
         });
 
         return results;
-
     } catch (error) {
         console.error("Error fetching data:", error);
         return [];
