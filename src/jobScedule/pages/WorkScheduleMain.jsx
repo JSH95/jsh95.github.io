@@ -24,7 +24,7 @@ const WorkScheduleMain = () => {
         // breakTimeIn: "",
         // breakTimeOut: "",
         noBreakTime: false,
-        workType: "출근",
+        workType: "出勤",
         workPosition: "",
         workLocation: "",
         basicWorkTime: "",
@@ -40,12 +40,12 @@ const WorkScheduleMain = () => {
     // 기본 데이터 설정 (초기 실행)
     useEffect(() => {
         if (data.checkInTime === null) {
-            window.alert("기본 근무시간을 설정해 주세요.");
+            window.alert("勤務表の基本情報を設定してください。\n 該当ページに移動します。");
             navigate("/workSchedule/dashBoard");
             return;
         }
         if (workData?.[today]) {
-            window.alert("이미 금일출근 기록이 있습니다. 출근리스트로 이동합니다.");
+            window.alert("本日の出勤記録がすでに存在します。\n 勤務表スケジュールに移動します。");
             navigate("/workSchedule/list");
             return;
         }
@@ -77,22 +77,21 @@ const WorkScheduleMain = () => {
             if (!savedData.flexTime && savedData.checkInTime > data.checkInTime ||
                 savedData.checkOutTime < data.checkOutTime) {
                 if(savedData.memo.length === 0) {
-                    window.alert("사유를 입력해주세요.");
+                    window.alert("理由を入力してください。\n");
                     return;
                 }
                 if (savedData.memo.length > 0 && savedData.memo.length < 5) {
-                    window.alert("사유가 너무 짧습니다. 5자 이상 입력해주세요.");
+                    window.alert("理由が短すぎます。 5文字以上入力してください。");
                     return;
                 }
-
             } else if (savedData.checkInTime === savedData.checkOutTime || data.checkInTime === data.checkOutTime) {
-                window.alert("출근 시간과 퇴근 시간이 동일합니다. 다시 입력해주세요.");
+                window.alert("出勤時間と退勤時間が同じです。もう一度入力してください。");
                 setSavedData((prev) => (
                     { ...prev, memo: ""}));
                 return;
             }
             if(!savedData.flexTime && savedData.checkInTime > data.checkInTime && selectedFile === null && fileStatus === false) {
-                const confirmDelete = window.confirm("지연서 파일을 업로드 하지 않았습니다. \n 그래도 진행하시겠습니까?");
+                const confirmDelete = window.confirm("遅延書ファイルをアップロードしていません。 \n 進めますか？");
                 if (!confirmDelete) return;
             }
 
@@ -105,12 +104,12 @@ const WorkScheduleMain = () => {
                 };
                 const axiosInstance = createAxiosInstance();
                 await axiosInstance.post("/workSchedule/save", toSave);
-                window.alert("출퇴근시간이 기록되었습니다.");
+                window.alert("通勤時間が記録されました。");
                 localStorage.setItem("fileStatus", JSON.stringify(false));
                 localStorage.removeItem("selectedFile");
                 navigate("/workSchedule/list");
             } catch (error) {
-                window.alert("오류가 발생했습니다. 다시한번 시도해주세요.");
+                window.alert("エラーが発生しました。 もう一度お試しください。");
             }
     };
 
@@ -131,11 +130,11 @@ const WorkScheduleMain = () => {
 
     const handleUpload = async () => {
         if(!selectedFile) {
-            window.alert("파일을 선택해주세요.");
+            window.alert("ファイルを選択してください。");
             return;
         }
         if(localStorage.getItem("fileStatus")) {
-            const confirmDelete = window.confirm("이미 업로드한 파일이 있습니다. 재업로드 하시겠습니까?");
+            const confirmDelete = window.confirm("すでにファイルがアップロードされています。再アップロードしますか？");
             if (!confirmDelete) return;
         }
         setUploading(true);
@@ -153,7 +152,7 @@ const WorkScheduleMain = () => {
                     setProgress(Math.round((progressEvent.loaded * 100) / progressEvent.total));
                 },
             });
-            window.alert("파일 업로드 성공!");
+            window.alert("ファイルのアップロード完了");
             localStorage.setItem("fileStatus", JSON.stringify(true));
             localStorage.setItem("selectedFile", selectedFile.name);
             setProgress(100); // 완료 후 100% 유지
@@ -162,7 +161,7 @@ const WorkScheduleMain = () => {
                 window.alert(error.response.data);
                 localStorage.setItem("fileStatus", JSON.stringify(false));
             } else {
-                window.alert("파일 업로드 중 오류가 발생했습니다.");
+                window.alert("ファイルアップロード中にエラーが発生しました。");
                 localStorage.setItem("fileStatus", JSON.stringify(false));
             }
         }finally {
@@ -175,12 +174,12 @@ const WorkScheduleMain = () => {
             <form onSubmit={handleStart}>
                 <div className="card" style={{ minWidth: "359.2px"}}>
                     <div className="card-header">
-                        <h2>근무 출퇴근 기록</h2>
+                        <h2>勤務の出退勤記録</h2>
                     </div>
                     <div className="card-body">
                         <div className="form-group">
                             <div className="d-flex align-items-center justify-content-center gap-2 flex-nowrap">
-                                <strong >출근 시간</strong>
+                                <strong >出勤時間</strong>
                                 <input
                                     name="checkInDate"
                                     type="date"
@@ -193,9 +192,9 @@ const WorkScheduleMain = () => {
                                 <input
                                     type="number"
                                     min="00"
-                                    max="99"
+                                    max="24"
                                     className="form-control"
-                                    placeholder="시"
+                                    placeholder="時"
                                     style={{ width: "80px" }}
                                     value={savedData.checkInHour ?? (savedData.checkInTime?.split(":")[0] || "")}
                                     onChange={(e) => {
@@ -214,7 +213,7 @@ const WorkScheduleMain = () => {
                                     min="00"
                                     max="59"
                                     className="form-control"
-                                    placeholder="분"
+                                    placeholder="分"
                                     style={{ width: "80px" }}
                                     value={savedData.checkInMinute ?? (savedData.checkInTime?.split(":")[1] || "")}
                                     onChange={(e) => {
@@ -231,7 +230,7 @@ const WorkScheduleMain = () => {
                         </div>
                         <div className="form-group">
                             <div className="d-flex align-items-center justify-content-center gap-2 flex-nowrap">
-                                <strong >퇴근 시간</strong>
+                                <strong >退勤時間</strong>
                                 <input
                                     name="checkOutDate"
                                     type="date"
@@ -244,9 +243,9 @@ const WorkScheduleMain = () => {
                                 <input
                                     type="number"
                                     min="0"
-                                    max="99"
+                                    max="23"
                                     className="form-control"
-                                    placeholder="시"
+                                    placeholder="時"
                                     style={{ width: "80px" }}
                                     value={savedData.checkOutHour ?? (savedData.checkOutTime?.split(":")[0] || "")}
                                     onChange={(e) => {
@@ -270,7 +269,7 @@ const WorkScheduleMain = () => {
                                     min="0"
                                     max="59"
                                     className="form-control"
-                                    placeholder="분"
+                                    placeholder="分"
                                     style={{ width: "80px" }}
                                     value={savedData.checkOutMinute ?? (savedData.checkOutTime?.split(":")[1] || "")}
                                     onChange={(e) => {
@@ -291,7 +290,7 @@ const WorkScheduleMain = () => {
                         </div>
                         <div className="form-group row">
                                 <div className="d-flex align-items-center justify-content-center gap-2 flex-nowrap">
-                                    <strong >플랙스 시간제</strong>
+                                    <strong >フレックスタイム制</strong>
                                     <input
                                         type="checkbox"
                                         name="flexTime"
@@ -310,7 +309,7 @@ const WorkScheduleMain = () => {
                         </div>
                         <div className="form-group row">
                             <div className="d-flex align-items-center justify-content-center gap-2 flex-nowrap">
-                                <strong >휴게 시간 없음</strong>
+                                <strong >休憩時間なし</strong>
                                 <input
                                     type="checkbox"
                                     name="noBreakTime"
@@ -330,26 +329,25 @@ const WorkScheduleMain = () => {
                         {(!savedData.flexTime && savedData.checkInTime > data.checkInTime || savedData.checkOutTime < data.checkOutTime) && (
                             <>
                             <div className="d-flex align-items-center gap-2 mb-3">
-                                <strong className="col-3">사유 :</strong>
+                                <strong className="col-3">理由 :</strong>
                                 <textarea
                                     className="bi-textarea-resize input"
                                     name="memo"
                                     value={savedData.memo || ""}
                                     onChange={handleChange}
-                                    placeholder="사유를 입력해 주세요."
+                                    placeholder="理由を入力してください。"
                                     maxLength={40}
                                     required = {!savedData.flexTime}
                                 />
                                 <small>{savedData.memo.length}/40</small>
                             </div>
-
                             </>
                         )}
                         {!savedData.flexTime &&savedData.checkInTime > data.checkInTime ? (
                             <div className="row-cols-1">
                                 {uploading && (
                                     <div style={{ marginBottom: "10px" }}>
-                                        <p>업로드 진행 중: {progress}%</p>
+                                        <p>アップロード進行中: {progress}%</p>
                                         <div
                                             style={{
                                                 // width: "100%",
@@ -370,20 +368,19 @@ const WorkScheduleMain = () => {
                                 )}
                                 <div className="d-flex flex-column align-items-end gap-2 mb-3 my-2">
                                     <div>
-                                        <strong>지연표 업로드 .jpg, .png타입 업로드 가능</strong>
+                                        <strong>.jpg、.pngタイプのみアップロード可能</strong>
                                         <input
                                             type="file"
                                             className="form-control"
                                             accept=".jpg, .png" // 필요에 따라 확장자 제한
                                             onChange={handleFileChange}
-                                            placeholder="지연표 업로드"
                                         />
                                     </div>
                                     <div>
                                         <button onClick={handleUpload}
                                                 className="btn btn-info"
                                                 type="button">
-                                            업로드
+                                            アップロード
                                         </button>
                                     </div>
                                 </div>
@@ -391,7 +388,7 @@ const WorkScheduleMain = () => {
                         ) : null}
                         <div className="card-footer bg-transparent">
                             <button type="submit" className="btn btn-primary w-100">
-                                출퇴근 기록
+                                出退勤記録
                             </button>
                         </div>
                     </div>

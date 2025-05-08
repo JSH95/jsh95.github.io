@@ -23,7 +23,7 @@ function AdminWorkScheduleDashboard (){
             }
         }catch (error){
             setItem(null);
-            setError("데이터를 불러오는데 실패했습니다.");
+            setError("データの読み込みに失敗しました。");
         } finally {
             setLoading(false);
         }
@@ -68,9 +68,9 @@ function AdminWorkScheduleDashboard (){
                                         <span className="form-control-plaintext me-2">
                                           {
                                               Number(item?.breakTime) === 0
-                                                  ? "휴게시간 없음"
+                                                  ? "休憩時間なし"
                                                   : Number(item?.breakTime) > 0
-                                                      ? item.breakTime + "분"
+                                                      ? item.breakTime + "分"
                                                       : ""
                                           }
                                         </span>

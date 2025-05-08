@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import {useLocation, useNavigate} from "react-router-dom";
+import { useNavigate} from "react-router-dom";
 import useWorkDefaultData from "../utils/WorkDataDefault";
 import {useAuth} from "../../config/AuthContext";
 import createAxiosInstance from "../../config/api";
@@ -40,7 +40,7 @@ function WorkScheduleDashboard (){
                     setIsEditing(true);
                 }
             } catch (error) {
-                setError("근무표 기본 정보를 불러오지 못했습니다.");
+                setError("勤務表の基本情報を読み込めませんでした。\n リロードまたは管理者にお問い合わせください");
             } finally {
                 setLoading(false);
             }
@@ -65,7 +65,7 @@ function WorkScheduleDashboard (){
 
     const handleSubmit = async (e) => {
         e.preventDefault(); // 폼 제출 방지
-        const confirmSave = window.confirm("기본 정보를 저장하시겠습니까?");
+        const confirmSave = window.confirm("基本情報を保存しますか？");
         if (!confirmSave) {
             return;
         } else {
@@ -75,32 +75,32 @@ function WorkScheduleDashboard (){
                 const axiosInstance = createAxiosInstance(); // 인스턴스 생성
                 await axiosInstance.put("/workSchedule/default/update", editedItem);
                 // setItem(editedItem);
-                window.alert("기본 정보를 저장하였습니다.");
+                window.alert("基本情報を保存しました。");
                 navigate("/workSchedule/list");
             } catch (error) {
-                setError("기본설정 저장에 실패했습니다.");
+                setError("基本情報の保存に失敗しました。");
             } finally {
                 setLoading(false);
             }
         }
         };
 
-    const handleTimeChange = (name, value) => {
-        setEditedItem((prevItem) => ({
-            ...prevItem,
-            checkInTime: value,
-        }));
-    };
-
-    if (loading) return <div>로딩 중...</div>;
-    if (error) return <div>{error}</div>;
+    // const handleTimeChange = (name, value) => {
+    //     setEditedItem((prevItem) => ({
+    //         ...prevItem,
+    //         checkInTime: value,
+    //     }));
+    // };
+    //
+    // if (loading) return <div>로딩 중...</div>;
+    // if (error) return <div>{error}</div>;
 
     return (
         <div className="container d-flex justify-content-center align-items-center flex-column">
-                    <div className="card">
+            <div className="card" style={{ width: '100%', maxWidth: '300px', minHeight: '500px' }}>
                         <form onSubmit={handleSubmit}>
                             <div className="card-header">
-                                <h3 className="title mb-0" style={{ color: "white"}}>근무표 기본 정보</h3>
+                                <h3 className="title mb-0" style={{ color: "white"}}>勤務表の基本情報</h3>
                             </div>
                             <div className="card-body">
                                 <div>
@@ -110,7 +110,7 @@ function WorkScheduleDashboard (){
                                                 className="input"
                                                 type="text"
                                                 name="employeeId"
-                                                value={editedItem.employeeId? editedItem.employeeId : username}
+                                                value={editedItem.employeeId? editedItem.employeeId : username || ""}
                                                 onChange={handleChange}
                                                 disabled
                                                 hidden
@@ -123,7 +123,7 @@ function WorkScheduleDashboard (){
                                                 className="input"
                                                 type="text"
                                                 name="employeeName"
-                                                value={editedItem.employeeName}
+                                                value={editedItem.employeeName || ""}
                                                 onChange={handleChange}
                                             disabled
                                                 hidden
@@ -131,38 +131,38 @@ function WorkScheduleDashboard (){
                                         </div>
                                     </div>
                                     <div className="form-group">
-                                        <label className="label">근무지</label>
+                                        <label className="label">勤務地</label>
                                         <div>
                                             <input
                                                 className="input"
                                                 type="text"
                                                 name="workLocation"
-                                                value={editedItem.workLocation}
+                                                value={editedItem.workLocation || ""}
                                                 onChange={handleChange}
                                                 required
                                             />
                                         </div>
                                     </div>
                                     <div className="form-group">
-                                        <label className="label">기본 근무장소</label>
+                                        <label className="label">基本勤務場所</label>
                                         <div>
                                             <select
                                                 className="input"
                                                 name="workPosition"
-                                                value={editedItem.workPosition}
+                                                value={editedItem.workPosition || ""}
                                                 onChange={handleChange}
                                                 required
                                             >
-                                                <option value="" disabled>기본 근무장소 선택</option>
-                                                <option value="현장">현장</option>
-                                                <option value="본사">본사</option>
-                                                <option value="재택근무">재택근무</option>
+                                                <option value="" disabled>基本勤務場所を選択</option>
+                                                <option value="現場">現場</option>
+                                                <option value="本社">本社</option>
+                                                <option value="在宅勤務">在宅勤務</option>
                                             </select>
                                         </div>
                                     </div>
                                         <div className="row">
                                             <div className="col">
-                                                <label className="label">플랙스 시간제</label>
+                                                <label className="label">フレックス勤務制</label>
                                             </div>
                                             <div className="col">
                                                 <input
@@ -182,26 +182,14 @@ function WorkScheduleDashboard (){
                                             </div>
                                         </div>
                                     <div className="form-group">
-                                        <label className="label">기준 출근 시간</label>
-                                        <div className="row">
-                                            {/*<DatePicker*/}
-                                            {/*    selected={startDate}*/}
-                                            {/*    onChange={(date) => setStartDate(date)}*/}
-                                            {/*    locale="pt-BR"*/}
-                                            {/*    showTimeSelect*/}
-                                            {/*    showTimeSelectOnly*/}
-                                            {/*    timeIntervals={15}*/}
-                                            {/*    timeCaption="시간"*/}
-                                            {/*    dateFormat="HH:mm"*/}
-                                            {/*/>*/}
-                                        </div>
+                                        <label className="label">基準出勤時間</label>
                                         <div className="d-flex align-items-center justify-content-start gap-2 flex-nowrap">
                                             <input
                                                 type="number"
                                                 min="00"
                                                 max="23"
                                                 className="form-control"
-                                                placeholder="시"
+                                                placeholder="時"
                                                 style={{ width: "80px" }}
                                                 value={editedItem.checkInHour ?? (editedItem.checkInTime?.split(":")[0] || "")}
                                                 onChange={(e) => {
@@ -220,7 +208,7 @@ function WorkScheduleDashboard (){
                                                 min="00"
                                                 max="59"
                                                 className="form-control"
-                                                placeholder="분"
+                                                placeholder="分"
                                                 style={{ width: "80px" }}
                                                 value={editedItem.checkInMinute ?? (editedItem.checkInTime?.split(":")[1] || "")}
                                                 onChange={(e) => {
@@ -236,22 +224,14 @@ function WorkScheduleDashboard (){
                                         </div>
                                     </div>
                                     <div className="form-group">
-                                        <label className="label">기준 퇴근 시간</label>
-                                        {/*<input*/}
-                                        {/*    type="time"*/}
-                                        {/*    className="input"*/}
-                                        {/*    name="checkOutTime"*/}
-                                        {/*    value={editedItem.checkOutTime}*/}
-                                        {/*    onChange={handleChange}*/}
-                                        {/*    required*/}
-                                        {/*/>*/}
+                                        <label className="label">基準退勤時間</label>
                                         <div className="d-flex align-items-center justify-content-start gap-2 flex-nowrap">
                                             <input
                                                 type="number"
                                                 min="0"
                                                 max="99"
                                                 className="form-control"
-                                                placeholder="시"
+                                                placeholder="時"
                                                 style={{ width: "80px" }}
                                                 value={editedItem.checkOutHour ?? (editedItem.checkOutTime?.split(":")[0] || "")}
                                                 onChange={(e) => {
@@ -271,7 +251,7 @@ function WorkScheduleDashboard (){
                                                 min="0"
                                                 max="59"
                                                 className="form-control"
-                                                placeholder="분"
+                                                placeholder="分"
                                                 style={{ width: "80px" }}
                                                 value={editedItem.checkOutMinute ?? (editedItem.checkOutTime?.split(":")[1] || "")}
                                                 onChange={(e) => {
@@ -287,57 +267,36 @@ function WorkScheduleDashboard (){
                                         </div>
                                     </div>
                                     <div className="form-group">
-                                        <label className="label">기준 휴게시간</label>
+                                        <label className="label">基準休憩時間</label>
                                         <div className="d-flex">
-                                            {/*<input*/}
-                                            {/*    name="breakTimeIn"*/}
-                                            {/*    type="time"*/}
-                                            {/*    className="input me-2"*/}
-                                            {/*    value={editedItem.breakTimeIn}*/}
-                                            {/*    onChange={handleChange}*/}
-                                            {/*    required*/}
-                                            {/*/>*/}
                                             <input
                                                 name="breakTime"
                                                 type="number"
                                                 className="input me-2"
-                                                value={editedItem.breakTime}
+                                                value={editedItem.breakTime || ""}
                                                 onChange={handleChange}
-                                                placeholder="분"
+                                                placeholder="分"
                                                 min="0"
                                                 max="240"
                                                 required
                                             />
-                                            {/*<div className="text-gray-500 me-2 fs-5	">~</div>*/}
-                                            {/*<input*/}
-                                            {/*    name="breakTimeOut"*/}
-                                            {/*    type="time"*/}
-                                            {/*    className="input"*/}
-                                            {/*    value={editedItem.breakTimeOut}*/}
-                                            {/*    onChange={handleChange}*/}
-                                            {/*    required*/}
-                                            {/*/>*/}
                                         </div>
                                     </div>
                                 </div>
                             </div>
                             <div className="card-footer">
 
-                                    {isEditing ?
-                                        <button type="submit" className="btn btn-secondary" >수정하기</button>
-                                        : <button type="submit" className="btn btn-secondary" >
-                                            저장</button>
-                                        }
-
                                 {isEditing ? (
-                                    <button type="button" className="btn btn-danger" onClick={handleClick}>
-                                        취소
-                                    </button>
+                                    <button type="submit" className="btn btn-secondary">修正する</button>
                                 ) : (
-                                    <>
-                                    </>
-                                )
-                                }
+                                    <button type="submit" className="btn btn-secondary">保存</button>
+                                )}
+
+                                {isEditing && (
+                                    <button type="button" className="btn btn-danger" onClick={handleClick}>
+                                        戻る
+                                    </button>
+                                )}
                             </div>
                         </form>
                     </div>

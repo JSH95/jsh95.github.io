@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import "../../config/index.css";
 import { getRankText, formatAmount } from "../../utils/textUtils";
 import createAxiosInstance from "../../config/api";
-import {useNavigate} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const EmployeeSettings = () => {
   const navigate = useNavigate();
@@ -11,9 +11,9 @@ const EmployeeSettings = () => {
   const [error, setError] = useState(null);
   const [password2, setPassword2] = useState("");
   const [item, setItem] = useState({
-        username : "",
-        password : "",
-        role : "",
+    username: "",
+    password: "",
+    role: "",
   });
 
   useEffect(() => {
@@ -24,7 +24,7 @@ const EmployeeSettings = () => {
         setEmployees(response.data);
         setLoading(false);
       } catch (err) {
-        setError("유저 정보를 불러오지 못했습니다.");
+        setError("ユーザー情報を取得できませんでした。");
         setLoading(false);
         // console.error(err); // 에러 로깅
       }
@@ -54,41 +54,38 @@ const EmployeeSettings = () => {
     try {
       const axiosInstance = createAxiosInstance(); // 인스턴스 생성
       await axiosInstance.put("/employees/admin/setting", employees);
-      alert("적립금이 업데이트 되었습니다.");
+      alert("積立金が更新されました。");
     } catch (err) {
-      alert("다시 한번 확인해 주세요. " + err.message);
+      alert("もう一度ご確認ください。" + err.message);
     }
   };
 
-  // 관리자 계정 저장하는 프로세스 생성
   const adminSignUp = async (e) => {
     e.preventDefault(); // 폼 제출 방지
     if (item.password !== password2) {
-        alert("비밀번호가 일치하지 않습니다.");
-        return;
+      alert("パスワードが一致しません。");
+      return;
     }
-    const confirmSave = window.confirm("해당 사원의 아이디를 발급하시겠습니까?");
+    const confirmSave = window.confirm("該当社員のIDを発行しますか？");
     if (!confirmSave) {
       return;
     } else {
       try {
         const axiosInstance = createAxiosInstance(); // 인스턴스 생성
-        const response2 = await axiosInstance.post("/signup",
-            item );
-        const {message} = response2.data;
+        const response2 = await axiosInstance.post("/signup", item);
+        const { message } = response2.data;
         window.alert(message);
         setItem({
-          username : "",
-          password : "",
-          role : "",
+          username: "",
+          password: "",
+          role: "",
         }); // 초기화
         setPassword2(""); // 초기화
       } catch (err) {
-        alert("중복된 아이디 입니다. ");
+        alert("重複したIDです。");
       }
     }
-  }
-
+  };
 
   if (loading) return <div className="loading">Loading...</div>;
   if (error) return <div className="error">{error}</div>;
@@ -101,9 +98,9 @@ const EmployeeSettings = () => {
     try {
       const axiosInstance = createAxiosInstance(); // 인스턴스 생성
       axiosInstance.get("/fcm/testSend");
-        alert("알림이 발송되었습니다.");
-    }catch (err) {
-       alert("다시 한번 확인해 주세요. " + err.message);
+      alert("通知が送信されました。");
+    } catch (err) {
+      alert("もう一度ご確認ください。" + err.message);
     }
   }
 
@@ -112,19 +109,19 @@ const EmployeeSettings = () => {
         <div className="row justify-content-center">
           <div className="col-md-8 col-lg-6">
             <div className="card shadow-lg mb-4">
-              <h2 className="card-header text-center bg-primary text-white">WEAVUS 관리자 페이지</h2>
+              <h2 className="card-header text-center bg-primary text-white">WEAVUS 管理者ページ</h2>
               <div className="card-body">
                 <button className="btn btn-info w-auto mb-3 me-4" type="button" onClick={handleGoList}>
-                  사원 월별 근무 그래프
+                  社員の月次勤務グラフ
                 </button>
                 <button className="btn btn-warning w-auto mb-3" onClick={handleMessage}>
-                  App 테스트 알림 발송
+                  アプリテスト通知送信
                 </button>
                 <table className="table table-striped">
                   <thead>
                   <tr>
-                    <th className="table-header">직급</th>
-                    <th className="table-header">현재 월 적립 금액</th>
+                    <th className="table-header">職級</th>
+                    <th className="table-header">今月の積立金額</th>
                   </tr>
                   </thead>
                   <tbody>
@@ -145,90 +142,14 @@ const EmployeeSettings = () => {
                 </table>
 
                 <button className="btn btn-success w-100 mt-3" onClick={handleSave}>
-                  적립금 업데이트
+                  積立金更新
                 </button>
               </div>
             </div>
-
-            {/* 계정 생성 폼 */}
-            {/*<div className="card shadow-lg mb-4">*/}
-            {/*  <h2 className="card-header text-center bg-secondary text-white">계정 생성</h2>*/}
-            {/*  <form onSubmit={adminSignUp} className="card-body">*/}
-            {/*    <div className="mb-3">*/}
-            {/*      <label htmlFor="username" className="form-label">아이디 :</label>*/}
-            {/*      <input*/}
-            {/*          name="username"*/}
-            {/*          type="text"*/}
-            {/*          value={item.username}*/}
-            {/*          onChange={handleInputChange}*/}
-            {/*          placeholder="아이디"*/}
-            {/*          className="form-control"*/}
-            {/*          required*/}
-            {/*      />*/}
-            {/*    </div>*/}
-
-            {/*    <div className="mb-3">*/}
-            {/*      <label htmlFor="password" className="form-label">비밀번호 :</label>*/}
-            {/*      <input*/}
-            {/*          name="password"*/}
-            {/*          type="password"*/}
-            {/*          value={item.password}*/}
-            {/*          onChange={handleInputChange}*/}
-            {/*          placeholder="비밀번호"*/}
-            {/*          className="form-control"*/}
-            {/*          required*/}
-            {/*      />*/}
-            {/*    </div>*/}
-
-            {/*    <div className="mb-3">*/}
-            {/*      <label htmlFor="password" className="form-label">비밀번호 확인 :</label>*/}
-            {/*      <input*/}
-            {/*          name="password2"*/}
-            {/*          type="password"*/}
-            {/*          value={password2}*/}
-            {/*          onChange={handlePassword2Change}*/}
-            {/*          placeholder="비밀번호 확인"*/}
-            {/*          className="form-control"*/}
-            {/*          required*/}
-            {/*      />*/}
-            {/*    </div>*/}
-
-            {/*    <div className="mb-3">*/}
-            {/*      <label htmlFor="role" className="form-label">권한 선택 :</label>*/}
-            {/*      <select*/}
-            {/*          name="role"*/}
-            {/*          value={item.role}*/}
-            {/*          onChange={handleInputChange}*/}
-            {/*          className="form-control"*/}
-            {/*          required*/}
-            {/*      >*/}
-            {/*        <option value="">권한 선택</option>*/}
-            {/*        <option value="GENERAL">일반사원</option>*/}
-            {/*        <option value="ADMIN">관리자권한</option>*/}
-            {/*        <option value="TEAM">팀장</option>*/}
-            {/*      </select>*/}
-            {/*    </div>*/}
-            {/*    <div>*/}
-            {/*      <button type="submit" className="btn btn-primary w-100">*/}
-            {/*        계정 생성*/}
-            {/*      </button>*/}
-            {/*    </div>*/}
-            {/*  </form>*/}
-            {/*</div>*/}
-
-            {/* 앱 테스트 알림 발송 버튼 */}
-            {/*<div className="text-center mt-4">*/}
-            {/*  <button className="btn btn-warning" onClick={handleMessage}>*/}
-            {/*    App 테스트 알림 발송*/}
-            {/*  </button>*/}
-            {/*</div>*/}
           </div>
         </div>
       </div>
-
-
-
   );
-}
+};
 
 export default EmployeeSettings;

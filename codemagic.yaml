@@ -1,0 +1,34 @@
+# codemagic.yaml
+workflows:
+  ios-capacitor:
+    name: iOS Build (Capacitor)
+    environment:
+      vars:
+        BUNDLE_ID: "com.example.app"
+        APP_NAME: "MyApp"
+      flutter: stable
+      xcode: latest
+    scripts:
+      - name: Install dependencies
+        script: |
+          npm install
+      - name: Build Web Assets
+        script: |
+          npm run build
+      - name: Sync Capacitor
+        script: |
+          npx cap sync ios
+      - name: Build iOS project
+        script: |
+          cd ios
+          xcodebuild -workspace App.xcworkspace -scheme App -sdk iphoneos -configuration Release archive -archivePath $HOME/build/App.xcarchive
+
+    artifacts:
+      - build/ios/ipa/*.ipa
+
+    publishing:
+      app_store_connect:
+        api_key_id: $APP_STORE_API_KEY_ID
+        issuer_id: $APP_STORE_ISSUER_ID
+        private_key: $APP_STORE_PRIVATE_KEY
+        submit_to_testflight: true

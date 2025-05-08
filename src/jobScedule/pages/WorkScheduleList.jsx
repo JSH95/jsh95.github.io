@@ -36,12 +36,12 @@ const WorkScheduleList = () =>  {
         const [displayText, setDisplayText] = useState("");
         const [modalOpen, setModalOpen] = useState(false);
         const [workTime, setWorkTime] = useState({});
-        const { data, loadingWorkHours, errorWorkHours } = useWorkHours(year, month, username, role);
+        const { data, loadingWorkHours, errorWorkHours } = useWorkHours(year, month, username, role, 0);
     //     "2025-01-01": { attendanceType: "휴일", workType: "", checkInTime: "", checkOutTime: "", memo: "공휴일" },
 
     useEffect(() => {
         if (!loadingWorkHours && data.length > 0) {
-            // console.log("받아온 데이터:", data);
+            console.log("받아온 데이터:", data);
             setWorkTime(data[0]); // 데이터가 있을 때만 사용
         }
     } , [data, loadingWorkHours, year, month]);
@@ -52,7 +52,7 @@ const WorkScheduleList = () =>  {
             setError("");
             try{
                 if (workDefaultData.checkInTime === null) {
-                    window.alert("기본 근무시간을 설정해 주세요.");
+                    window.alert("勤務表の基本情報を設定してください。\n 該当ページに移動します。");
                     navigate("/workSchedule/dashBoard");
                     return;
                 }
@@ -76,7 +76,7 @@ const WorkScheduleList = () =>  {
                         checkInTime: workType.checkInTime || "",
                         checkOutTime: workType.checkOutTime || "",
                         checkOutDate: workType.checkOutDate || "",
-                        memo: workType.memo || (HolidayType ? holidayData[key] : isWeekend ? "주말" : ""),
+                        memo: workType.memo || (HolidayType ? holidayData[key] : isWeekend ? "週末" : ""),
                         workType: workType.workType || "",
                         workLocation: workType.workLocation || "",
                         workPosition: workType.workPosition || "",
@@ -85,8 +85,8 @@ const WorkScheduleList = () =>  {
                         breakTime: workType.breakTime || "",
                         styleClass: key === todayKey ? "today" : (HolidayType ? "holiday" : isWeekend ? "weekend" : ""),
                         styleClass2: workType.workStatus === "" ? "" :
-                            (workType.workStatus ==="수정요청" ? "change" :
-                                workType.workStatus ==="재수정요청" ? "change2" : "") ,
+                            (workType.workStatus ==="修正依頼" ? "change" :
+                                workType.workStatus ==="再修正依頼" ? "change2" : "") ,
                         file: workType.workFileStatus > 0 ? "true" : "false",
                         fileName : workType.fileName || "",
                         fileUrl : workType.fileUrl || "",
@@ -101,7 +101,7 @@ const WorkScheduleList = () =>  {
                 // console.log("근무 데이터:", newSchedule);
                 setLoading(false);
             }catch (error){
-                setError("근무 데이터를 불러오는데 실패했습니다." + error);
+                setError("勤務データの読み込みに失敗しました。" + error);
             } finally {
                 setLoading(false);
             }
@@ -151,6 +151,7 @@ const WorkScheduleList = () =>  {
         // console.log("checkStates", checkStates);
         // console.log("text", text);
         setDisplayText(text);
+        localStorage.setItem("displayText", text); // 저장
     }, []);
 
     useEffect(() => {
@@ -168,13 +169,13 @@ const WorkScheduleList = () =>  {
     const handleClickSummit = async (key) => {
         switch (key) {
             case 0:
-                if (window.confirm("근무표를 제출하시겠습니까?") === false) return;
+                if (window.confirm("勤務表を提出しますか？") === false) return;
                 break;
             case 1:
-                if (window.confirm("근무표를 재제출하시겠습니까?") === false) return;
+                if (window.confirm("勤務表を再提出しますか？") === false) return;
                 break;
             case 2:
-                if (window.confirm("근무표 제출을 취소하시겠습니까?") === false) return;
+                if (window.confirm("勤務表の提出を取り消しますか？") === false) return;
                 break;
         }
         setIsProcessing(true);
@@ -193,25 +194,28 @@ const WorkScheduleList = () =>  {
                 });
             switch(key) {
                 case 0:
-                    alert("근무표를 제출하였습니다.")
-                    setDisplayText("제출 중")
+                    alert("勤務表を提出しました。")
+                    setDisplayText("sending")
+                    localStorage.setItem("displayText", "sending"); // 저장
                     break;
                 case 1:
-                    alert("근무표를 재제출하였습니다.")
-                    setDisplayText("재제출 중")
+                    alert("勤務表を再提出しました。")
+                    setDisplayText("reSending")
+                    localStorage.setItem("displayText", "reSending"); // 저장
                     break;
                 case 2:
-                    alert("근무표 제출을 취소하였습니다.")
-                    setDisplayText("미제출")
+                    alert("勤務表の提出を取り消しました。")
+                    setDisplayText("notSubmitted")
+                    localStorage.setItem("displayText", "notSubmitted"); // 저장
                     break;
             }
         }catch (error){
             switch(key) {
                 case 0, 1:
-                    alert("근무표를 제출을 다시 시도해 주세요.")
+                    alert("ERROR : 勤務表の提出をもう一度お試しください。\n これ以上できない場合は、管理者にお問い合わせください。")
                     break;
                 case 2:
-                    alert("근무표 취소를 다시 시도해 주세요.")
+                    alert("ERROR : 勤務票の取り消しをもう一度お試しください。\n これ以上できない場合は、管理者にお問い合わせください。")
                     break;
             }
         }finally {
@@ -222,26 +226,25 @@ const WorkScheduleList = () =>  {
 
     return (
             <div className="container">
-                <h2 className="text-dark mb-1">WORK SCHEDULE</h2>
                 <div className="d-flex justify-content-center align-items-center">
                     <button onClick={() => changeMonth(-1)} className="btn">
                         <i className="bi bi-arrow-left-circle-fill fs-3"></i>
                     </button>
-                    <h2 className="px-3">{year} / {String(month).padStart(2, "0")}</h2>
+                    <h2 className="px-3">{year} / {String(month).padStart(2, "0")} 勤務表</h2>
                     <button onClick={() => changeMonth(1)} className="btn">
                         <i className="bi bi-arrow-right-circle-fill fs-3"></i>
                     </button>
                 </div>
-                <div className="d-flex justify-content-center align-items-center mb-4">
+                <div className="d-flex flex-wrap justify-content-center align-items-center text-center mb-4 gap-3">
                     { loading? "loading..." :<>
-                    <button type="button" className="btn btn-light me-4" onClick={handleClickReceipt}>
-                        {month}월 영수증
-                    </button>
+                        <button type="button" className="btn btn-light me-2" onClick={handleClickReceipt}>
+                            {month}月の領収書
+                        </button>
                             <div>
-                                {displayText !== "수정 요청" ? <></>:
+                                {displayText !== "request" ? <></>:
                                     <>
                                         <Button type="button" className="btn btn-success fw-bold me-3" onClick={handleClickModal}>
-                                            수정 요청 사항
+                                            修正事項確認
                                         </Button>
                                         <ScheduleMemoPopup
                                             schedule={schedule}
@@ -251,21 +254,21 @@ const WorkScheduleList = () =>  {
                                     </>
                                 }
                             </div>
-                            {displayText === "수정 요청" ?
+                            {displayText === "request" ?
                                 <button type="button" className="btn btn-secondary" onClick={() => handleClickSummit(1)}>
-                                    근무표 재제출
+                                    勤務表再提出
                                 </button>
-                                : displayText === "제출 중" || displayText === "재제출 중"?
+                                : displayText === "sending" || displayText === "reSending"?
                                     <button type="button" className="btn btn-danger" onClick={() => handleClickSummit(2)}>
-                                        제출 취소
+                                        申請キャンセル
                                     </button>
-                                    :  displayText === "승인 완료" ?
+                                    :  displayText === "finalConfirm" ?
                                         <>
                                             <i className="bi bi-calendar-check"></i>
-                                            승인완료
+                                            承認完了
                                         </>
                                         : <button type="button" className="btn btn-secondary" onClick={() => handleClickSummit(0)}>
-                                            근무표 제출
+                                            勤務表提出
                                         </button>
                             }
                         </>
@@ -284,7 +287,7 @@ const WorkScheduleList = () =>  {
                             <th className="text-center">区分</th>
                             <th className="text-center">開始時間</th>
                             <th className="text-center">終了時間</th>
-                            <th className="text-center" style={{ maxWidth: "200px" }}>비고</th>
+                            <th className="text-center" style={{ maxWidth: "200px" }}>その他</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -305,7 +308,7 @@ const WorkScheduleList = () =>  {
                                             >
                                                 {day.date}日
                                             </span>
-                                        {displayText === "제출 중" || displayText === "재제출 중" || displayText === "승인 완료" ? null :
+                                        {displayText === "sending" || displayText === "reSending" || displayText === "confirm" || displayText === "finalConfirm"? null :
                                             <a
                                                 onClick={() => handleClickEdit(day.key, displayText)}
                                                 style={{ cursor: "pointer", transition: "color 0.2s ease-in-out" }}
@@ -320,8 +323,8 @@ const WorkScheduleList = () =>  {
                                 <td className={day.styleClass}>{day.workType} </td>
                                 <td className={day.styleClass}>{day.workPosition}</td>
                                 <td className={day.styleClass}>
-                                    {day.workPosition !== "휴가" ?
-                                        day.workType !== "유급휴가" && day.workType !== "출근" && day.workType !== "휴일출근" ? "-" : day.checkInTime
+                                    {day.workPosition !== "休暇" ?
+                                        day.workType !== "有給休暇" && day.workType !== "出勤" && day.workType !== "休日出勤" ? "-" : day.checkInTime
                                     : "-"
                                     }
                                 </td>
@@ -330,8 +333,8 @@ const WorkScheduleList = () =>  {
                                         { color: 'red', fontWeight: 'bold' }
                                         : {}}
                                 >
-                                    {day.workPosition !== "휴가" ?
-                                    day.workType !== "유급휴가" && day.workType !== "출근" && day.workType !== "휴일출근" ? "-" :
+                                    {day.workPosition !== "休暇" ?
+                                    day.workType !== "有給休暇" && day.workType !== "出勤" && day.workType !== "休日出勤" ? "-" :
                                         (day.checkOutTime ? ((day.checkOutDate !== day.key)  ?
                                         "次の日 " : "" )
                                         : "" )
@@ -357,87 +360,149 @@ const WorkScheduleList = () =>  {
                         </tbody>
                     </table>
                 </div>
+                {role === "ROLE_ADMIN" ?
                 <div className=" justify-content-center align-items-center mb-4">
                     <div className="mt-4 p-4">
-                        <h2 className="text-xl mb-4">근무 시간 요약(테스트 중)</h2>
+                        <h2 className="text-xl mb-4">勤務時間の要約(管理者のみ)</h2>
                         <div className="row">
-                            <div className="col-12 col-lg-4">
-                                <div className="card shadow-sm p-3 mb-3">
-                                    <h5 className="card-header fw-bold">기본 근무 정보</h5>
-                                    <ul className="list-group list-group-flush">
-                                        <li className="list-group-item d-flex justify-content-between">
-                                            <span>총 근무 시간</span>
-                                            <span>{workTime?.totalWorkHours ? workTime?.totalWorkHours + " h"  : "-"}</span>
-                                        </li>
-                                        <li className="list-group-item d-flex justify-content-between">
-                                            <span>실업시간</span>
-                                            <span>16:05</span>
-                                        </li>
-                                        <li className="list-group-item d-flex justify-content-between">
-                                            <span>소정 시간</span>
-                                            <span>162:45</span>
-                                        </li>
-                                        <li className="list-group-item d-flex justify-content-between">
-                                            <span>소정 내 근무 시간</span>
-                                            <span>15:26</span>
-                                        </li>
-                                        <li className="list-group-item d-flex justify-content-between">
-                                            <span>잔업 시간</span>
-                                            <span>0:39</span>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
+
                             <div className="col-12 col-lg-4 mb-3">
                                 <div className="card shadow-sm p-3">
-                                    <h5 className="card-header fw-bold">법정 시간</h5>
+                                    <h5 className="card-header fw-bold">出勤状況</h5>
                                     <ul className="list-group list-group-flush">
                                         <li className="list-group-item d-flex justify-content-between">
-                                            <span>법정내 시간외 노동시간</span>
-                                            <span>0:34</span>
+                                            <span>所定日数</span>
+                                            <span>{workTime?.scheduledWorkDays ?? "-"}</span>
                                         </li>
                                         <li className="list-group-item d-flex justify-content-between">
-                                            <span>법정시간 외 근무시간</span>
-                                            <span>0:05</span>
+                                            <span>出勤日数</span>
+                                            <span>{workTime?.totalWorkDays ?? "-"}</span>
                                         </li>
                                         <li className="list-group-item d-flex justify-content-between">
-                                            <span>법정외 휴일 노동시간</span>
-                                            <span>0:00</span>
+                                            <span>法定外休日出勤日数</span>
+                                            <span>{workTime?.holidayWorkNonLegal ?? "-"}</span>
                                         </li>
                                         <li className="list-group-item d-flex justify-content-between">
-                                            <span>법정 휴일 근무 시간</span>
-                                            <span>0:00</span>
+                                            <span>法定休日出勤日数</span>
+                                            <span>{workTime?.holidayWorkLegal ?? "-"}</span>
                                         </li>
                                         <li className="list-group-item d-flex justify-content-between">
-                                            <span>자정 근무 시간</span>
-                                            <span>0:00</span>
+                                            <span>欠勤日数</span>
+                                            <span>{workTime?.absences ?? "-"}</span>
+                                        </li>
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>遅刻日数</span>
+                                            <span>{workTime?.lateCount ?? "-"}</span>
+                                        </li>
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>早退日数</span>
+                                            <span>{workTime?.earlyLeaveCount ?? "-"}</span>
                                         </li>
                                     </ul>
                                 </div>
                             </div>
+
                             <div className="col-12 col-lg-4">
-                                <div className="card shadow-sm p-3">
-                                    <h5 className="card-header fw-bold">휴일 및 휴가</h5>
+                                <div className="card shadow-sm p-3 mb-3">
+                                    <h5 className="card-header fw-bold">勤務時間</h5>
                                     <ul className="list-group list-group-flush">
                                         <li className="list-group-item d-flex justify-content-between">
-                                            <span>공휴일 수</span>
-                                            <span>9.0일</span>
+                                            <span>総労働時間</span>
+                                            <span>{workTime?.totalWorkHours ?? "-"}</span>
                                         </li>
                                         <li className="list-group-item d-flex justify-content-between">
-                                            <span>유급휴가 일수</span>
-                                            <span>0.0일</span>
+                                            <span>実働時間</span>
+                                            <span>{workTime?.actualWorkHours ?? "-"}</span>
                                         </li>
                                         <li className="list-group-item d-flex justify-content-between">
-                                            <span>오늘까지 유급휴가잔수</span>
-                                            <span>0.0일</span>
+                                            <span>所定時間</span>
+                                            <span>{workTime?.basicWorkHours ?? "-"}</span>
                                         </li>
                                         <li className="list-group-item d-flex justify-content-between">
-                                            <span>이체 휴일 일수</span>
-                                            <span>0.0일</span>
+                                            <span>所定内労働時間</span>
+                                            <span>{workTime?.withinScheduledHours ?? "-"}</span>
                                         </li>
                                         <li className="list-group-item d-flex justify-content-between">
-                                            <span>오늘까지 이체 휴일 잔수</span>
-                                            <span>0.0일</span>
+                                            <span>残業時間</span>
+                                            <span>{workTime?.overScheduledHours ?? "-"}</span>
+                                        </li>
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>法定内時間外労働時間</span>
+                                            <span>{workTime?.overScheduledHours ?? "-"}</span>
+                                        </li>
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>法定時間外労働時間</span>
+                                            <span>{workTime?.statutoryOvertime ?? "-"}</span>
+                                        </li>
+
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>法定外休日労働時間</span>
+                                            <span>{workTime?.holidayWorkNonLegal ?? "-"}</span>
+                                        </li>
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>法定休日労働時間</span>
+                                            <span>{workTime?.holidayWorkLegal ?? "-"}</span>
+                                        </li>
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>深夜労働時間</span>
+                                            <span>{workTime?.midnightWork ?? "-"}</span>
+                                        </li>
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>遅刻時間</span>
+                                            <span>{workTime?.lateMinutes ?? "-"}</span>
+                                        </li>
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>早退時間</span>
+                                            <span>{workTime?.earlyLeaveMinutes ?? "-"}</span>
+                                        </li>
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>所定不足時間</span>
+                                            <span>{workTime?.deficitScheduledHours ?? "-"}</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+
+
+                            <div className="col-12 col-lg-4">
+                                <div className="card shadow-sm p-3">
+                                    <h5 className="card-header fw-bold">休日・休暇取得 (x)</h5>
+                                    <ul className="list-group list-group-flush">
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>公休日数</span>
+                                            <span>0</span>
+                                        </li>
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>有給休暇日数</span>
+                                            <span>0</span>
+                                        </li>
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>本日までの有給休暇残数</span>
+                                            <span>0</span>
+                                        </li>
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>振替休日日数</span>
+                                            <span>0</span>
+                                        </li>
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>本日までの振替休日残数</span>
+                                            <span>0</span>
+                                        </li>
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>代休日数</span>
+                                            <span>0</span>
+                                        </li>
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>本日までの代休残数</span>
+                                            <span>0</span>
+                                        </li>
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>特別休暇日数</span>
+                                            <span>0</span>
+                                        </li>
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>休職日数</span>
+                                            <span>0</span>
                                         </li>
                                     </ul>
                                 </div>
@@ -445,6 +510,7 @@ const WorkScheduleList = () =>  {
                         </div>
                     </div>
                 </div>
+                : null }
             </div>
         );
 }

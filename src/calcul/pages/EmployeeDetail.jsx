@@ -379,7 +379,7 @@ function EmployeeDetail() {
                   </div>
                   <div  className="form-group mb-1">
                     <label className="label">퇴사일</label>
-                      <p className="box">{item.exitDate ? item.exitDate : "재직중"}</p>
+                      <p className="box">{item.exitDate ? item.exitDate : "在職中"}</p>
                   </div>
                   <div  className="form-group mb-1">
                     <label className="label">계약 상태</label>
@@ -390,7 +390,7 @@ function EmployeeDetail() {
                   </div>
                   <div  className="form-group mb-1">
                     <label className="label">전환 날짜</label>
-                      <p className="box">{item.conversionDate ? item.conversionDate : "없음"}</p>
+                      <p className="box">{item.conversionDate ? item.conversionDate : "なし"}</p>
                   </div>
                   <div  className="form-group mb-1">
                     <label className="label">직급</label>
