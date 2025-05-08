@@ -10,7 +10,7 @@ const MainPage = () => {
     // console.log(date); // 예: 2025年4月15日(火)
     const links = [
         {
-            title: '勤務表スケジュール',
+            title: '勤務表',
             description: '本人の勤務表を確認または修正、提出します。',
             path: '/workSchedule/list',
             rel: null

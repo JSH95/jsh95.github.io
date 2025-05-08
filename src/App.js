@@ -93,7 +93,6 @@ const Layout = ({ children }) => {
                     </div>
                     <ScrollToTopButton />
                 </main>
-
                 <Footer />
             </div>
         </>

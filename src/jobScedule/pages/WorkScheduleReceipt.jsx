@@ -1,14 +1,10 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useEffect, useRef, useState, useCallback} from 'react';
 import createAxiosInstance from "../../config/api";
 import { useNavigate, useParams} from "react-router-dom";
 import {useLoading} from "../../utils/LoadingContext";
 
-
 const ReceiptList = () => {
     const { setIsProcessing } = useLoading();
-    // const location = useLocation();
-    // const { state } = location;
-    // const displayText = state?.displayText;
     const { month } = useParams();
     const navigate = useNavigate();
     const [receipts, setReceipts] = useState([]);  // 영수증 리스트
@@ -20,15 +16,70 @@ const ReceiptList = () => {
         receiptContent: "",  // 지불내용
         receiptAmount: "",  // 지급금액
     });  // 새 영수증 내용
-    
+
     const [isAdding, setIsAdding] = useState(false);  // 새로운 영수증 입력 창의 표시 여부
     const [progress, setProgress] = useState(0); // 업로드 진행 상태
     const [uploading, setUploading] = useState(false);
     const [selectedFile, setSelectedFile] = useState(null);
-    const fileInputRef = useRef(null)
+    const fileInputRef = useRef(null);
 
     const [displayText, setDisplayText] = useState("");
 
+    // 폼 초기화 함수 분리
+    const resetForm = useCallback(() => {
+        setNewReceipt({
+            receiptDate: "",
+            receiptType: "",
+            receiptName: "",
+            receiptItem: "",
+            receiptContent: "",
+            receiptAmount: "",
+        });
+        setSelectedFile(null);
+        if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+        }
+    }, []);
+
+    // 영수증 데이터 가져오기
+    const fetchReceipts = useCallback(async () => {
+        setIsProcessing(true);
+        try {
+            const axiosInstance = createAxiosInstance();
+            const response = await axiosInstance.get(`/workSchedule/receipts/${month}`);
+            setReceipts(response.data);
+        } catch (error) {
+            console.error('영수증 데이터 로드 실패:', error);
+            alert("領収書データの読み込みに失敗しました。");
+        } finally {
+            setIsProcessing(false);
+        }
+    }, [month, setIsProcessing]);
+
+    // 파일 업로드 프로그레스 관리 함수
+    const handleFileUpload = async (formData) => {
+        let lastUpdateTime = 0;
+        const delay = 100;
+        const axiosInstance = createAxiosInstance();
+
+        return await axiosInstance.post("/workSchedule/receipts", formData, {
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
+            onUploadProgress: (progressEvent) => {
+                const percentCompleted = Math.round(
+                    (progressEvent.loaded * 100) / progressEvent.total
+                );
+                const now = Date.now();
+                if (now - lastUpdateTime > delay) {
+                    setProgress(percentCompleted > 95 ? 95 : percentCompleted);
+                    lastUpdateTime = now;
+                }
+            },
+        });
+    };
+
+    // displayText 로컬스토리지에서 가져오기
     useEffect(() => {
         const storedDisplayText = localStorage.getItem("displayText");
         if (storedDisplayText) {
@@ -36,26 +87,12 @@ const ReceiptList = () => {
         }
     }, []);
 
+    // 영수증 목록 가져오기
     useEffect(() => {
         fetchReceipts();
-    }, [month]);
+    }, [fetchReceipts]);
 
-    const fetchReceipts = async () => {
-        setIsProcessing(true); // 로딩 상태 설정
-        try {
-            const axiosInstance = createAxiosInstance();
-            const response = await axiosInstance.get(`/workSchedule/receipts/${month}`);  // API 엔드포인트 호출
-            setReceipts(response.data);  // 서버로부터 받은 데이터를 상태에 저장
-        } catch (error) {
-            // console.error('영수증 데이터를 불러오는 데 실패했습니다:', error);
-            alert("領収書データの読み込みに失敗しました。")
-        } finally {
-            setIsProcessing(false); // 로딩 상태 해제
-        }
-    };
-
-
-
+    // 입력값 처리
     const handleChange = (e) => {
         let { name, value } = e.target;
 
@@ -75,115 +112,127 @@ const ReceiptList = () => {
         }
     };
 
+    // 새 영수증 추가
     const handleAddReceipt = async (e) => {
         e.preventDefault();
 
-        if(selectedFile === null && newReceipt.receiptType !== "既存") {
+        // 필수 입력값 검증
+        if(!newReceipt.receiptType) {
+            window.alert("タイプを選択してください。");
+            return;
+        }
+
+        if(newReceipt.receiptType !== "既存" && selectedFile === null) {
             window.alert("ファイルを選択してください。");
             return;
         }
-        setUploading(true);
-        setProgress(0); // 초기화
-        setIsProcessing(true); // 로딩 상태 설정
-        try {
-                let lastUpdateTime = 0;
-                const delay = 100; // 업데이트 간격 (ms)
-                const formData = new FormData();
-                if(newReceipt.receiptType !== "既存"){
-                    formData.append("file", selectedFile);
-                } else {
-                    // 더미 빈 파일 생성
-                    const dummyFile = new Blob([], { type: 'application/octet-stream' });
-                    formData.append("file", dummyFile, "empty.txt");
-                }
-                formData.append("date", newReceipt.receiptDate);
-                formData.append("type", 1);
-                formData.append(
-                    "employeeReceiptData",
-                    new Blob([JSON.stringify(newReceipt)], { type: "application/json" })
-                );
-                const axiosInstance = createAxiosInstance();
-                await axiosInstance.post("/workSchedule/receipts", formData, {
-                    headers: {
-                        "Content-Type": "multipart/form-data",
-                    },
-                    onUploadProgress: (progressEvent) => {
-                        const percentCompleted = Math.round(
-                            (progressEvent.loaded * 100) / progressEvent.total
-                        );
-                        const now = Date.now();
-                        if (now - lastUpdateTime > delay) {
-                            setProgress(percentCompleted > 95 ? 95 : percentCompleted);
-                            lastUpdateTime = now;
-                        }
-                    },
-                });  // API 엔드포인트 호출
-                window.alert("領収書情報が保存されました。");
-                setTimeout(() => {
-                    setProgress(100); // 약간의 텀을 두고 100% 표시
-                    setTimeout(() => {
-                        setProgress(0); // 필요시 리셋
-                    }, 800);
-                }, 200); // 0.2초 정도 후에 100%로 업데이트
 
-                setNewReceipt({
-                    receiptDate: "",
-                    receiptType: "",
-                    receiptName: "",
-                    receiptItem: "",
-                    receiptContent: "",
-                    receiptAmount: "",
-                });
-                setSelectedFile(null); // 선택된 파일 초기화
-                if (fileInputRef.current) {
-                    fileInputRef.current.value = ""; // 파일 선택 초기화
-                }
-                fetchReceipts();  // 저장 후 데이터 다시 불러오기
-            }catch (e) {
-                window.alert('領収書情報の保存に失敗しました。');
-            }finally {
-                setUploading(false);
-            setIsProcessing(false); // 로딩 상태 해제
+        setUploading(true);
+        setProgress(0);
+        setIsProcessing(true);
+
+        try {
+            const formData = new FormData();
+
+            // 타입에 따라 파일 추가
+            if(newReceipt.receiptType !== "既存"){
+                formData.append("file", selectedFile);
+            } else {
+                // 더미 빈 파일 생성
+                const dummyFile = new Blob([], { type: 'application/octet-stream' });
+                formData.append("file", dummyFile, "empty.txt");
+            }
+
+            formData.append("date", newReceipt.receiptDate);
+            formData.append("type", 1);
+            formData.append(
+                "employeeReceiptData",
+                new Blob([JSON.stringify(newReceipt)], { type: "application/json" })
+            );
+
+            // 업로드 처리
+            await handleFileUpload(formData);
+
+            window.alert("領収書情報が保存されました。");
+
+            // 프로그레스 업데이트 (완료 처리)
+            setTimeout(() => {
+                setProgress(100);
+                setTimeout(() => {
+                    setProgress(0);
+                }, 800);
+            }, 200);
+
+            // 입력 폼 초기화
+            resetForm();
+
+            // 목록 새로고침
+            fetchReceipts();
+
+        } catch (error) {
+            console.error('영수증 저장 실패:', error);
+            window.alert('領収書情報の保存に失敗しました。');
+        } finally {
+            setUploading(false);
+            setIsProcessing(false);
         }
     };
 
-    function handleClickList() {
+    // 목록 화면으로 이동
+    const handleClickList = () => {
         navigate("/workSchedule/list");
-    }
+    };
 
-    const handleClickEdit = async (id, name) => {
-        const confirmSave = window.confirm(`${name}の領収書を削除しますか？`);
-        if (!confirmSave) {
+    // 영수증 삭제
+    const handleDeleteReceipt = async (id, name) => {
+        const confirmDelete = window.confirm(`${name}の領収書を削除しますか？`);
+
+        if (!confirmDelete) {
             return;
-        } else {
-            setIsProcessing(true);
-            try{
-                const axiosInstance = createAxiosInstance();
-                await axiosInstance.delete(`/workSchedule/receipts/${id}`);
-                window.alert('領収書が削除されました。');
-                fetchReceipts();
-            }catch (e){
-                // console.error('영수증 삭제 실패:', e);
-                window.alert("領収書削除に失敗しました。");
-            } finally {
-                setIsProcessing(false); // 로딩 상태 해제
-            }
         }
-    }
 
+        setIsProcessing(true);
+
+        try {
+            const axiosInstance = createAxiosInstance();
+            await axiosInstance.delete(`/workSchedule/receipts/${id}`);
+            window.alert('領収書が削除されました。');
+            fetchReceipts();
+        } catch (error) {
+            console.error('영수증 삭제 실패:', error);
+            window.alert("領収書削除に失敗しました。");
+        } finally {
+            setIsProcessing(false);
+        }
+    };
+
+    // 파일 선택 처리
     const handleFileChange = (e) => {
         const file = e.target.files[0];
+
         if (file) {
             const allowedTypes = ['image/jpeg', 'image/png'];
+
             if (!allowedTypes.includes(file.type)) {
                 alert("JPGまたはPNG形式のみアップロードできます。");
-                e.target.value = null; // input 초기화
-                setSelectedFile(null); // 선택된 파일 초기화
+                e.target.value = null;
+                setSelectedFile(null);
                 return;
             }
-            setSelectedFile(file); // 파일 선택 처리
+
+            setSelectedFile(file);
         }
     };
+
+    // 날짜 기준으로 정렬된 영수증 목록
+    const sortedReceipts = React.useMemo(() => {
+        return [...receipts].sort((a, b) => new Date(a.receiptDate) - new Date(b.receiptDate));
+    }, [receipts]);
+
+    // 편집 모드 표시 여부 확인
+    const isEditMode = ![
+        "sending", "reSending", "confirm", "finalConfirm"
+    ].includes(displayText);
 
     return (
         <div className="container">
@@ -213,13 +262,11 @@ const ReceiptList = () => {
                                 </tr>
                                 </thead>
                                 <tbody>
-                                {receipts
-                                    .sort((a, b) => new Date(a.receiptDate) - new Date(b.receiptDate))  // 날짜 오름차순 정렬
-                                    .map((receipt, index) => (
+                                {sortedReceipts.map((receipt, index) => (
                                     <tr key={index}>
                                         <td>
-                                            {displayText === "sending" || displayText === "reSending" || displayText === "confirm" || displayText === "finalConfirm" ? null :(
-                                                <a onClick={() => handleClickEdit(receipt.id, receipt.receiptName)}
+                                            {isEditMode && (
+                                                <a onClick={() => handleDeleteReceipt(receipt.id, receipt.receiptName)}
                                                    style={{ cursor: "pointer", transition: "color 0.2s ease-in-out" }}
                                                    className="me-2"
                                                 >
@@ -253,7 +300,7 @@ const ReceiptList = () => {
                     </ul>
                 )}
 
-                {displayText === "sending" || displayText === "reSending" || displayText === "confirm" || displayText === "finalConfirm" ? null :
+                {isEditMode && (
                     <>
                         <h2>
                             <i className="bi bi-plus-square-dotted" onClick={() => setIsAdding(true)}></i>
@@ -419,19 +466,23 @@ const ReceiptList = () => {
                                                     accept=".jpg, .png"
                                                     onChange={handleFileChange}
                                                     ref={fileInputRef} // ref 연결
+                                                    disabled={newReceipt.receiptType === "既存"}
                                                 />
                                             </div>
                                         </div>
                                     </div>
                                     <button className="btn btn-primary me-4" type="submit">保存</button>
                                     <button className="btn btn-info" type="button"
-                                            onClick={() => setIsAdding(false)}
+                                            onClick={() => {
+                                                setIsAdding(false);
+                                                resetForm();
+                                            }}
                                     >キャンセル</button>
                                 </div>
                             </ul>
                         )}
                     </>
-                }
+                )}
             </form>
         </div>
     );

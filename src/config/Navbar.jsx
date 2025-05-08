@@ -110,7 +110,7 @@ const NavigationBar = () => {
                           </Dropdown.Toggle>
                           <Dropdown.Menu>
                             <Dropdown.Item as={Link} to="/workSchedule/main"  onClick={handleLinkClick}>勤務記録</Dropdown.Item>
-                            <Dropdown.Item as={Link} to="workSchedule/list" onClick={handleLinkClick}>勤務表スケジュール</Dropdown.Item>
+                            <Dropdown.Item as={Link} to="workSchedule/list" onClick={handleLinkClick}>勤務表</Dropdown.Item>
                             <Dropdown.Item as={Link} to="workSchedule/dashBoard" onClick={handleLinkClick}>勤務表 基本情報</Dropdown.Item>
                           </Dropdown.Menu>
                         </Dropdown>
@@ -172,7 +172,7 @@ const NavigationBar = () => {
                                          fw-bold
                                          text-nowrap"
                                 to="workSchedule/list"
-                                onClick={handleLinkClick}>勤務表スケジュール</Link>
+                                onClick={handleLinkClick}>勤務表</Link>
                         </li>
                         <li className="nav-item" >
                           <Link className="nav-link
@@ -208,7 +208,7 @@ const NavigationBar = () => {
                                          fw-bold
                                          text-nowrap"
                                 to="workSchedule/list"
-                                onClick={handleLinkClick}>勤務表スケジュール</Link>
+                                onClick={handleLinkClick}>勤務表</Link>
                         </li>
                         <li className="nav-item" >
                           <Link className="nav-link

@@ -226,12 +226,11 @@ const WorkScheduleList = () =>  {
 
     return (
             <div className="container">
-                <h2 className="text-dark mb-1">勤務表スケジュール</h2>
                 <div className="d-flex justify-content-center align-items-center">
                     <button onClick={() => changeMonth(-1)} className="btn">
                         <i className="bi bi-arrow-left-circle-fill fs-3"></i>
                     </button>
-                    <h2 className="px-3">{year} / {String(month).padStart(2, "0")}</h2>
+                    <h2 className="px-3">{year} / {String(month).padStart(2, "0")} 勤務表</h2>
                     <button onClick={() => changeMonth(1)} className="btn">
                         <i className="bi bi-arrow-right-circle-fill fs-3"></i>
                     </button>
@@ -364,85 +363,146 @@ const WorkScheduleList = () =>  {
                 {role === "ROLE_ADMIN" ?
                 <div className=" justify-content-center align-items-center mb-4">
                     <div className="mt-4 p-4">
-                        <h2 className="text-xl mb-4">勤務時間の要約</h2>
+                        <h2 className="text-xl mb-4">勤務時間の要約(管理者のみ)</h2>
                         <div className="row">
-                            <div className="col-12 col-lg-4">
-                                <div className="card shadow-sm p-3 mb-3">
-                                    <h5 className="card-header fw-bold">基本勤務情報</h5>
-                                    <ul className="list-group list-group-flush">
-                                        <li className="list-group-item d-flex justify-content-between">
-                                            <span>全勤務時間</span>
-                                            <span>{workTime?.totalWorkHours ? workTime?.totalWorkHours + " h"  : "-"}</span>
-                                        </li>
-                                        <li className="list-group-item d-flex justify-content-between">
-                                            <span>실업시간</span>
-                                            <span>16:05</span>
-                                        </li>
-                                        <li className="list-group-item d-flex justify-content-between">
-                                            <span>소정 시간</span>
-                                            <span>162:45</span>
-                                        </li>
-                                        <li className="list-group-item d-flex justify-content-between">
-                                            <span>소정 내 근무 시간</span>
-                                            <span>15:26</span>
-                                        </li>
-                                        <li className="list-group-item d-flex justify-content-between">
-                                            <span>잔업 시간</span>
-                                            <span>0:39</span>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
+
                             <div className="col-12 col-lg-4 mb-3">
                                 <div className="card shadow-sm p-3">
-                                    <h5 className="card-header fw-bold">법정 시간</h5>
+                                    <h5 className="card-header fw-bold">出勤状況</h5>
                                     <ul className="list-group list-group-flush">
                                         <li className="list-group-item d-flex justify-content-between">
-                                            <span>법정내 시간외 노동시간</span>
-                                            <span>0:34</span>
+                                            <span>所定日数</span>
+                                            <span>{workTime?.scheduledWorkDays ?? "-"}</span>
                                         </li>
                                         <li className="list-group-item d-flex justify-content-between">
-                                            <span>법정시간 외 근무시간</span>
-                                            <span>0:05</span>
+                                            <span>出勤日数</span>
+                                            <span>{workTime?.totalWorkDays ?? "-"}</span>
                                         </li>
                                         <li className="list-group-item d-flex justify-content-between">
-                                            <span>법정외 휴일 노동시간</span>
-                                            <span>0:00</span>
+                                            <span>法定外休日出勤日数</span>
+                                            <span>{workTime?.holidayWorkNonLegal ?? "-"}</span>
                                         </li>
                                         <li className="list-group-item d-flex justify-content-between">
-                                            <span>법정 휴일 근무 시간</span>
-                                            <span>0:00</span>
+                                            <span>法定休日出勤日数</span>
+                                            <span>{workTime?.holidayWorkLegal ?? "-"}</span>
                                         </li>
                                         <li className="list-group-item d-flex justify-content-between">
-                                            <span>자정 근무 시간</span>
-                                            <span>0:00</span>
+                                            <span>欠勤日数</span>
+                                            <span>{workTime?.absences ?? "-"}</span>
+                                        </li>
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>遅刻日数</span>
+                                            <span>{workTime?.lateCount ?? "-"}</span>
+                                        </li>
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>早退日数</span>
+                                            <span>{workTime?.earlyLeaveCount ?? "-"}</span>
                                         </li>
                                     </ul>
                                 </div>
                             </div>
+
                             <div className="col-12 col-lg-4">
-                                <div className="card shadow-sm p-3">
-                                    <h5 className="card-header fw-bold">휴일 및 휴가</h5>
+                                <div className="card shadow-sm p-3 mb-3">
+                                    <h5 className="card-header fw-bold">勤務時間</h5>
                                     <ul className="list-group list-group-flush">
                                         <li className="list-group-item d-flex justify-content-between">
-                                            <span>공휴일 수</span>
-                                            <span>9.0일</span>
+                                            <span>総労働時間</span>
+                                            <span>{workTime?.totalWorkHours ?? "-"}</span>
                                         </li>
                                         <li className="list-group-item d-flex justify-content-between">
-                                            <span>유급휴가 일수</span>
-                                            <span>0.0일</span>
+                                            <span>実働時間</span>
+                                            <span>{workTime?.actualWorkHours ?? "-"}</span>
                                         </li>
                                         <li className="list-group-item d-flex justify-content-between">
-                                            <span>오늘까지 유급휴가잔수</span>
-                                            <span>0.0일</span>
+                                            <span>所定時間</span>
+                                            <span>{workTime?.basicWorkHours ?? "-"}</span>
                                         </li>
                                         <li className="list-group-item d-flex justify-content-between">
-                                            <span>이체 휴일 일수</span>
-                                            <span>0.0일</span>
+                                            <span>所定内労働時間</span>
+                                            <span>{workTime?.withinScheduledHours ?? "-"}</span>
                                         </li>
                                         <li className="list-group-item d-flex justify-content-between">
-                                            <span>오늘까지 이체 휴일 잔수</span>
-                                            <span>0.0일</span>
+                                            <span>残業時間</span>
+                                            <span>{workTime?.overScheduledHours ?? "-"}</span>
+                                        </li>
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>法定内時間外労働時間</span>
+                                            <span>{workTime?.overScheduledHours ?? "-"}</span>
+                                        </li>
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>法定時間外労働時間</span>
+                                            <span>{workTime?.statutoryOvertime ?? "-"}</span>
+                                        </li>
+
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>法定外休日労働時間</span>
+                                            <span>{workTime?.holidayWorkNonLegal ?? "-"}</span>
+                                        </li>
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>法定休日労働時間</span>
+                                            <span>{workTime?.holidayWorkLegal ?? "-"}</span>
+                                        </li>
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>深夜労働時間</span>
+                                            <span>{workTime?.midnightWork ?? "-"}</span>
+                                        </li>
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>遅刻時間</span>
+                                            <span>{workTime?.lateMinutes ?? "-"}</span>
+                                        </li>
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>早退時間</span>
+                                            <span>{workTime?.earlyLeaveMinutes ?? "-"}</span>
+                                        </li>
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>所定不足時間</span>
+                                            <span>{workTime?.deficitScheduledHours ?? "-"}</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+
+
+                            <div className="col-12 col-lg-4">
+                                <div className="card shadow-sm p-3">
+                                    <h5 className="card-header fw-bold">休日・休暇取得 (x)</h5>
+                                    <ul className="list-group list-group-flush">
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>公休日数</span>
+                                            <span>0</span>
+                                        </li>
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>有給休暇日数</span>
+                                            <span>0</span>
+                                        </li>
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>本日までの有給休暇残数</span>
+                                            <span>0</span>
+                                        </li>
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>振替休日日数</span>
+                                            <span>0</span>
+                                        </li>
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>本日までの振替休日残数</span>
+                                            <span>0</span>
+                                        </li>
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>代休日数</span>
+                                            <span>0</span>
+                                        </li>
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>本日までの代休残数</span>
+                                            <span>0</span>
+                                        </li>
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>特別休暇日数</span>
+                                            <span>0</span>
+                                        </li>
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>休職日数</span>
+                                            <span>0</span>
                                         </li>
                                     </ul>
                                 </div>
