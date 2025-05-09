@@ -39,7 +39,7 @@ const AdminWorkScheduleDashboard = () => {
     };
 
     function moveToDetail(id) {
-        window.alert("詳細ページに移動します：" + id + " " + year + "年 " + month + "月");
+        // window.alert("詳細ページに移動します：" + id + " " + year + "年 " + month + "月");
         navigate(`/workSchedule/adminList/${id}?year=${year}&month=${month}`);
     }
 

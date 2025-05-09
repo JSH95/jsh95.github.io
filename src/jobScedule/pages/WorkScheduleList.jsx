@@ -230,7 +230,7 @@ const WorkScheduleList = () =>  {
                     <button onClick={() => changeMonth(-1)} className="btn">
                         <i className="bi bi-arrow-left-circle-fill fs-3"></i>
                     </button>
-                    <h2 className="px-3">{year} / {String(month).padStart(2, "0")} 勤務表</h2>
+                    <h2 className="px-3">{year} / {String(month).padStart(2, "0")} 月 勤務表</h2>
                     <button onClick={() => changeMonth(1)} className="btn">
                         <i className="bi bi-arrow-right-circle-fill fs-3"></i>
                     </button>
@@ -295,8 +295,8 @@ const WorkScheduleList = () =>  {
                             <tr>
                                 <td colSpan="5" className="text-center">Loading...</td>
                             </tr>
-                            :schedule.map((day, index) => (
-                            <tr key={index} >
+                            :schedule.map((day) => (
+                            <tr key={day.key} >
                                     <td className={day.styleClass}>
                                         <div className="d-flex align-items-center justify-content-center px-1">
                                             <span

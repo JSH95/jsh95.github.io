@@ -15,8 +15,8 @@ const AdminWorkScheduleList = () =>  {
     const [searchParams] = useSearchParams();
     const selectedYear = searchParams.get("year") || new Date().getFullYear();
     const selectedMonth = searchParams.get("month") || new Date().getMonth() + 1;
-    const [year, setYear] = useState(selectedYear);
-    const [month, setMonth] = useState(selectedMonth);
+    const [year, setYear] = useState(Number(selectedYear));
+    const [month, setMonth] = useState(Number(selectedMonth));
     const [schedule, setSchedule] = useState([]);
 
     const loadFromLocalStorage = () => {
@@ -263,7 +263,7 @@ const AdminWorkScheduleList = () =>  {
                     <button onClick={() => changeMonth(-1)} className="btn">
                         <i className="bi bi-arrow-left-circle-fill fs-3"></i>
                     </button>
-                    <h2 className="px-3">{year} / {String(month).padStart(2, "0")}</h2>
+                    <h2 className="px-3">{year} / {String(month).padStart(2, "0")} 月 勤務表</h2>
                     <button onClick={() => changeMonth(1)} className="btn">
                         <i className="bi bi-arrow-right-circle-fill fs-3"></i>
                     </button>
@@ -324,8 +324,8 @@ const AdminWorkScheduleList = () =>  {
                         </tr>
                         </thead>
                         <tbody>
-                        {loading ? null : schedule.map((day, index) => (
-                            <tr key={index} onClick={() => handleClickEdit(day.key)}
+                        {loading ? null : schedule.map((day) => (
+                            <tr key={day.key} onClick={() => handleClickEdit(day.key)}
                                 style={{
                                     cursor: "pointer",
                                     transition: "color 0.2s ease-in-out",

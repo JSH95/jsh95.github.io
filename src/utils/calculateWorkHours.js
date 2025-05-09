@@ -63,7 +63,6 @@ export const calculateWorkStats = async (year, month, username, role, run) => {
             groupedByEmployee[id].records.push(entry);
         });
 
-        const allowedTypes = ["出勤", "休日出勤", "有給休暇"];
         const results = [];
 
         Object.values(groupedByEmployee).forEach(({ employee, records }) => {
@@ -86,8 +85,33 @@ export const calculateWorkStats = async (year, month, username, role, run) => {
             const standardCheckInMinutes = 9 * 60;
             const standardCheckOutMinutes = 18 * 60;
 
-            records
-                .filter(r => allowedTypes.includes(r.workType) && r.workPosition !== "休暇")
+            const halfDayPositions = ["本社", "現場", "在宅"];
+
+            const workRecords = records.filter(r => {
+                // 1) 출근/휴일출근
+                if (r.workType === "出勤" || r.workType === "休日出勤") {
+                    return true;
+                }
+                // 2) 유급휴가 중 반휴만
+                if (r.workType === "有給休暇") {
+                    return halfDayPositions.includes(r.workPosition);
+                }
+                // 그 외는 제외
+                return false;
+            });
+            console.log("필터", workRecords)
+            records.forEach((r)=> {
+                switch (r.workType) {
+                    case "欠勤": absences++; break;
+                    case "代休": substituteHolidays++; break;
+                    case "有給休暇": paidLeave++; break;
+                    case "特別休暇": specialLeave++; break;
+                    case "休日代替": dayOff++; break;
+                    case "慶弔休暇": condolenceLeave++; break;
+                    case "休日出勤": holidayWork++; break;
+                }
+            })
+            workRecords
                 .forEach((r) => {
                     const checkIn = new Date(`${r.checkInDate}T${r.checkInTime}`);
                     const checkOut = new Date(`${r.checkOutDate || r.checkInDate}T${r.checkOutTime}`);
@@ -115,15 +139,15 @@ export const calculateWorkStats = async (year, month, username, role, run) => {
                         nightShiftHours += Math.floor(overtimeMinutes / 60);
                     }
 
-                    switch (r.workType) {
-                        case "欠勤": absences++; break;
-                        case "代休": substituteHolidays++; break;
-                        case "有給休暇": paidLeave++; break;
-                        case "特別休暇": specialLeave++; break;
-                        case "休日代替": dayOff++; break;
-                        case "慶弔休暇": condolenceLeave++; break;
-                        case "休日出勤": holidayWork++; break;
-                    }
+                    // switch (r.workType) {
+                    //     case "欠勤": absences++; break;
+                    //     case "代休": substituteHolidays++; break;
+                    //     case "有給休暇": paidLeave++; break;
+                    //     case "特別休暇": specialLeave++; break;
+                    //     case "休日代替": dayOff++; break;
+                    //     case "慶弔休暇": condolenceLeave++; break;
+                    //     case "休日出勤": holidayWork++; break;
+                    // }
 
                     if (r.workPosition === "本社") headOfficeAttendance++;
 
@@ -153,11 +177,10 @@ export const calculateWorkStats = async (year, month, username, role, run) => {
                         midnightWork += checkOutHour - 22;
                     }
                 });
-
             const monthlyBasicWorkTime = businessDaysInMonth * 8;
             const deficitScheduledHours = Math.max(0, monthlyBasicWorkTime - withinScheduledHours);
 
-            const checkStates = records.map(r => r.workScheduleState).filter(Boolean);
+            const checkStates = workRecords.map(r => r.workScheduleState).filter(Boolean);
             const getWorkScheduleStatus = (checkStates) => {
                 if (!checkStates || checkStates.length === 0) return "未提出";
                 if (checkStates.includes("修正依頼") || checkStates.includes("再修正依頼")) return "修正依頼";
@@ -173,7 +196,7 @@ export const calculateWorkStats = async (year, month, username, role, run) => {
                 employeeId: employee.id,
                 employeeName: employee.name,
                 scheduledWorkDays: businessDaysInMonth,
-                totalWorkDays: records.length,
+                totalWorkDays: workRecords.length,
                 totalWorkHours: Number(totalWorkHours.toFixed(1)),
                 basicWorkHours: Number(monthlyBasicWorkTime),
                 status: getWorkScheduleStatus(checkStates),

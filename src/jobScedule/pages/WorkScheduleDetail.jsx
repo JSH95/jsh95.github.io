@@ -581,7 +581,6 @@ function WorkScheduleDashboard (){
                                     <label>理由</label>
                                     <textarea
                                         name="memo"
-                                        // type="text"
                                         className="input"
                                         placeholder="理由を入力してください。"
                                         value={editedItem.memo  || ""}
@@ -590,17 +589,16 @@ function WorkScheduleDashboard (){
                                     />
                                 </div>
                             ) : (
-                                    <>
-                                        <input
+                                    <div className="form-group">
+                                        <label>理由</label>
+                                        <textarea
                                             name="memo"
-                                            type="text"
                                             className="input"
-                                            value={editedItem.memo? editedItem.memo : ""}
+                                            placeholder="必要に応じて入力してください。"
+                                            value={editedItem.memo  || ""}
                                             onChange={handleInputChange}
-                                            hidden
-                                            disabled
                                         />
-                                    </>
+                                    </div>
                             )}
                                     {editedItem.workType !== "有給休暇" && editedItem.workType !== "出勤" && editedItem.workType !== "休日出勤"? (
                                         <></>
