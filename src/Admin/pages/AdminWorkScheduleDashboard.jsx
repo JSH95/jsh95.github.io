@@ -17,6 +17,8 @@ const AdminWorkScheduleDashboard = () => {
     useEffect(() => {
         if (!loadingWorkHours && data.length > 0) {
             setChartData(data);
+        }　else{
+            setChartData([]);
         }
     }, [data, loadingWorkHours]);
 
@@ -71,7 +73,7 @@ const AdminWorkScheduleDashboard = () => {
                     </tr>
                     </thead>
                     <tbody>
-                    {!errorWorkHours ? chartData
+                    {!errorWorkHours && !loadingWorkHours && data?.length > 0 ? chartData
                             .sort((a, b) => a.employeeName.localeCompare(b.employeeName))
                             .map((entry) => (
                                 <tr key={entry.employeeName}
@@ -108,7 +110,11 @@ const AdminWorkScheduleDashboard = () => {
                                     </td>
                                 </tr>
                             ))
-                        : "エラー"
+                        : <>
+                            <span className="text-danger">
+                                まだデータがありません。
+                            </span>
+                        </>
                     }
                     </tbody>
                 </table>

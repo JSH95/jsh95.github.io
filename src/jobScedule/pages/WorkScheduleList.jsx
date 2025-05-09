@@ -36,12 +36,12 @@ const WorkScheduleList = () =>  {
         const [displayText, setDisplayText] = useState("");
         const [modalOpen, setModalOpen] = useState(false);
         const [workTime, setWorkTime] = useState({});
-        const { data, loadingWorkHours, errorWorkHours } = useWorkHours(year, month, username, role, 0);
+        const { data, loadingWorkHours } = useWorkHours(year, month, username, role, 0);
     //     "2025-01-01": { attendanceType: "휴일", workType: "", checkInTime: "", checkOutTime: "", memo: "공휴일" },
 
     useEffect(() => {
         if (!loadingWorkHours && data.length > 0) {
-            console.log("받아온 데이터:", data);
+            // console.log("받아온 데이터:", data);
             setWorkTime(data[0]); // 데이터가 있을 때만 사용
         }
     } , [data, loadingWorkHours, year, month]);

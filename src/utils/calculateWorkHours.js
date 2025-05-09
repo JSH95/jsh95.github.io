@@ -99,7 +99,6 @@ export const calculateWorkStats = async (year, month, username, role, run) => {
                 // 그 외는 제외
                 return false;
             });
-            console.log("필터", workRecords)
             records.forEach((r)=> {
                 switch (r.workType) {
                     case "欠勤": absences++; break;

@@ -8,6 +8,7 @@ import useWorkData from "../../jobScedule/utils/WorkData";
 import createAxiosInstance from "../../config/api";
 import {getCheckStateText} from "../../jobScedule/utils/getCheckStateText";
 import {useAuth} from "../../config/AuthContext";
+import useWorkHours from "../../jobScedule/utils/useWorkHours";
 
 const AdminWorkScheduleList = () =>  {
     const { id } = useParams();
@@ -30,6 +31,14 @@ const AdminWorkScheduleList = () =>  {
     const [error, setError] = useState("");
     const workDataList = useWorkData(year, month, id); // ✅ 데이터와 갱신 함수 가져오기
     const [displayText, setDisplayText] = useState("");
+    const [workTime, setWorkTime] = useState({});
+    const { data, loadingWorkHours } = useWorkHours(year, month, id, role, 0);
+
+    useEffect(() => {
+        if (!loadingWorkHours && data.length > 0) {
+            setWorkTime(data[0]); // 데이터가 있을 때만 사용
+        }
+    } , [data, loadingWorkHours, year, month]);
 
     useEffect(() => {
         const fetchSchedule = async () => {
@@ -258,17 +267,18 @@ const AdminWorkScheduleList = () =>  {
     if (error) return <p>{error}</p>;
     return (
             <div className="container">
-                <h2 className="text-dark mb-1">WORK SCHEDULE</h2>
+                <h2 className="text-dark mb-1">{workTime?.employeeName || ""}の勤務表</h2>
                 <div className="d-flex justify-content-center align-items-center">
                     <button onClick={() => changeMonth(-1)} className="btn">
                         <i className="bi bi-arrow-left-circle-fill fs-3"></i>
                     </button>
-                    <h2 className="px-3">{year} / {String(month).padStart(2, "0")} 月 勤務表</h2>
+                    <h2 className="px-3">{year} / {String(month).padStart(2, "0")} 月</h2>
                     <button onClick={() => changeMonth(1)} className="btn">
                         <i className="bi bi-arrow-right-circle-fill fs-3"></i>
                     </button>
                 </div>
-                {loading ? "Loading ...":<div className="d-flex justify-content-center align-items-center mb-2">
+                {loading ? "Loading ...":
+                    <div className="d-flex justify-content-center align-items-center mb-2">
                     <button type="button" className="btn btn-secondary me-3" onClick={handleClickReceipt}>
                         {month}월 영수증 첨부
                     </button>
@@ -308,7 +318,7 @@ const AdminWorkScheduleList = () =>  {
                 </div>}
                 <div
                     className="table-responsive"
-                    style={{ maxHeight: "450px", overflowY: "auto", border: "1px solid #ddd" }}
+                    style={{ maxHeight: "500px", overflowY: "auto", border: "1px solid #ddd" }}
                 >
                     <table className="table table-hover">
                         <thead className="table-light sticky-top" style={{ top: "0", zIndex: 1 }}>
@@ -394,6 +404,154 @@ const AdminWorkScheduleList = () =>  {
                         ))}
                         </tbody>
                     </table>
+                </div>
+                <div className=" justify-content-center align-items-center mb-4">
+                    <div className="mt-4 p-4">
+                        <h2 className="text-xl mb-4">勤務時間の要約(管理者のみ)</h2>
+                        <div className="row">
+                            <div className="col-12 col-lg-4 mb-3">
+                                <div className="card shadow-sm p-3">
+                                    <h5 className="card-header fw-bold">出勤状況</h5>
+                                    <ul className="list-group list-group-flush">
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>所定日数</span>
+                                            <span>{workTime?.scheduledWorkDays ?? "-"}</span>
+                                        </li>
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>出勤日数</span>
+                                            <span>{workTime?.totalWorkDays ?? "-"}</span>
+                                        </li>
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>法定外休日出勤日数</span>
+                                            <span>{workTime?.holidayWorkNonLegal ?? "-"}</span>
+                                        </li>
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>法定休日出勤日数</span>
+                                            <span>{workTime?.holidayWorkLegal ?? "-"}</span>
+                                        </li>
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>欠勤日数</span>
+                                            <span>{workTime?.absences ?? "-"}</span>
+                                        </li>
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>遅刻日数</span>
+                                            <span>{workTime?.lateCount ?? "-"}</span>
+                                        </li>
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>早退日数</span>
+                                            <span>{workTime?.earlyLeaveCount ?? "-"}</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div className="col-12 col-lg-4">
+                                <div className="card shadow-sm p-3 mb-3">
+                                    <h5 className="card-header fw-bold">勤務時間</h5>
+                                    <ul className="list-group list-group-flush">
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>総労働時間</span>
+                                            <span>{workTime?.totalWorkHours ?? "-"}</span>
+                                        </li>
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>実働時間</span>
+                                            <span>{workTime?.actualWorkHours ?? "-"}</span>
+                                        </li>
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>所定時間</span>
+                                            <span>{workTime?.basicWorkHours ?? "-"}</span>
+                                        </li>
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>所定内労働時間</span>
+                                            <span>{workTime?.withinScheduledHours ?? "-"}</span>
+                                        </li>
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>残業時間</span>
+                                            <span>{workTime?.overScheduledHours ?? "-"}</span>
+                                        </li>
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>法定内時間外労働時間</span>
+                                            <span>{workTime?.overScheduledHours ?? "-"}</span>
+                                        </li>
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>法定時間外労働時間</span>
+                                            <span>{workTime?.statutoryOvertime ?? "-"}</span>
+                                        </li>
+
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>法定外休日労働時間</span>
+                                            <span>{workTime?.holidayWorkNonLegal ?? "-"}</span>
+                                        </li>
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>法定休日労働時間</span>
+                                            <span>{workTime?.holidayWorkLegal ?? "-"}</span>
+                                        </li>
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>深夜労働時間</span>
+                                            <span>{workTime?.midnightWork ?? "-"}</span>
+                                        </li>
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>遅刻時間</span>
+                                            <span>{workTime?.lateMinutes ?? "-"}</span>
+                                        </li>
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>早退時間</span>
+                                            <span>{workTime?.earlyLeaveMinutes ?? "-"}</span>
+                                        </li>
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>所定不足時間</span>
+                                            <span>{workTime?.deficitScheduledHours ?? "-"}</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+
+
+                            <div className="col-12 col-lg-4">
+                                <div className="card shadow-sm p-3">
+                                    <h5 className="card-header fw-bold">休日・休暇取得 (x)</h5>
+                                    <ul className="list-group list-group-flush">
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>公休日数</span>
+                                            <span>0</span>
+                                        </li>
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>有給休暇日数</span>
+                                            <span>0</span>
+                                        </li>
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>本日までの有給休暇残数</span>
+                                            <span>0</span>
+                                        </li>
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>振替休日日数</span>
+                                            <span>0</span>
+                                        </li>
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>本日までの振替休日残数</span>
+                                            <span>0</span>
+                                        </li>
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>代休日数</span>
+                                            <span>0</span>
+                                        </li>
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>本日までの代休残数</span>
+                                            <span>0</span>
+                                        </li>
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>特別休暇日数</span>
+                                            <span>0</span>
+                                        </li>
+                                        <li className="list-group-item d-flex justify-content-between">
+                                            <span>休職日数</span>
+                                            <span>0</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         );
