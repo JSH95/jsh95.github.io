@@ -7,6 +7,7 @@ import {TeamListApi} from "../../utils/TeamListApi";
 import {DepartmentListApi} from "../../utils/DepartmentListApi";
 import handleChangePass from "../utils/passwordChange";
 import ChangePassword from "../utils/passwordChange";
+import {AdministratorListApi} from "../../utils/AdministratorListApi";
 
 
 function EmployeeDetail() {
@@ -19,6 +20,7 @@ function EmployeeDetail() {
   const [editedItem, setEditedItem] = useState({});
   const { loadList, teamList, errorMsg} = TeamListApi();
   const { deLoadList, departmentList, deErrorMsg, deLoading} = DepartmentListApi();
+  const { administratorList, adminLoadList, adminLoading, adminErrorMsg} = AdministratorListApi();
   const [teamId, setTeamId] = useState(""); // 팀 아이디 설정
   const [employeeRole, setEmployeeRole] = useState(""); // 관리자 설정
   const [showModal, setShowModal] = useState(false);
@@ -51,6 +53,10 @@ function EmployeeDetail() {
   useEffect(() => {
     deLoadList();
   }, [deLoadList]);
+
+  useEffect(() => {
+    adminLoadList();
+  }, [adminLoadList]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -343,7 +349,7 @@ function EmployeeDetail() {
                         }
                   </select>
                 </div>
-                <div  className="form-group">
+                <div className="form-group">
                   <label className="label">계정 권한</label>
                   <select
                       className="input"
@@ -351,12 +357,25 @@ function EmployeeDetail() {
                       onChange={handleChangeRole}
                       required
                   >
-                    <option value="" disabled>계정 권한을 선택해 주세요</option>
-                    <option value="ADMIN">관리자권한</option>
-                    <option value="TEAM_LEADER">서브관리자권한</option>
-                    <option value="TEAM">팀장</option>
-                    <option value="GENERAL">일반사원</option>
-                   
+                    {/*<option value="" disabled>계정 권한을 선택해 주세요</option>*/}
+                    {/*<option value="MASTER">마스터권한</option>*/}
+                    {/*<option value="ADMIN">관리자권한</option>*/}
+                    {/*<option value="SUBADMIN">서브관리자권한</option>*/}
+                    {/*<option value="TEAM_LEADER">팀장</option>*/}
+                    {/*<option value="GENERAL">일반사원</option>*/}
+                    {adminErrorMsg ? (
+                        <option value="" disabled>{adminErrorMsg}</option> // 오류 메시지를 옵션으로 표시
+                    ) : administratorList && administratorList.length > 0 ? (
+                        administratorList.map((administrator) => (
+                            <option key={administrator.id} value={administrator.id}>
+                              {administrator.name}
+                            </option>
+                        ))
+                    ) : (
+                        <option value="" disabled>
+                          Loading...
+                        </option>
+                    )}
                   </select>
                 </div>
               </>

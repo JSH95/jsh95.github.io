@@ -39,7 +39,7 @@ const WorkScheduleMain = () => {
 
     // 기본 데이터 설정 (초기 실행)
     useEffect(() => {
-        if (data.checkInTime === null) {
+        if (data?.checkInTime === null) {
             window.alert("勤務表の基本情報を設定してください。\n 該当ページに移動します。");
             navigate("/workSchedule/dashBoard");
             return;
@@ -59,23 +59,23 @@ const WorkScheduleMain = () => {
         }
         setSavedData((prev) => ({
             ...prev,
-            checkInTime: data.checkInTime || "",
-            checkOutTime: data.checkOutTime || "",
+            checkInTime: data?.checkInTime || "",
+            checkOutTime: data?.checkOutTime || "",
             // breakTimeIn: data.breakTimeIn || "",
             // breakTimeOut: data.breakTimeOut || "",
-            noBreakTime: data.breakTime <= 0 || false,
-            workLocation: data.workLocation || "",
-            workPosition: data.workPosition || "",
-            basicWorkTime: data.basicWorkTime || "",
-            flexTime: data.flexTime || false,
+            noBreakTime: data?.breakTime <= 0 || false,
+            workLocation: data?.workLocation || "",
+            workPosition: data?.workPosition || "",
+            basicWorkTime: data?.basicWorkTime || "",
+            flexTime: data?.flexTime || false,
             memo: "",
         }));
     }, [workData, data, today]);
 
     const handleStart = async (e) => {
         e.preventDefault();
-            if (!savedData.flexTime && savedData.checkInTime > data.checkInTime ||
-                savedData.checkOutTime < data.checkOutTime) {
+            if (!savedData.flexTime && savedData.checkInTime > data?.checkInTime ||
+                savedData.checkOutTime < data?.checkOutTime) {
                 if(savedData.memo.length === 0) {
                     window.alert("理由を入力してください。\n");
                     return;
@@ -84,7 +84,7 @@ const WorkScheduleMain = () => {
                     window.alert("理由が短すぎます。 5文字以上入力してください。");
                     return;
                 }
-            } else if (savedData.checkInTime === savedData.checkOutTime || data.checkInTime === data.checkOutTime) {
+            } else if (savedData.checkInTime === savedData.checkOutTime || data?.checkInTime === data?.checkOutTime) {
                 window.alert("出勤時間と退勤時間が同じです。もう一度入力してください。");
                 setSavedData((prev) => (
                     { ...prev, memo: ""}));
@@ -100,7 +100,7 @@ const WorkScheduleMain = () => {
                 const toSave = {
                     ...savedData,
                     checkOutTime: adjusted.time,
-                    breakTime: savedData.noBreakTime ? 0 : data.breakTime,
+                    breakTime: savedData.noBreakTime ? 0 : data?.breakTime,
                 };
                 const axiosInstance = createAxiosInstance();
                 await axiosInstance.post("/workSchedule/save", toSave);
@@ -326,7 +326,7 @@ const WorkScheduleMain = () => {
                                 />
                             </div>
                         </div>
-                        {(!savedData.flexTime && savedData.checkInTime > data.checkInTime || savedData.checkOutTime < data.checkOutTime) && (
+                        {(!savedData?.flexTime && savedData?.checkInTime > data?.checkInTime || savedData?.checkOutTime < data?.checkOutTime) && (
                             <>
                             <div className="d-flex align-items-center gap-2 mb-3">
                                 <strong className="col-3">理由 :</strong>
@@ -343,7 +343,7 @@ const WorkScheduleMain = () => {
                             </div>
                             </>
                         )}
-                        {!savedData.flexTime &&savedData.checkInTime > data.checkInTime ? (
+                        {!savedData.flexTime &&savedData.checkInTime > data?.checkInTime ? (
                             <div className="row-cols-1">
                                 {uploading && (
                                     <div style={{ marginBottom: "10px" }}>

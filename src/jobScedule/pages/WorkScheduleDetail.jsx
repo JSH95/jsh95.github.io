@@ -1,5 +1,5 @@
-import React, {useCallback, useEffect, useState} from "react";
-import {useLocation, useNavigate, useParams} from "react-router-dom";
+import React, {useEffect, useMemo, useState} from "react";
+import {useNavigate, useParams} from "react-router-dom";
 import useWorkData from "../utils/WorkData";
 import createAxiosInstance from "../../config/api";
 import workDataDefault from "../utils/WorkDataDefault";
@@ -8,9 +8,6 @@ import {useLoading} from "../../utils/LoadingContext";
 
 function WorkScheduleDashboard (){
     const { setIsProcessing } = useLoading();
-    const location = useLocation();
-    const fromState = location.state || {};
-
     const { date } = useParams();
     const year = new Date(date).getFullYear();
     const month = new Date(date).getMonth()+ 1;
@@ -19,28 +16,25 @@ function WorkScheduleDashboard (){
         year,
         month
     );
-    const [leaveType, setLeaveType] = useState(""); // 초기값 없음
-    const [item, setItem] = useState({});
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState("")
-    const [isEditing, setIsEditing] = useState(!!fromState.isEditing);
-    const [editedItem, setEditedItem] = useState({});
-    const [uploading, setUploading] = useState(false);
-    const [selectedFile, setSelectedFile] = useState(null);
-    const [progress, setProgress] = useState(0); // 업로드 진행 상태
+    const [ leaveType, setLeaveType ] = useState(""); // 초기값 없음
+    const [ item, setItem ] = useState({});
+    const [ loading, setLoading ] = useState(false);
+    const [ error, setError ] = useState("");
+    const [ isEditing, setIsEditing ] = useState(localStorage.getItem("fileStatus") === "true");
+    const [ editedItem, setEditedItem ] = useState({});
+    const [ uploading, setUploading ] = useState(false);
+    const [ selectedFile, setSelectedFile ] = useState(null);
+    const [ progress, setProgress ] = useState(0);
     const data = workDataDefault();
-    const [noBreakTime, setNoBreakTime] = useState(false)
-    console.log("1", editedItem)
-    console.log("2", item)
-
+    const [ noBreakTime, setNoBreakTime ] = useState(false);
+    const dayData = workData?.[date];
+    console.log(editedItem)
     const defaultItem = {
         id: "",
         checkInDate: date,
         checkInTime: "",
         checkOutDate: date,
         checkOutTime: "",
-        // breakTimeIn: "",
-        // breakTimeOut: "",
         breakTime: 0,
         workType: "",
         workPosition: "",
@@ -50,35 +44,40 @@ function WorkScheduleDashboard (){
         };
 
     useEffect(() => {
-        console.log("useEffect")
-        if (workData?.[date]) {
-            setItem(workData[date]);
-            setEditedItem(workData[date]);
-            setNoBreakTime(Number(workData[date].breakTime) === 0);
-        } else {
-            setItem(null);
-            setEditedItem({
-                ...defaultItem,
-                checkInTime: data.checkInTime || "",
-                checkOutTime: data.checkOutTime || "",
-                breakTime: data.breakTime || "",
-                workLocation: data.workLocation || "",
-                workPosition: data.workPosition || "",
-                flexTime: data.flexTime || false,
-            });
-        }
-    }, [workData, data]);
-
-    useEffect(() => {
         fetchWorkData();
     }, [year, month, fetchWorkData]);
+
+    useEffect(() => {
+
+        if (dayData) {
+            // 기존 데이터 있을 때
+            setItem(dayData);
+            setEditedItem(dayData);
+            setNoBreakTime(dayData.breakTime === 0);
+        } else {
+            // 신규 작성 모드일 때, defaultData 값을 채워 넣는다!
+            const defaults = {
+                ...defaultItem,
+                checkInTime: data?.checkInTime || "",
+                checkOutTime: data?.checkOutTime || "",
+                breakTime: data?.breakTime   || 0,
+                workPosition: data?.workPosition || "",
+                workLocation: data?.workLocation || "",
+                flexTime: data?.flexTime || false,
+            };
+            setEditedItem(defaults);
+            setNoBreakTime(defaults.breakTime === 0);
+        }
+    }, [dayData, data]);
 
     function handleClickBack() {
         navigate("/workSchedule/list");
     }
+
     const handleEditClick = () => {
         setIsEditing(true);
     };
+
     function handleCancelClick() {
         if (!item || Object.keys(item).length === 0) {
             navigate("/workSchedule/list");
@@ -87,17 +86,26 @@ function WorkScheduleDashboard (){
             setEditedItem(item);
         }
     }
+
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-
         setEditedItem((prevItem) => {
             const updated = { ...prevItem, [name]: value };
-
             // workType이 변경된 경우만 체크인/체크아웃 시간 자동 설정
             if (name === "workType") {
                 if (value !== "出勤" && value !== "休日出勤" && value !== "有給休暇") {
                     updated.checkInTime = "00:00";
                     updated.checkOutTime = "00:00";
+                }else {
+                    if (prevItem.workType === "有給休暇" ) {
+                        setLeaveType(""); // leaveType 초기화
+                        updated.checkInTime = data?.checkInTime || "";
+                        updated.checkOutTime = data?.checkOutTime || "";
+                    } else {
+                        // 여기서 prevItem을 참조해야함!
+                        updated.checkInTime = prevItem.checkInTime || data?.checkInTime || "";
+                        updated.checkOutTime = prevItem.checkOutTime || data?.checkOutTime || "";
+                    }
                 }
             }
             return updated;
@@ -114,26 +122,20 @@ function WorkScheduleDashboard (){
                 if(editedItem.workType !== "有給休暇" && editedItem.workType !== "出勤" && editedItem.workType !== "休日出勤"){
                     editedItem.workPosition = "休暇";
                 }
-                if(!(editedItem.workType !== "出勤" && editedItem.workType !== "休日出勤"
-                    || editedItem.checkInTime > data.checkInTime
-                    || editedItem.checkInDate !== editedItem.checkOutDate)){
-                    editedItem.memo = "";
-                }
                 const adjusted = adjustTime(editedItem.checkOutTime);
                 const toSave = {
                     ...editedItem,
                     checkOutTime: adjusted.time,
                     breakTime: noBreakTime ? 0 : editedItem.breakTime,
                 };
-
+                console.log("toSave", toSave);
                 const axiosInstance = createAxiosInstance(); // 인스턴스 생성
-                await axiosInstance.post("/workSchedule/save", toSave);
-
-                setItem(toSave);
-                setEditedItem(toSave);
-                setIsEditing(false);
+                const response = await axiosInstance.post("/workSchedule/save", toSave);
+                setItem(response.data[0]);
+                setEditedItem(response.data[0]);
                 window.alert("勤務表情報を保存しました。");
-                // fetchWorkData();
+                setIsEditing(false);
+                localStorage.setItem("fileStatus", JSON.stringify(false));
             } catch (err) {
                 setError(err.response?.status === 404
                     ? "入力された値をもう一度確認してください。"
@@ -227,7 +229,6 @@ function WorkScheduleDashboard (){
                 });
                 setProgress(100);
                 window.alert("ファイルアップロード完了！");
-
                 localStorage.setItem("fileStatus", JSON.stringify(true));
                 localStorage.setItem("selectedFile", JSON.stringify(selectedFile));
             } catch (error) {
@@ -238,6 +239,7 @@ function WorkScheduleDashboard (){
                     window.alert("ファイルのアップロード中にエラーが発生しました。");
                     localStorage.setItem("fileStatus", JSON.stringify(false));
                 }
+
             }finally {
                 setProgress(0);
                 setUploading(false);
@@ -249,36 +251,35 @@ function WorkScheduleDashboard (){
         const selectedType = e.target.value;
         setLeaveType(selectedType);
 
-        switch (selectedType) {
-            case "전휴":
-                setEditedItem((prev) => ({
-                    ...prev,
-                    checkInTime: "00:00",
-                    checkOutTime: "00:00",
-                    workPosition: "休暇",
-                }));
-                break;
-            case "오후반휴":
-                setEditedItem((prev) => ({
-                    ...prev,
-                    checkInTime: data?.checkInTime || "",
-                    checkOutTime: "12:00",
-                    workPosition: data?.workPosition || "",
-                }));
-                break;
-            case "오전반휴":
-                setEditedItem((prev) => ({
-                    ...prev,
-                    checkInTime: "13:00",
-                    checkOutTime: data?.checkOutTime || "",
-                    workPosition: data?.workPosition || "",
-                }));
-                break;
-            default:
-                break;
-        }
-    };
+        setEditedItem((prev) => {
+            const updated = { ...prev };
 
+            switch (selectedType) {
+                case "전휴":
+                    updated.checkInTime = "00:00";
+                    updated.checkOutTime = "00:00";
+                    updated.workPosition = "休暇";
+                    break;
+
+                case "오후반휴":
+                    updated.checkInTime = data?.checkInTime || "";
+                    updated.checkOutTime = "12:00";
+                    updated.workPosition = prev.workPosition || data?.workPosition || "";
+                    break;
+
+                case "오전반휴":
+                    updated.checkInTime = "13:00";
+                    updated.checkOutTime = data?.checkOutTime || "";
+                    updated.workPosition = prev.workPosition || data?.workPosition || "";
+                    break;
+
+                default:
+                    break;
+            }
+
+            return updated;
+        });
+    };
 
     useEffect(() => {
         if (
@@ -333,26 +334,25 @@ function WorkScheduleDashboard (){
                                         name="checkInDate"
                                         type="date"
                                         className="form-control"
-                                        style={{ maxWidth: "150px" , minWidth: 0}}
+                                        style={{ maxWidth: "150px", minWidth: 0 }}
                                         value={editedItem.checkInDate || ""}
                                         onChange={handleInputChange}
                                         required
                                     />
                                     <input
                                         type="number"
-                                        min="00"
+                                        min="0"
                                         max="23"
                                         className="form-control"
                                         placeholder="時"
-                                        style={{ width: "80px" , minWidth: 0}}
-                                        value={editedItem.checkInHour ?? (editedItem.checkInTime?.split(":")[0] || "")}
+                                        style={{ width: "80px", minWidth: 0 }}
+                                        value={editedItem.checkInTime ? editedItem.checkInTime.split(":")[0] : ""}
                                         onChange={(e) => {
-                                            const hour = e.target.value;
-                                            const minute = editedItem.checkInMinute ?? editedItem.checkInTime?.split(":")[1] ?? "00";
+                                            const hour = e.target.value.padStart(2, "0");
+                                            const minute = editedItem.checkInTime ? editedItem.checkInTime.split(":")[1] : "00";
                                             setEditedItem((prev) => ({
                                                 ...prev,
-                                                checkInHour: hour,
-                                                checkInTime: `${hour.padStart(2, "0")}:${minute.padStart(2, "0")}`,
+                                                checkInTime: `${hour}:${minute}`,
                                             }));
                                         }}
                                         required
@@ -360,19 +360,18 @@ function WorkScheduleDashboard (){
                                     <span className="fs-5">:</span>
                                     <input
                                         type="number"
-                                        min="00"
+                                        min="0"
                                         max="59"
                                         className="form-control"
                                         placeholder="分"
-                                        style={{ width: "80px" , minWidth: 0}}
-                                        value={editedItem.checkInMinute ?? (editedItem.checkInTime?.split(":")[1] || "")}
+                                        style={{ width: "80px", minWidth: 0 }}
+                                        value={editedItem.checkInTime ? editedItem.checkInTime.split(":")[1] : ""}
                                         onChange={(e) => {
-                                            const minute = e.target.value;
-                                            const hour = editedItem.checkInHour ?? editedItem.checkInTime?.split(":")[0] ?? "00";
+                                            const minute = e.target.value.padStart(2, "0");
+                                            const hour = editedItem.checkInTime ? editedItem.checkInTime.split(":")[0] : "00";
                                             setEditedItem((prev) => ({
                                                 ...prev,
-                                                checkInMinute: minute,
-                                                checkInTime: `${hour.padStart(2, "0")}:${minute.padStart(2, "0")}`,
+                                                checkInTime: `${hour}:${minute}`,
                                             }));
                                         }}
                                         required
@@ -380,15 +379,14 @@ function WorkScheduleDashboard (){
                                 </div>
                             </div>
 
-
                             <div className="form-group">
-                                <label className="label">退勤日 / 時間</label>
-                                <div className="d-flex align-items-center justify-content-start gap-2 ">
+                                <label className="label">出勤日 / 時間</label>
+                                <div className="d-flex align-items-center justify-content-start gap-2">
                                     <input
                                         name="checkOutDate"
                                         type="date"
                                         className="form-control"
-                                        style={{ maxWidth: "150px" , minWidth: 0}}
+                                        style={{ maxWidth: "150px", minWidth: 0 }}
                                         value={editedItem.checkOutDate || ""}
                                         onChange={handleInputChange}
                                         required
@@ -396,23 +394,17 @@ function WorkScheduleDashboard (){
                                     <input
                                         type="number"
                                         min="0"
-                                        max="99"
+                                        max="23"
                                         className="form-control"
                                         placeholder="時"
-                                        style={{ width: "80px" , minWidth: 0}}
-                                        value={editedItem.checkOutHour ?? (editedItem.checkOutTime?.split(":")[0] || "")}
+                                        style={{ width: "80px", minWidth: 0 }}
+                                        value={editedItem.checkOutTime ? editedItem.checkOutTime.split(":")[0] : ""}
                                         onChange={(e) => {
-                                            const hour = e.target.value;
-                                            const minute = editedItem.checkOutMinute ?? editedItem.checkOutTime?.split(":")[1] ?? "00";
-                                            const checkOutDate = parseInt(hour) >= 24
-                                                ? new Date(new Date(editedItem.checkInDate).getTime() + 86400000).toISOString().split("T")[0]
-                                                : editedItem.checkOutDate;
-
+                                            const hour = e.target.value.padStart(2, "0");
+                                            const minute = editedItem.checkOutTime ? editedItem.checkOutTime.split(":")[1] : "00";
                                             setEditedItem((prev) => ({
                                                 ...prev,
-                                                checkOutHour: hour,
-                                                checkOutDate: checkOutDate,
-                                                checkOutTime: `${hour.padStart(2, "0")}:${minute.padStart(2, "0")}`,
+                                                checkOutTime: `${hour}:${minute}`,
                                             }));
                                         }}
                                         required
@@ -424,21 +416,21 @@ function WorkScheduleDashboard (){
                                         max="59"
                                         className="form-control"
                                         placeholder="分"
-                                        style={{ width: "80px" , minWidth: 0}}
-                                        value={editedItem.checkOutMinute ?? (editedItem.checkOutTime?.split(":")[1] || "")}
+                                        style={{ width: "80px", minWidth: 0 }}
+                                        value={editedItem.checkOutTime ? editedItem.checkOutTime.split(":")[1] : ""}
                                         onChange={(e) => {
-                                            const minute = e.target.value;
-                                            const hour = editedItem.checkOutHour ?? editedItem.checkOutTime?.split(":")[0] ?? "00";
+                                            const minute = e.target.value.padStart(2, "0");
+                                            const hour = editedItem.checkOutTime ? editedItem.checkOutTime.split(":")[0] : "00";
                                             setEditedItem((prev) => ({
                                                 ...prev,
-                                                checkOutMinute: minute,
-                                                checkOutTime: `${hour.padStart(2, "0")}:${minute.padStart(2, "0")}`,
+                                                checkOutTime: `${hour}:${minute}`,
                                             }));
                                         }}
                                         required
                                     />
                                 </div>
                             </div>
+
                             <div className="form-group row">
                                 <div className="row">
                                     <div className="col">
@@ -694,7 +686,7 @@ function WorkScheduleDashboard (){
                                     {!(item?.checkInTime === "00:00" && item?.checkOutTime === "00:00" && item?.checkInDate === item?.checkOutDate) ?
                                         <div className="d-flex justify-content-center align-items-center">
                                             <span className="form-control-plaintext me-2">
-                                              {item?.checkInTime || defaultItem.checkInTime}
+                                              {item?.checkInTime || ""}
                                             </span>
                                             <span className="text-gray-500 me-2 fs-5"> ~ </span>
                                             <span className="form-control-plaintext">
@@ -726,26 +718,26 @@ function WorkScheduleDashboard (){
                                 <div className="form-group">
                                     <label className="label">勤務タイプ</label>
                                     <span className="form-control-plaintext">
-                                        {item?.workType || defaultItem.workType}
+                                        {item?.workType || ""}
                                       </span>
                                 </div>
                                 <div className="form-group">
                                     <label className="label">勤怠タイプ</label>
                                     <span className="form-control-plaintext">
-                                        {item?.workPosition || defaultItem.workPosition}
+                                        {item?.workPosition || ""}
                                     </span>
                                 </div>
                                 <div className="form-group">
                                     <label className="label">勤務地</label>
                                     <span className="form-control-plaintext">
-                                        {item?.workLocation || defaultItem.workLocation}
+                                        {item?.workLocation || ""}
                                     </span>
                                 </div>
                                 {item?.memo && (
                                     <div className="form-group">
                                         <label>理由</label>
                                         <span className="form-control-plaintext">
-                                            {item?.memo || defaultItem.checkInTime}
+                                            {item?.memo || ""}
                                         </span>
                                     </div>
                                 )}
@@ -753,7 +745,7 @@ function WorkScheduleDashboard (){
                                     <div className="form-group">
                                         <label>遅延表アップロード履歴</label>
                                         <span>
-                                            <a href={item?.fileUrl}
+                                            <a href={item?.fileUrl || ""}
                                                rel="noreferrer"
                                                className="me-3"
                                                target="_blank"
@@ -769,7 +761,7 @@ function WorkScheduleDashboard (){
                                     </div>
                                 ) : (
                                     <>
-                                        {editedItem.workType !== "出勤" && editedItem.workType !== "有給休暇" && !item?.flexTime && item?.checkInTime !== data.checkInTime && (
+                                        {editedItem.workType !== "出勤" && editedItem.workType !== "有給休暇" && !item?.flexTime && item?.checkInTime !== data?.checkInTime && (
                                             <label>遅延表をアップロードしてください。</label>
                                         )}
                                     </>

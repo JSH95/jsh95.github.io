@@ -106,7 +106,7 @@ const WorkScheduleList = () =>  {
                 setLoading(false);
             }
         };
-        if (workDataList?.workData && Object.keys(workDefaultData).length > 0) {
+        if (workDataList?.workData && workDefaultData !== true) {
             fetchSchedule();
         }
     }, [year, month, workDataList?.workData, workDefaultData]); // 변경된 의존성만 추가
@@ -136,13 +136,12 @@ const WorkScheduleList = () =>  {
 
     const handleClickEdit = (date) => {
         if(workDataList?.workData[date] === undefined) {
-            navigate(`/workSchedule/detail/${date}`, {
-                state: { isEditing: true }
-            });
+            localStorage.setItem("fileStatus", JSON.stringify(true));
+            navigate(`/workSchedule/detail/${date}`);
         } else {
+            localStorage.setItem("fileStatus", JSON.stringify(false));
             navigate(`/workSchedule/detail/${date}`);
         }
-
     }
 
     const checkStatesHandle = useCallback((schedule) => {

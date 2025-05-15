@@ -6,7 +6,7 @@ import {useNavigate} from "react-router-dom";
 const useWorkDefaultData = () => {
     const { username } = useAuth();
     const navigate = useNavigate();
-    const [workDefaultData, setWorkDefaultData] = useState({});
+    const [workDefaultData, setWorkDefaultData] = useState(null);
     let cachedHolidays = null; // 캐싱하여 여러 번 호출해도 다시 요청하지 않음
 
     useEffect(() => {
@@ -32,7 +32,7 @@ const useWorkDefaultData = () => {
     }, [username]);
 
     useEffect(() => {
-        if (workDefaultData.checkInTime === "") {
+        if (workDefaultData?.checkInTime === "") {
             window.alert("근무표 초기 설정이 필요합니다. \n 해당 페이지로 이동합니다.");
             navigate("/workSchedule/dashBoard");
         }

@@ -232,13 +232,14 @@ const EmployeeRegi = () => {
               <option value="" disabled>
                 계정 권한을 선택해 주세요.
               </option>
+              <option value="MASTER">마스터권한</option>
               <option value="ADMIN">관리자권한</option>
-              <option value="TEAM_LEADER">서브관리자권한</option>
-              <option value="TEAM">팀장</option>
+              <option value="SUBADMIN">서브관리자권한</option>
+              <option value="TEAM_LEADER">팀장</option>
               <option value="GENERAL">일반사원</option>
             </select>
           </div>
-          {employeeRole === "TEAM" ? null : (
+          {employeeRole === "TEAM_LEADER" ? null : (
             <div className="form-group">
               <label>소속 팀장</label>
                 <select

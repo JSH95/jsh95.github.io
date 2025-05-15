@@ -110,7 +110,7 @@ function WorkScheduleDashboard (){
                                                 className="input"
                                                 type="text"
                                                 name="employeeId"
-                                                value={editedItem.employeeId? editedItem.employeeId : username || ""}
+                                                value={editedItem?.employeeId? editedItem.employeeId : username || ""}
                                                 onChange={handleChange}
                                                 disabled
                                                 hidden
@@ -123,7 +123,7 @@ function WorkScheduleDashboard (){
                                                 className="input"
                                                 type="text"
                                                 name="employeeName"
-                                                value={editedItem.employeeName || ""}
+                                                value={editedItem?.employeeName || ""}
                                                 onChange={handleChange}
                                             disabled
                                                 hidden
@@ -137,7 +137,7 @@ function WorkScheduleDashboard (){
                                                 className="input"
                                                 type="text"
                                                 name="workLocation"
-                                                value={editedItem.workLocation || ""}
+                                                value={editedItem?.workLocation || ""}
                                                 onChange={handleChange}
                                                 required
                                             />
@@ -149,7 +149,7 @@ function WorkScheduleDashboard (){
                                             <select
                                                 className="input"
                                                 name="workPosition"
-                                                value={editedItem.workPosition || ""}
+                                                value={editedItem?.workPosition || ""}
                                                 onChange={handleChange}
                                                 required
                                             >
@@ -170,7 +170,7 @@ function WorkScheduleDashboard (){
                                                     name="flexTime"
                                                     className="form-check-input"
                                                     style={{marginBottom: "5px" , marginTop: "0px"}}
-                                                    checked={editedItem.flexTime || false}
+                                                    checked={editedItem?.flexTime || false}
                                                     onChange={(e) => {
                                                         setEditedItem({
                                                             ...editedItem,
@@ -191,10 +191,10 @@ function WorkScheduleDashboard (){
                                                 className="form-control"
                                                 placeholder="時"
                                                 style={{ width: "80px" }}
-                                                value={editedItem.checkInHour ?? (editedItem.checkInTime?.split(":")[0] || "")}
+                                                value={editedItem?.checkInHour ?? (editedItem?.checkInTime?.split(":")[0] || "")}
                                                 onChange={(e) => {
                                                     const hour = e.target.value;
-                                                    const minute = editedItem.checkInMinute ?? editedItem.checkInTime?.split(":")[1] ?? "00";
+                                                    const minute = editedItem?.checkInMinute ?? editedItem?.checkInTime?.split(":")[1] ?? "00";
                                                     setEditedItem((prev) => ({
                                                         ...prev,
                                                         checkInHour: hour,
@@ -210,10 +210,10 @@ function WorkScheduleDashboard (){
                                                 className="form-control"
                                                 placeholder="分"
                                                 style={{ width: "80px" }}
-                                                value={editedItem.checkInMinute ?? (editedItem.checkInTime?.split(":")[1] || "")}
+                                                value={editedItem?.checkInMinute ?? (editedItem?.checkInTime?.split(":")[1] || "")}
                                                 onChange={(e) => {
                                                     const minute = e.target.value;
-                                                    const hour = editedItem.checkInHour ?? editedItem.checkInTime?.split(":")[0] ?? "00";
+                                                    const hour = editedItem?.checkInHour ?? editedItem?.checkInTime?.split(":")[0] ?? "00";
                                                     setEditedItem((prev) => ({
                                                         ...prev,
                                                         checkInMinute: minute,
@@ -233,10 +233,10 @@ function WorkScheduleDashboard (){
                                                 className="form-control"
                                                 placeholder="時"
                                                 style={{ width: "80px" }}
-                                                value={editedItem.checkOutHour ?? (editedItem.checkOutTime?.split(":")[0] || "")}
+                                                value={editedItem?.checkOutHour ?? (editedItem?.checkOutTime?.split(":")[0] || "")}
                                                 onChange={(e) => {
                                                     const hour = e.target.value;
-                                                    const minute = editedItem.checkOutMinute ?? editedItem.checkOutTime?.split(":")[1] ?? "00";
+                                                    const minute = editedItem?.checkOutMinute ?? editedItem?.checkOutTime?.split(":")[1] ?? "00";
 
                                                     setEditedItem((prev) => ({
                                                         ...prev,
@@ -253,10 +253,10 @@ function WorkScheduleDashboard (){
                                                 className="form-control"
                                                 placeholder="分"
                                                 style={{ width: "80px" }}
-                                                value={editedItem.checkOutMinute ?? (editedItem.checkOutTime?.split(":")[1] || "")}
+                                                value={editedItem?.checkOutMinute ?? (editedItem?.checkOutTime?.split(":")[1] || "")}
                                                 onChange={(e) => {
                                                     const minute = e.target.value;
-                                                    const hour = editedItem.checkOutHour ?? editedItem.checkOutTime?.split(":")[0] ?? "00";
+                                                    const hour = editedItem?.checkOutHour ?? editedItem?.checkOutTime?.split(":")[0] ?? "00";
                                                     setEditedItem((prev) => ({
                                                         ...prev,
                                                         checkOutMinute: minute,
@@ -273,7 +273,7 @@ function WorkScheduleDashboard (){
                                                 name="breakTime"
                                                 type="number"
                                                 className="input me-2"
-                                                value={editedItem.breakTime || ""}
+                                                value={editedItem?.breakTime || ""}
                                                 onChange={handleChange}
                                                 placeholder="分"
                                                 min="0"
